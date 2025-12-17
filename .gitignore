@@ -1,0 +1,29 @@
+# --- Arquivos da Raiz (Global) ---
+.env
+
+# --- Serviço: Bancho (Python) ---
+osu-bancho-service/.vscode
+osu-bancho-service/__pycache__/
+osu-bancho-service/config.py
+osu-bancho-service/.data
+osu-bancho-service/_testing/
+osu-bancho-service/*.lprof
+osu-bancho-service/ext/GeoLite2-City.mmdb
+osu-bancho-service/.env
+osu-bancho-service/tools/migrate_v420/go.sum
+osu-bancho-service/tools/migrate_v420/scoreMigrator
+osu-bancho-service/.venv/
+osu-bancho-service/.mypy_cache/
+osu-bancho-service/.pytest_cache/
+osu-bancho-service/ext/nginx.conf
+osu-bancho-service/tools/cf_records.txt
+osu-bancho-service/.db-data/
+osu-bancho-service/.redis-data/
+osu-bancho-service/poetry.toml
+osu-bancho-service/.coverage
+osu-bancho-service/logging.yaml
+osu-bancho-service/logs.log
+
+# --- Serviço: API (Node/Prisma) ---
+osu-api-service/node_modules/
+osu-api-service/.env

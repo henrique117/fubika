@@ -2,12 +2,21 @@ import React from 'react'
 import style from './style.module.css'
 
 interface NavbarProps {
-    userAvatar?: string
+    userId?: number
 }
 
-const Navbar: React.FC<NavbarProps> = ({ 
-    userAvatar = "https://github.com/shadcn.png"
-}) => {
+const getUserAvatar = (id?: number): string => {
+    if (id) {
+        return `https://a.bpy.local/${id}`
+    }
+
+    return 'https://a.bpy.local/' 
+}
+
+const Navbar: React.FC<NavbarProps> = ({ userId }) => {
+
+    const userAvatar = userId ? getUserAvatar(userId) : getUserAvatar()
+
     return (
         <header className={style.header}>
             <div className={style.container}>

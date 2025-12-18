@@ -1,0 +1,138 @@
+.pageWrapper {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+.registerCard {
+    background-color: var(--color-background-dark);
+    width: 100%;
+    max-height: 688px;
+    max-width: 720px;
+    padding: 17px 60px 40px 60px;
+    border-radius: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center; 
+}
+
+.backButton {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.backButton:hover {
+    opacity: 1;
+}
+
+.logoContainer {
+    margin-bottom: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.logoSvg {
+    height: auto;
+    width: auto;
+}
+
+.formContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.label {
+    font-size: 17.5px;
+    margin-bottom: 20px;
+    font-weight: 300;
+}
+
+.input {
+    width: 100%;
+    max-width: 337px;
+    height: 28px;
+    background-color: var(--color-background);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    color: #e0e0e0;
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+    background-color: #333;
+}
+
+.input::placeholder {
+    color: #666;
+}
+
+.passwordWrapper {
+    position: relative;
+    width: 100%;
+    max-width: 337px; 
+    display: flex;
+    align-items: center;
+}
+
+.passwordWrapper .input {
+    max-width: none; 
+    padding-right: 45px;
+    padding-left: 45px;
+}
+
+.eyeButton {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    padding: 0;
+    outline: none;
+    transition: color 0.2s;
+    height: 100%;
+    top: 0;
+}
+
+.eyeButton:hover {
+    color: #ccc;
+}
+
+@media (max-width: 600px) {
+    .registerCard {
+        width: 90%;
+        padding: 30px 20px;
+        margin-top: 20px;
+    }
+    
+    .input, .passwordWrapper {
+        max-width: 100%;
+    }
+}

@@ -26,5 +26,6 @@ assets.{$DOMAIN} {
 a.{$DOMAIN} {
 	encode gzip
 	root * {$DATA_DIRECTORY}/avatars
+	file_server
 	try_files {path} {file.base}.png {file.base}.jpg {file.base}.gif {file.base}.jpeg {file.base}.jfif default.jpg =404
 }

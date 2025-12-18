@@ -1,0 +1,251 @@
+.pageWrapper {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.snowflakesContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.snow {
+    position: absolute;
+    /* Começa acima da tela para não aparecer "pipocando" */
+    top: -50px; 
+    /* Usa a variável --left passada pelo React, ou 50% se falhar */
+    left: var(--left, 50%);
+    
+    width: 30px; /* Tamanho base, pode variar se quiser */
+    height: 30px;
+    
+    /* Configuração da animação */
+    animation: fall var(--duration, 10s) linear infinite;
+    animation-delay: var(--delay, 0s);
+    
+    /* Filtro para deixar branquinho caso o SVG seja preto */
+    filter: brightness(0) invert(1);
+    opacity: 0.6;
+}
+
+.centerContent {
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.infoCard {
+    background-color: var(--color-background-dark);
+    border-radius: 20px;
+    padding-inline: 20px;
+    padding-bottom: 15px;
+    width: 100%;
+    margin-top: 71px;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch; 
+}
+
+.cardUpperText {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logoSvg {
+    padding-top: 5px;
+    width: 40%;
+    display: flex;
+    align-items: flex-start;
+}
+
+.stats {
+    font-size: 10px;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    margin-top: 20px;
+    padding-left: 30px;
+    font-weight: bold;
+}
+
+.statsNumber {
+    font-size: 20px;
+    font-weight: bold;
+
+    background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    
+    display: inline-block; 
+}
+
+.description {
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    font-size: 17.5px;
+    line-height: 1.6;
+    padding-left: 30px;
+    font-weight: bold;
+}
+
+.buttonsRow {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.btnWrapper {
+    flex: 1;
+    max-width: 300px;
+    height: 50px;
+    position: relative;
+}
+
+.ornamentsWrapper {
+    width: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly;
+    top: 35px;
+}
+
+.ornamentsSvg {
+    width: 100%;
+    height: 100%;
+    max-width: 86px;
+    max-height: 86px;
+}
+
+.christmasSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: -10px;
+}
+
+.christmasTitle {
+    font-size: 64px;
+    margin-top: 100px;
+    z-index: 15;
+}
+
+.footerDeco {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+    z-index: 20;
+    padding: 0;
+}
+
+.leftDeco, .rightDeco {
+    display: flex;
+    align-items: flex-end;
+}
+
+.treeSvg {
+    height: clamp(150px, 22vw, 350px); 
+    width: auto;
+    margin-right: -4vw; 
+    z-index: 1;
+}
+
+.santaSvg {
+    height: clamp(120px, 18vw, 300px);
+    width: auto;
+    z-index: 2;
+    transform: translate(-50%, 15%); 
+}
+
+.deerSvg {
+    height: clamp(130px, 20vw, 320px);
+    width: auto;
+    z-index: 3;
+    margin-right: -2vw;
+    transform: translate(30%, 10%);
+}
+
+.giftsSvg {
+    height: clamp(100px, 15vw, 250px);
+    width: auto;
+    z-index: 1;
+}
+
+.giftsSvg2 {
+    height: clamp(60px, 9vw, 150px);
+    width: auto;
+    z-index: 2;
+    transform: translateX(55%);
+}
+
+@media (max-width: 768px) {
+    .footerDeco {
+        position: relative;
+        margin-top: 50px;
+        flex-direction: row;
+        justify-content: space-between;
+        overflow: hidden;
+    }
+    
+    .treeSvg, .santaSvg, .deerSvg, .giftsSvg {
+        height: 120px; 
+    }
+    
+    .santaSvg {
+        transform: translate(-20px, 0);
+    }
+    .deerSvg {
+        transform: translate(20px, 0);
+    }
+    .treeSvg {
+        margin-right: -20px;
+    }
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-50px) translateX(0px) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateY(50vh) translateX(20px) rotate(180deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(110vh) translateX(-20px) rotate(360deg);
+        opacity: 0;
+    }
+}

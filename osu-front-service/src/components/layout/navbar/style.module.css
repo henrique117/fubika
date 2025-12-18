@@ -1,0 +1,141 @@
+.header {
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(var(--color-azul-baitola) 0%, var(--color-verde-baitola) 100%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: fixed;
+    z-index: 1000;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+    background: inherit;
+    color: #2dd4bf;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Comic Sans MS', cursive, sans-serif; 
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.navLinks a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.navLinks a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.separator {
+    opacity: 0.5;
+    font-size: 12px;
+}
+
+.rightSection {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.searchWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchInput {
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 12px 8px 35px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    width: 150px;
+    transition: width 0.3s ease, background 0.3s;
+}
+
+.searchInput::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.searchInput:focus {
+    background: rgba(0, 0, 0, 0.3);
+    width: 200px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+}
+
+.actionButtons {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 5px 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.iconButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.iconButton:hover {
+    opacity: 1;
+}
+
+.profile img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}

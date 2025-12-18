@@ -1,0 +1,45 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box
+}
+
+:root {
+    --color-verde-baitola: #41D3BD;
+    --color-azul-baitola: #4189D3;
+    --color-azul-menos-baitola: #436990;
+    --color-roxo-baitola: #773887;
+    --color-branco: #FFFFFF;
+    --color-background: #2C2825;
+    --color-background-dark: #191715;
+}
+
+@font-face {
+    font-family: 'Caviar Dreams';
+    src: url(./fonts/CaviarDreams.ttf) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Cute Dino';
+    src: url(./fonts/CuteDino.ttf) format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+a, input, h2, p, span {
+    font-family: 'Caviar Dreams', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    line-height: auto;
+    color: var(--color-branco);
+}
+
+h1 {
+    font-family: 'Cute Dino', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    line-height: auto;
+    color: var(--color-branco);
+}

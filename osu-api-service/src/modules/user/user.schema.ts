@@ -17,11 +17,11 @@ const createUserSchema = z.object({
         .min(1, "O código de convite é obrigatório.")
 });
 
-export type CreateUserInput = z.infer<typeof createUserSchema>
+export type CreateUserInput = z.infer<typeof createUserSchema>;
 
 const loginUserSchema = z.object({
     name: z.string({ message: "O nome de usuário deve ser um texto." }),
     password: z.string({ message: "A senha deve ser um texto." })
 });
 
-export type LoginUserInput = z.infer<typeof loginUserSchema>
+export type LoginUserInput = z.infer<typeof loginUserSchema>;

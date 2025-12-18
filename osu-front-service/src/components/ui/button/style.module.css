@@ -1,0 +1,24 @@
+.container {
+    width: 100%;
+    height: 100%;
+
+    background-color: var(--color-verde-baitola);
+    border-radius: 6px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    filter: grayscale(0.5)
+}
+
+.container:hover:not(:disabled) {
+    cursor: pointer;
+    border-color: transparent;
+    background-color: rgba(65, 211, 189, 0.7);
+    transition: 0.3s;
+}

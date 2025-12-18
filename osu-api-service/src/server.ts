@@ -1,5 +1,5 @@
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
-import { userRoutes, inviteRoutes } from "./modules/barrel";
+import { userRoutes, inviteRoutes, discordRoutes } from "./modules/barrel";
 import prisma from "./utils/prisma";
 import fastifyJwt from "@fastify/jwt";
 
@@ -34,6 +34,7 @@ async function main() {
 
     await server.register(userRoutes, { prefix: 'api/user' });
     await server.register(inviteRoutes, { prefix: 'api/invite' });
+    await server.register(discordRoutes, { prefix: 'api/discord' });
 
     try {
         await server.listen({ port: 3000, host: '0.0.0.0' });

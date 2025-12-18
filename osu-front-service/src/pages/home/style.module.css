@@ -21,19 +21,14 @@
 
 .snow {
     position: absolute;
-    /* Começa acima da tela para não aparecer "pipocando" */
-    top: -50px; 
-    /* Usa a variável --left passada pelo React, ou 50% se falhar */
+    top: -50px;
     left: var(--left, 50%);
     
-    width: 30px; /* Tamanho base, pode variar se quiser */
     height: 30px;
     
-    /* Configuração da animação */
     animation: fall var(--duration, 10s) linear infinite;
     animation-delay: var(--delay, 0s);
     
-    /* Filtro para deixar branquinho caso o SVG seja preto */
     filter: brightness(0) invert(1);
     opacity: 0.6;
 }

@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { HomePage, LoginPage, RegisterPage } from '../pages/pages.export'
+import { ForgotPassPage, HomePage, LoginPage, RedefinePassPage, RegisterPage } from '../pages/pages.export'
 
 const router = createBrowserRouter([
     {
@@ -13,6 +13,14 @@ const router = createBrowserRouter([
     {
         path: '/register',
         element: <RegisterPage />
+    },
+    {
+        path: '/forgotpass',
+        element: <ForgotPassPage />
+    },
+    {
+        path: '/redefinepass',
+        element: <RedefinePassPage />
     },
     /* {
         path: '*',

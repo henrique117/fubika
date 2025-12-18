@@ -3,14 +3,15 @@ import style from './style.module.css'
 
 interface ButtonProps {
     text?: React.ReactNode
+    fontSize?: number
 }
 
-const Button: React.FC<ButtonProps> = ({ text = '' }) => {
+const ButtonGradient: React.FC<ButtonProps> = ({ text = '', fontSize = 14 }) => {
     return (
         <div className={style.container}>
-            <h2>{ text }</h2>
+            <h2 style={{ fontSize: `${fontSize}px` }}>{ text }</h2>
         </div>
     )
 }
 
-export default Button
+export default ButtonGradient

@@ -8,7 +8,7 @@
 .registerCard {
     background-color: var(--color-background-dark);
     width: 100%;
-    max-height: 688px;
+    max-height: 727px;
     max-width: 720px;
     padding: 17px 60px 40px 60px;
     border-radius: 20px;
@@ -123,6 +123,27 @@
 
 .eyeButton:hover {
     color: #ccc;
+}
+
+.forgotPassword {
+    text-align: center;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.2s;
+    margin-top: 20px;
+}
+
+.forgotPassword:hover {
+    color: #bbb;
+    text-decoration: underline;
+}
+
+.entrarButton {
+    height: 100%;
+    max-height: 25px;
+    width: 100%;
+    max-width: 82px;
+    margin-top: 20px;
 }
 
 @media (max-width: 600px) {

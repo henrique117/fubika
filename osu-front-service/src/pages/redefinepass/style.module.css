@@ -5,17 +5,18 @@
     justify-content: center;
 }
 
-.loginCard {
+.redefineCard {
     background-color: var(--color-background-dark);
     width: 100%;
-    max-height: 486px;
-    max-width: 720px;
+    max-height: 309px;
+    max-width: 572px;
     padding: 17px 60px 40px 60px;
     border-radius: 20px;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     margin-top: 10%;
 }
 
@@ -90,30 +91,57 @@
     color: #666;
 }
 
-.forgotPassword {
-    text-align: center;
-    font-size: 14px;
-    text-decoration: none;
-    margin-top: 10px;
-    transition: color 0.2s;
+.passwordWrapper {
+    position: relative;
+    width: 100%;
+    max-width: 337px; 
+    display: flex;
+    align-items: center;
 }
 
-.forgotPassword:hover {
-    color: #bbb;
-    text-decoration: underline;
+.passwordWrapper .input {
+    max-width: none; 
+    padding-right: 45px;
+    padding-left: 45px;
+}
+
+.eyeButton {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    padding: 0;
+    outline: none;
+    transition: color 0.2s;
+    height: 100%;
+    top: 0;
+}
+
+.eyeButton:hover {
+    color: #ccc;
 }
 
 .entrarButton {
     height: 100%;
     max-height: 25px;
     width: 100%;
-    max-width: 65px;
+    max-width: 47px;
     margin-top: 20px;
 }
 
 @media (max-width: 600px) {
-    .loginCard {
+    .registerCard {
         width: 90%;
         padding: 30px 20px;
+        margin-top: 20px;
+    }
+    
+    .input, .passwordWrapper {
+        max-width: 100%;
     }
 }

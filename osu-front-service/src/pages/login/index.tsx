@@ -1,15 +1,18 @@
 import React from 'react'
 import style from './style.module.css'
-import { WrapperComponent } from '../../components/components.export'
+import { ButtonGradientComponent, WrapperComponent } from '../../components/components.export'
+import { Link } from 'react-router-dom'
 
 const Login: React.FC = () => {
     return (
         <WrapperComponent>
             <div className={style.pageWrapper}>
                 <div className={style.loginCard}>
-                    <button className={style.backButton}>
-                        <img src="arrow_icon.svg" alt="" />
-                    </button>
+                    <Link to='/'>
+                        <button className={style.backButton}>
+                            <img src="arrow_icon.svg" alt="" />
+                        </button>
+                    </Link>
 
                     <div className={style.logoContainer}>
                         <img src="/logo_entrar.svg" alt="Entrar" className={style.logoSvg} />
@@ -36,12 +39,18 @@ const Login: React.FC = () => {
                                 className={style.input}
                             />
                         </div>
-
-                        <a href="#" className={style.forgotPassword}>
-                            Esqueceu a sua senha?
-                        </a>
-
                     </form>
+
+                    <Link to='/forgotpass' className={style.forgotPassword}>
+                        <a href="#">
+                            Esqueceu a senha?
+                        </a>
+                    </Link>
+
+                    <div className={style.entrarButton}>
+                        <ButtonGradientComponent text='Entrar' />
+                    </div>
+
                 </div>
             </div>
         </WrapperComponent>

@@ -10,16 +10,15 @@ import Deer from '/dear.svg'
 import GiftsRight from '/gift_dec.svg'
 import TreeLeft from '/presents.svg'
 import Ornaments from '/ornaments.svg'
+import { Link } from 'react-router-dom'
 
 const Home: React.FC = () => {
     const snowflakes = useMemo(() => {
-        // Criamos um array com 20 itens (aumente se quiser mais neve)
         return Array.from({ length: 20 }).map((_, index) => {
-            // Gera valores aleatórios para cada floco
-            const randomLeft = Math.random() * 100;      // Posição horizontal (0% a 100%)
-            const randomDuration = 5 + Math.random() * 10; // Duração entre 5s e 15s (velocidade)
-            const randomDelay = Math.random() * 10;      // Atraso inicial para não caírem todos juntos
-            const randomSize = 20 + Math.random() * 20;  // Tamanho entre 20px e 40px
+            const randomLeft = Math.random() * 100
+            const randomDuration = 5 + Math.random() * 10
+            const randomDelay = Math.random() * 10
+            const randomSize = 20 + Math.random() * 20
 
             return (
                 <img 
@@ -28,7 +27,6 @@ const Home: React.FC = () => {
                     alt="neve" 
                     className={style.snow}
                     style={{
-                        // Passamos as variáveis para o CSS deste elemento específico
                         '--left': `${randomLeft}%`,
                         '--duration': `${randomDuration}s`,
                         '--delay': `${randomDelay}s`,
@@ -75,7 +73,9 @@ const Home: React.FC = () => {
 
                     <div className={style.buttonsRow}>
                         <div className={style.btnWrapper}>
-                            <ButtonComponent text="Acessar conta" />
+                            <Link to='/login' style={{ textDecoration: 'none' }}>
+                                <ButtonComponent text="Acessar conta" />
+                            </Link>
                             <div className={style.ornamentsWrapper}>
                                 <img src={Ornaments} alt="Decoração" className={style.ornamentsSvg} />
                                 <img src={Ornaments} alt="Decoração" className={style.ornamentsSvg} />
@@ -83,7 +83,9 @@ const Home: React.FC = () => {
                             </div>
                         </div>
                         <div className={style.btnWrapper}>
-                            <ButtonComponent text="Como conectar?" />
+                            <Link to='/' style={{ textDecoration: 'none' }}>
+                                <ButtonComponent text="Como conectar?" />
+                            </Link>
                             <div className={style.ornamentsWrapper}>
                                 <img src={Ornaments} alt="Decoração" className={style.ornamentsSvg} />
                                 <img src={Ornaments} alt="Decoração" className={style.ornamentsSvg} />

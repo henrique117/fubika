@@ -3,7 +3,7 @@ import style from './style.module.css'
 import { ButtonGradientComponent, WrapperComponent } from '../../components/components.export'
 import { Link } from 'react-router-dom'
 
-const Register: React.FC = () => {
+const ForgotPass: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -13,41 +13,17 @@ const Register: React.FC = () => {
     return (
         <WrapperComponent>
             <div className={style.pageWrapper}>
-                <div className={style.registerCard}>
+                <div className={style.redefineCard}>
                     <Link to='/'>
                         <button className={style.backButton}>
                             <img src="arrow_icon.svg" alt="" />
                         </button>
                     </Link>
 
-                    <div className={style.logoContainer}>
-                        <img src="/logo_registro.svg" alt="Registro" className={style.logoSvg} />
-                    </div>
-
                     <form className={style.formContainer}>
 
                         <div className={style.inputGroup}>
-                            <label htmlFor="email" className={style.label}>E-mail</label>
-                            <input
-                                type="email"
-                                id="email"
-                                placeholder="orlandoalmeida0000@gmail.com"
-                                className={style.input}
-                            />
-                        </div>
-
-                        <div className={style.inputGroup}>
-                            <label htmlFor="user" className={style.label}>Nome de usuário</label>
-                            <input
-                                type="text"
-                                id="user"
-                                placeholder="ManfaceEnjoyer"
-                                className={style.input}
-                            />
-                        </div>
-
-                        <div className={style.inputGroup}>
-                            <label htmlFor="pass" className={style.label}>Senha</label>
+                            <label htmlFor="pass" className={style.label}>Nova senha</label>
                             <div className={style.passwordWrapper}>
                                 <input
                                     type={showPassword ? "text" : "password"}
@@ -93,26 +69,10 @@ const Register: React.FC = () => {
                                 </button>
                             </div>
                         </div>
-
-                        <div className={style.inputGroup}>
-                            <label htmlFor="key" className={style.label}>Chave de acesso</label>
-                            <input
-                                type="text"
-                                id="key"
-                                placeholder="ABCDEFGH"
-                                className={style.input}
-                            />
-                        </div>
                     </form>
-                    
-                    <Link to='/login' className={style.forgotPassword}>
-                        <a href="#">
-                            Já tem uma conta? Entre agora
-                        </a>
-                    </Link>
 
                     <div className={style.entrarButton}>
-                        <ButtonGradientComponent text='Registrar' />
+                        <ButtonGradientComponent text='OK' />
                     </div>
                     
                 </div>
@@ -121,4 +81,4 @@ const Register: React.FC = () => {
     )
 }
 
-export default Register
+export default ForgotPass

@@ -48,45 +48,6 @@ const mapOsuBeatmapsetToDomain = (data: any): IBeatmapset => {
     };
 };
 
-export const mapDatabaseToScore = (row: any): IScore => {
-    return {
-        id: Number(row.score_id), 
-        score: Number(row.score_val),
-        acc: row.score_acc,
-        mods_int: row.mods,
-        mods: getModString(row.mods),
-        n300: row.n300,
-        n100: row.n100,
-        n50: row.n50,
-        nmiss: row.nmiss,
-        grade: row.grade,
-        perfect: Boolean(row.perfect),
-        max_combo: row.max_combo,
-        map_md5: row.map_md5,
-
-        player: {
-            id: row.userid,
-            name: row.name,
-            safe_name: row.safe_name,
-            rank: 0, 
-            pp: row.user_pp || 0,
-            acc: row.user_acc || 0,
-            pfp: `https://a.ppy.sh/${row.userid}`,
-
-            a_count: row.a_count || 0,
-            s_count: row.s_count || 0,
-            ss_count: row.x_count || 0,
-            sh_count: row.sh_count || 0,
-            ssh_count: row.xh_count || 0,
-
-            total_score: Number(row.user_tscore || 0),
-            ranked_score: Number(row.user_rscore || 0),
-            max_combo: row.user_max_combo || 0,
-            playtime: row.playtime || 0
-        }
-    };
-};
-
 const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<IScore[]> => {
     
     let bmap_md5 = knownMd5;
@@ -203,3 +164,42 @@ export const getBeatmapset = async (input: SearchBeatmaps): Promise<IBeatmapset>
         throw err;
     }
 }
+
+export const mapDatabaseToScore = (row: any): IScore => {
+    return {
+        id: Number(row.score_id), 
+        score: Number(row.score_val),
+        acc: row.score_acc,
+        mods_int: row.mods,
+        mods: getModString(row.mods),
+        n300: row.n300,
+        n100: row.n100,
+        n50: row.n50,
+        nmiss: row.nmiss,
+        grade: row.grade,
+        perfect: Boolean(row.perfect),
+        max_combo: row.max_combo,
+        map_md5: row.map_md5,
+
+        player: {
+            id: row.userid,
+            name: row.name,
+            safe_name: row.safe_name,
+            rank: 0, 
+            pp: row.user_pp || 0,
+            acc: row.user_acc || 0,
+            pfp: `https://a.${process.env.DOMAIN}/${row.userid}`,
+
+            a_count: row.a_count || 0,
+            s_count: row.s_count || 0,
+            ss_count: row.x_count || 0,
+            sh_count: row.sh_count || 0,
+            ssh_count: row.xh_count || 0,
+
+            total_score: Number(row.user_tscore || 0),
+            ranked_score: Number(row.user_rscore || 0),
+            max_combo: row.user_max_combo || 0,
+            playtime: row.playtime || 0
+        }
+    };
+};

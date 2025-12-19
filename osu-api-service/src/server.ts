@@ -6,6 +6,7 @@ import Fastify from "fastify";
 import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./modules/barrel";
 import prisma from "./utils/prisma";
 import fastifyJwt from "@fastify/jwt";
+import rankingRoutes from "./modules/ranking/ranking.route";
 
 export const server = Fastify({ 
     logger: true
@@ -21,17 +22,18 @@ server.get('/ping', async () => {
         database: 'connected', 
         latency_db_ms: end - start
     }
-})
+});
 
 async function main() {
     await server.register(fastifyJwt, {
         secret: process.env.JWT_SECRET || 'aaabbbccc'
-    })
+    });
 
     await server.register(userRoutes, { prefix: 'api/user' });
     await server.register(inviteRoutes, { prefix: 'api/invite' });
     await server.register(discordRoutes, { prefix: 'api/discord' });
     await server.register(beatmapRoutes, { prefix: 'api/beatmap' });
+    await server.register(rankingRoutes, { prefix: 'api/ranking' });
 
     try {
         await server.listen({ port: 3000, host: '0.0.0.0' });

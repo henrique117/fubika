@@ -10,7 +10,7 @@ export default interface IScore {
     n100: number;
     n50: number;
     nmiss: number;
-    grade: number;      // F = 0, D = 1, C = 2, B = 3, A = 4, S = 5, SS = 6, SH = 7, SSH = 8
+    grade: string;
     perfect: boolean;
     max_combo: number;
 

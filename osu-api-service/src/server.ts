@@ -1,3 +1,7 @@
+(BigInt.prototype as any).toJSON = function () {
+    return Number(this);
+};
+
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./modules/barrel";
 import prisma from "./utils/prisma";

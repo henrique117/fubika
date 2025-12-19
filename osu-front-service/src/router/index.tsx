@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { ForgotPassPage, HomePage, LoginPage, RedefinePassPage, RegisterPage } from '../pages/pages.export'
+import { ForgotPassPage, HomePage, HowToConnectPage, LoginPage, RedefinePassPage, RegisterPage } from '../pages/pages.export'
 
 const router = createBrowserRouter([
     {
@@ -21,6 +21,10 @@ const router = createBrowserRouter([
     {
         path: '/redefinepass',
         element: <RedefinePassPage />
+    },
+    {
+        path: '/howtoconnect',
+        element: <HowToConnectPage />
     },
     /* {
         path: '*',

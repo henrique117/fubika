@@ -2,7 +2,7 @@
     return Number(this);
 };
 
-import Fastify, { FastifyReply, FastifyRequest } from "fastify";
+import Fastify from "fastify";
 import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./modules/barrel";
 import prisma from "./utils/prisma";
 import fastifyJwt from "@fastify/jwt";
@@ -27,14 +27,6 @@ async function main() {
     await server.register(fastifyJwt, {
         secret: process.env.JWT_SECRET || 'aaabbbccc'
     })
-
-    server.decorate("authenticate", async (req: FastifyRequest, res: FastifyReply) => {
-        try {
-            await req.jwtVerify();
-        } catch (err) {
-            return res.status(401).send({ message: "Token inválido ou não fornecido" });
-        }
-    });
 
     await server.register(userRoutes, { prefix: 'api/user' });
     await server.register(inviteRoutes, { prefix: 'api/invite' });

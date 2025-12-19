@@ -1,7 +1,7 @@
 import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import { checkInvite, useInvite } from "../invite/invite.service";
-import { CreateUserInput, LoginUserInput } from "./user.schema"
+import { CreateUserInput, LoginUserInput } from "./user.schema";
 
 export const createUser = async (input: CreateUserInput) => {
 

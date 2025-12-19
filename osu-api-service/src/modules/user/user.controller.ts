@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUser, loginUser } from "./user.service";
-import { CreateUserInput, LoginUserInput } from "./user.schema";
+import { createUser, getUserStats, loginUser } from "./user.service";
+import { CreateUserInput, GetUserInput, LoginUserInput } from "./user.schema";
 
 export const handleUserLogin = async (req: FastifyRequest<{ Body: LoginUserInput }>, res: FastifyReply) => {
     try {
@@ -35,7 +35,30 @@ export const handleUserRegister = async (
 
         return res.code(201).send(user);
     } catch (err) {
-        console.log(err);
         return res.code(401).send(err);
+    }
+}
+
+export const handleUserReq = async (
+    req: FastifyRequest<{ Params: GetUserInput }>,
+    res: FastifyReply
+) => {
+    try {
+        const userId = Number(req.params.id);
+
+        if (isNaN(userId)) {
+            return res.code(400).send({ error: "O ID fornecido não é um número válido." });
+        }
+
+        const user = await getUserStats(userId);
+
+        return res.code(200).send(user);
+
+    } catch (err: any) {
+        if (err.message === "Usuário não encontrado" || err.message === "Usuário inválido (Bot ou Bancho)") {
+            return res.code(404).send({ error: err.message });
+        }
+
+        return res.code(500).send({ error: "Erro interno ao buscar dados do usuário." });
     }
 }

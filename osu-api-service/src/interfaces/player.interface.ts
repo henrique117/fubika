@@ -1,3 +1,5 @@
+import IScore from "./score.interface";
+
 export default interface IPlayer {
     id: number;
     name: string;
@@ -5,7 +7,8 @@ export default interface IPlayer {
     rank: number;
     pp: number;
     acc: number;
-    pfp: string;
+    pfp?: string;
+    banner?: string;
 
     a_count: number;
     s_count: number;
@@ -17,4 +20,6 @@ export default interface IPlayer {
     ranked_score: number;
     max_combo: number;
     playtime: number;
+
+    top_100?: Omit<IScore, 'player'>[];
 }

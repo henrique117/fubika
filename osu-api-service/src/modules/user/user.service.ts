@@ -1,7 +1,33 @@
+import IPlayer from "../../interfaces/player.interface";
+import IScore from "../../interfaces/score.interface";
+import { getModString } from "../../utils/getModString";
 import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import { checkInvite, useInvite } from "../invite/invite.service";
 import { CreateUserInput, LoginUserInput } from "./user.schema";
+
+const toSafeName = (name: string): string => {
+    return name.trim().toLowerCase().replace(/ /g, '_');
+}
+
+const mapProfileScore = (row: any): Omit<IScore, 'player'> => {
+    return {
+        id: Number(row.id),
+        score: Number(row.score),
+        pp: row.pp,
+        acc: row.acc,
+        max_combo: row.max_combo,
+        mods_int: row.mods,
+        mods: getModString(row.mods),
+        n300: row.n300,
+        n100: row.n100,
+        n50: row.n50,
+        nmiss: row.nmiss,
+        grade: row.grade,
+        perfect: Boolean(row.perfect),
+        map_md5: row.map_md5,
+    };
+};
 
 export const createUser = async (input: CreateUserInput) => {
 
@@ -33,7 +59,7 @@ export const createUser = async (input: CreateUserInput) => {
 
     await createUserStats(user.id);
 
-    return {user, usedKey};
+    return { user, usedKey };
 }
 
 export const loginUser = async (input: LoginUserInput) => {
@@ -63,7 +89,7 @@ export const loginUser = async (input: LoginUserInput) => {
 }
 
 export const createUserStats = async (playerId: number): Promise<void> => {
-    
+
     const modes = [0, 1, 2, 3, 4, 5, 6, 8];
 
     const statsData = modes.map(mode => ({
@@ -90,6 +116,71 @@ export const createUserStats = async (playerId: number): Promise<void> => {
     });
 }
 
-const toSafeName = (name: string): string => {
-    return name.trim().toLowerCase().replace(/ /g, '_');
+export const getUserStats = async (playerId: number, mode: number = 0): Promise<IPlayer> => {
+
+    if (playerId < 3) throw new Error("Usuário inválido (Bot ou Bancho)");
+
+    const user = await prisma.users.findUnique({
+        where: { id: playerId }
+    });
+
+    if (!user) throw new Error("Usuário não encontrado");
+
+    const stats = await prisma.stats.findUnique({
+        where: {
+            id_mode: { id: playerId, mode: mode }
+        }
+    });
+
+    const userStats = stats || {
+        pp: 0, acc: 0, tscore: 0n, rscore: 0n,
+        max_combo: 0, playtime: 0,
+        x_count: 0, xh_count: 0, s_count: 0, sh_count: 0, a_count: 0
+    };
+
+    const rank = await prisma.stats.count({
+        where: {
+            mode: mode,
+            pp: { gt: userStats.pp }
+        }
+    }) + 1;
+
+    const topScoresRaw = await prisma.scores.findMany({
+        where: {
+            userid: playerId,
+            mode: mode,
+            status: 2,
+            pp: { gt: 0 }
+        },
+        orderBy: [
+            { pp: 'desc' },
+            { score: 'desc' }
+        ],
+        take: 100
+    });
+
+    return {
+        id: user.id,
+        name: user.name,
+        safe_name: user.safe_name,
+        pfp: `https://a.ppy.sh/${user.id}`,
+        banner: `https://assets.ppy.sh/user-profile-covers/${user.id}.jpg`,
+
+        rank: rank,
+        pp: userStats.pp,
+        acc: userStats.acc,
+
+        playtime: userStats.playtime,
+        max_combo: userStats.max_combo,
+        total_score: Number(userStats.tscore),
+        ranked_score: Number(userStats.rscore),
+
+        ss_count: userStats.x_count,
+        ssh_count: userStats.xh_count,
+        s_count: userStats.s_count,
+        sh_count: userStats.sh_count,
+        a_count: userStats.a_count,
+
+        top_100: topScoresRaw.map(mapProfileScore)
+    };
 }

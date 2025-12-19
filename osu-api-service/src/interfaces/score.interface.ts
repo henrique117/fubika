@@ -2,6 +2,7 @@ import IPlayer from "./player.interface";
 
 export default interface IScore {
     id: number;
+    pp: number;
     score: number;
     acc: number;
     mods_int: number;

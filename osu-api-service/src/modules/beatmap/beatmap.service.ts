@@ -169,6 +169,7 @@ export const mapDatabaseToScore = (row: any): IScore => {
     return {
         id: Number(row.score_id), 
         score: Number(row.score_val),
+        pp: row.score_pp || 0,
         acc: row.score_acc,
         mods_int: row.mods,
         mods: getModString(row.mods),

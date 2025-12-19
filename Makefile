@@ -68,6 +68,7 @@ shell-bancho:
 shell-api:
 	docker compose exec api /bin/bash
 
+# Reinicia a API
 restart-api:
 	docker compose restart api
 

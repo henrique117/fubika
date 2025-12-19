@@ -6,6 +6,8 @@ interface BeatmapProps {
 }
 
 const beatmapRoutes = async (server: FastifyInstance) => {
+    server.addHook('onRequest', server.authenticate);
+    
     server.get<{ Params: BeatmapProps }>('/:id', handleBeatmapReq);
     server.get<{ Params: BeatmapProps }>('/c/:id', handleBeatmapsetReq);
 }

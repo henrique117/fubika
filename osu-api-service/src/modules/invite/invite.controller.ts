@@ -14,7 +14,6 @@ export const handleInviteCreate = async (
 
         return res.code(201).send(invite);
     } catch (err) {
-        console.log(err);
         return res.code(401).send(err);
     }
 }

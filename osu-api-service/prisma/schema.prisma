@@ -8,6 +8,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- TABELA NOVA PARA KEYS DA API ---
+model api_keys {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(50)
+  key         String   @unique @db.Char(64)
+  owner_id    Int
+  created_at  DateTime @default(now())
+
+  can_write   Boolean  @default(false) 
+
+  user        users    @relation(fields: [owner_id], references: [id])
+
+  @@index([key])
+}
+
 // --- TABELA NOVA PARA O SISTEMA DE CONVITES ---
 model invites {
   id            Int      @id @default(autoincrement())
@@ -322,9 +337,10 @@ model users {
   is_admin          Boolean  @default(false)
   discord_id        String?   @unique
 
-  // Relações Adicionadas
   stats             stats[]
   created_invites   invites[] @relation("CreatedInvites")
+
+  fubika_api_keys    api_keys[]
 
   @@index([clan_id], map: "users_clan_id_index")
   @@index([clan_priv], map: "users_clan_priv_index")

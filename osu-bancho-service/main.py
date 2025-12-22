@@ -2,19 +2,22 @@
 from __future__ import annotations
 
 import logging
-
+import asyncio
 import uvicorn
 
 import app.logging
 import app.settings
 import app.utils
+from app.state import services
 
 app.logging.configure_logging()
 
-
-def main() -> int:
+async def async_main() -> int:
     app.utils.display_startup_dialog()
-    uvicorn.run(
+
+    asyncio.create_task(services.run_redis_listener())
+
+    config = uvicorn.Config(
         "app.api.init_api:asgi_app",
         reload=app.settings.DEBUG,
         log_level=logging.WARNING,
@@ -24,8 +27,15 @@ def main() -> int:
         host=app.settings.APP_HOST,
         port=app.settings.APP_PORT,
     )
+    
+    server = uvicorn.Server(config)
+    
+    await server.serve()
+    
     return 0
 
+def main() -> int:
+    return asyncio.run(async_main())
 
 if __name__ == "__main__":
     exit(main())

@@ -11,12 +11,16 @@ from collections.abc import MutableMapping
 from pathlib import Path
 from typing import TypedDict
 
+import asyncio
+import json
+
 import datadog as datadog_module
 import datadog.threadstats.base as datadog_client
 import httpx
 import pymysql
 from redis import asyncio as aioredis
 
+import app.packets
 import app.settings
 import app.state
 from app._typing import IPAddress
@@ -489,3 +493,57 @@ async def run_sql_migrations() -> None:
                 "micro": software_version.micro,
             },
         )
+
+""" redis usecases """
+
+async def send_ingame_message(user_id: int, message: str) -> None:
+    """Envia uma mensagem para o Redis, para ser entregue in-game."""
+    payload = json.dumps({
+        "target_id": user_id,
+        "msg": message
+    })
+    await redis.publish("api:notification", payload)
+    log(f"Enviado pedido de notificação para ID {user_id}", Ansi.LCYAN)
+
+
+async def run_redis_listener() -> None:
+    """
+    Serviço que fica escutando o canal 'api:notification' do Redis
+    e entrega as mensagens para os jogadores online.
+    """
+    import app.state.sessions as sessions
+
+    log("Iniciando ouvinte do Redis (Pub/Sub)...", Ansi.LMAGENTA)
+
+    async with redis.pubsub() as pubsub:
+        await pubsub.subscribe("api:notification")
+
+        async for message in pubsub.listen():
+            if message["type"] != "message":
+                continue
+
+            try:
+                data = json.loads(message["data"])
+                target_id = int(data["target_id"])
+                msg_content = data["msg"]
+
+                player = sessions.players.get(id=target_id)
+
+                if player:
+                    bot = sessions.bot
+
+                    packet = app.packets.send_message(
+                        sender=bot.name,
+                        msg=msg_content,
+                        recipient=player.name, 
+                        sender_id=bot.id,
+                    )
+
+                    player.enqueue(packet)
+                    
+                    log(f"[Redis] DM enviada de {bot.name} para {player.name}", Ansi.LGREEN)
+                else:
+                    pass
+
+            except Exception as e:
+                log(f"[Redis Error] Falha ao processar mensagem: {e}", Ansi.LRED)

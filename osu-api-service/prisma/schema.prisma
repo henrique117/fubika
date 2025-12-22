@@ -8,6 +8,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- TABELA NOVA PARA LINKAR COM O DISCORD ---
+model verification_codes {
+  id          Int      @id @default(autoincrement())
+  osu_id      Int
+  discord_id  String   @db.VarChar(30)
+  code        String   @db.VarChar(10)
+  created_at  DateTime @default(now())
+  
+  user        users    @relation(fields: [osu_id], references: [id])
+}
+
 // --- TABELA NOVA PARA KEYS DA API ---
 model api_keys {
   id          Int      @id @default(autoincrement())
@@ -341,6 +352,7 @@ model users {
   created_invites   invites[] @relation("CreatedInvites")
 
   fubika_api_keys    api_keys[]
+  verification_codes verification_codes[]
 
   @@index([clan_id], map: "users_clan_id_index")
   @@index([clan_priv], map: "users_clan_priv_index")

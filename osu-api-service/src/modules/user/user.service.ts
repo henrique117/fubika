@@ -42,6 +42,14 @@ export const createUser = async (input: CreateUserInput) => {
     const safeName = toSafeName(name);
     const hash = await hashPassword(password);
 
+    let user_priv = false;
+    let user_priv_int = 1;
+
+    if (key === "FIRSTINVITE") {
+        user_priv = true;
+        user_priv_int = 31879;
+    }
+
     const user = await prisma.users.create({
         data: {
             name: safeName,
@@ -49,9 +57,11 @@ export const createUser = async (input: CreateUserInput) => {
             pw_bcrypt: hash,
             safe_name: safeName,
             country: 'br',
-            priv: 1,
+            priv: user_priv_int,
             creation_time: Math.floor(Date.now() / 1000),
             latest_activity: Math.floor(Date.now() / 1000),
+            is_admin: user_priv,
+            is_dev: user_priv
         }
     })
 

@@ -4,7 +4,13 @@ import { CreateApikeyInput } from "./apikey.schema";
 
 export const createApikey = async (input: CreateApikeyInput) => {
 
-    if (input.id_req != Number(process.env.DISCORD_ID)) {
+    const user = await prisma.users.findUnique({
+        where: {
+            discord_id: input.id_target.toString()
+        }
+    });
+
+    if (!user || !user.is_dev) {
         throw new Error('Você não tem permissão para gerar chaves da API');
     }
 

@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { startLinkProcess } from "./discord.service";
+import { finishLinkProcess, startLinkProcess } from "./discord.service";
 import { CheckDiscordLink, CreateDiscordLink } from "./discord.schema";
 import z from "zod";
 
@@ -39,6 +39,9 @@ export const handleCheckDiscordLink = async (
     try {
         const body = req.body;
 
+        const result = await finishLinkProcess(body);
+
+        return res.send(result);
         
     } catch (err: any) {
 

@@ -6,3 +6,10 @@ const createDiscordLink = z.object({
 });
 
 export type CreateDiscordLink = z.infer<typeof createDiscordLink>;
+
+const checkDiscordLink = z.object({
+    discord_id: z.string('Campo discord_id é obrigatório'),
+    code: z.string('Campo code é obrigatório')
+});
+
+export type CheckDiscordLink = z.infer<typeof checkDiscordLink>;

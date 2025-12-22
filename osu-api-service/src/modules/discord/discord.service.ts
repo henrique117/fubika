@@ -1,6 +1,6 @@
 import prisma from "../../utils/prisma";
 import { sendIngameMessage } from "../../utils/redis";
-import { CreateDiscordLink } from "./discord.schema";
+import { CheckDiscordLink, CreateDiscordLink } from "./discord.schema";
 import crypto from "crypto";
 
 export const startLinkProcess = async (input: CreateDiscordLink) => {
@@ -22,7 +22,7 @@ export const startLinkProcess = async (input: CreateDiscordLink) => {
         prisma.verification_codes.deleteMany({
             where: { discord_id: input.discord_id }
         }),
-        
+
         prisma.verification_codes.create({
             data: {
                 osu_id: user.id,
@@ -36,6 +36,33 @@ export const startLinkProcess = async (input: CreateDiscordLink) => {
 
     return { 
         success: true, 
-        message: "Código enviado no chat do jogo (F8)." 
+        message: "Código enviado no chat do jogo (F9)." 
+    };
+}
+
+export const finishLinkProcess = async (input: CheckDiscordLink) => {
+    const code = await prisma.verification_codes.findFirst({
+        where: {
+            code: input.code
+        }
+    });
+
+    if (!code || code.discord_id != input.discord_id) {
+        throw new Error('INVALID_CODE');
+    }
+
+    await prisma.$transaction([
+        prisma.users.update({
+            where: { id: code.osu_id },
+            data: { discord_id: code.discord_id }
+        }),
+        prisma.verification_codes.delete({
+            where: { id: code.id }
+        })
+    ]);
+
+    return {
+        success: true,
+        message: "Conta vinculada com sucesso"
     };
 }

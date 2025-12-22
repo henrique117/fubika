@@ -1,9 +1,9 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { startLinkProcess } from "./discord.service";
-import { CreateDiscordLink } from "./discord.schema";
+import { CheckDiscordLink, CreateDiscordLink } from "./discord.schema";
 import z from "zod";
 
-export const handleDiscordLink = async (
+export const handleCreateDiscordLink = async (
     req: FastifyRequest<{ Body: CreateDiscordLink }>,
     res: FastifyReply
 ) => {
@@ -26,6 +26,24 @@ export const handleDiscordLink = async (
 
         if (err.message === "ALREADY_LINKED") {
             return res.status(409).send({ error: "Este usuário já está vinculado a um Discord." });
+        }
+
+        return res.status(500).send({ error: "Erro interno ao processar vinculação." });
+    }
+}
+
+export const handleCheckDiscordLink = async (
+    req: FastifyRequest<{ Body: CheckDiscordLink }>,
+    res: FastifyReply
+) => {
+    try {
+        const body = req.body;
+
+        
+    } catch (err: any) {
+
+        if (err instanceof z.ZodError) {
+            return res.status(400).send({ error: "Dados inválidos", details: err.format() });
         }
 
         return res.status(500).send({ error: "Erro interno ao processar vinculação." });

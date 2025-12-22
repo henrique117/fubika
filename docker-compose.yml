@@ -20,8 +20,8 @@ services:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u${DB_USER} -p${DB_PASS}"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 10s
+      retries: 20
+      start_period: 60s
 
   redis:
     image: redis:7.2-alpine

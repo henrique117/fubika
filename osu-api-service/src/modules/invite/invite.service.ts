@@ -4,10 +4,23 @@ import prisma from "../../utils/prisma";
 
 export const createInvite = async (input: CreateInviteInput) => {
 
-    const user = await prisma.users.findUniqueOrThrow({
-        where: { id: input.id },
-        select: { is_admin: true }
-    });
+    let user;
+
+    if (typeof input.id === "number") {
+        user = await prisma.users.findUniqueOrThrow({
+            where: { id: input.id },
+            select: { is_admin: true, id: true }
+        });
+    } else {
+        user = await prisma.users.findUnique({
+            where: { discord_id: input.id },
+            select: { is_admin: true, id: true }
+        });
+    }
+
+    if (!user) {
+        throw new Error('Permissão negada: Apenas administradores podem criar convites.');
+    }
 
     if (!user.is_admin) {
         throw new Error('Permissão negada: Apenas administradores podem criar convites.');
@@ -37,7 +50,7 @@ export const createInvite = async (input: CreateInviteInput) => {
         data: {
             code: code,
             expires_at: expirationDate,
-            created_by_id: input.id
+            created_by_id: user.id
         }
     });
 

@@ -42,66 +42,73 @@ Autentica o usuário e retorna o token JWT.
 ```
 
 ### `GET /api/user/:id`
-Busca informações de um usuário específico.
+Busca informações de um usuário específico. Pode ser usado o ID do Discord também como parâmetro.
 **Autenticação:** Obrigatória.
 
 **Exemplo de Uso:**
-`GET /api/user/10`
+`GET /api/user/3`
 **Resposta:**
 ```json
 {
 	"id": 3,
 	"name": "henrique",
 	"safe_name": "henrique",
-	"pfp": "https://a.ppy.sh/3",
+	"pfp": "https://a.bpy.local/3",
 	"banner": "https://assets.ppy.sh/user-profile-covers/3.jpg",
 	"rank": 1,
-	"pp": 0,
-	"acc": 0,
-	"playtime": 0,
-	"max_combo": 0,
-	"total_score": 0,
-	"ranked_score": 0,
+	"pp": 35,
+	"acc": 93.9252,
+	"playtime": 367,
+	"playcount": 2,
+	"max_combo": 209,
+	"total_score": 1040907,
+	"ranked_score": 268113,
+	"level": 5.6198309090909095,
 	"ss_count": 0,
 	"ssh_count": 0,
 	"s_count": 0,
 	"sh_count": 0,
-	"a_count": 0,
+	"a_count": 1,
+	"last_activity": "há 38 minutos",
 	"top_100": [
-        {
-			"id": 4,
-			"score": 249674,
-			"acc": 93.42508,
+		{
+			"id": 2,
+			"score": 268113,
+			"pp": 34.454,
+			"acc": 93.92523,
+			"max_combo": 209,
 			"mods_int": 536870912,
 			"mods": "V2",
-			"n300": 699,
+			"n300": 491,
 			"n100": 33,
-			"n50": 17,
-			"nmiss": 14,
+			"n50": 3,
+			"nmiss": 8,
 			"grade": "A",
 			"perfect": false,
-			"max_combo": 252,
-			"map_md5": "644d7a8cd82e09b03bb48c21e963e826",
-			"player": {
-				"id": 3,
-				"name": "henrique",
-				"safe_name": "henrique",
-				"rank": 0,
-				"pp": 78,
-				"acc": 94.58208,
-				"pfp": "https://a.ppy.sh/3",
-				"a_count": 2,
-				"s_count": 0,
-				"ss_count": 0,
-				"sh_count": 0,
-				"ssh_count": 0,
-				"total_score": 2731931,
-				"ranked_score": 615351,
-				"max_combo": 584,
-				"playtime": 726
+			"play_time": "2025-12-23T17:59:40.000Z",
+			"beatmap": {
+				"beatmap_id": 977708,
+				"beatmapset_id": 456212,
+				"beatmap_md5": "0ee95aa2718e4f106cdd36a8e58a1fa9",
+				"title": "Candy Luv",
+				"mode": "osu",
+				"mode_int": 0,
+				"status": "ranked",
+				"total_lenght": 181,
+				"author_id": 3178418,
+				"author_name": "pishifat",
+				"cover": "https://assets.ppy.sh/beatmaps/456212/covers/cover.jpg?1622103831",
+				"diff": "Insane",
+				"star_rating": 4.06623,
+				"bpm": 130,
+				"od": 7,
+				"ar": 8,
+				"cs": 5,
+				"hp": 6,
+				"max_combo": 784
 			}
 		}, ...
-    ]
+	]
 }
 ```
 ---
@@ -115,62 +122,67 @@ Rotas para buscar informações de mapas.
 Busca informações de uma dificuldade específica de um mapa.
 
 **Exemplo de Uso:**
-`GET /api/beatmap/1480224` (Onde 1480224 é o ID do beatmap)
+`GET /api/beatmap/977708` (Onde 977708 é o ID do beatmap)
 **Resposta:**
 ```json
 {
-	"beatmap_id": 1480224,
-	"beatmapset_id": 696175,
-	"beatmap_md5": "644d7a8cd82e09b03bb48c21e963e826",
-	"title": "First Storm feat. Hatsune Miku",
+	"beatmap_id": 977708,
+	"beatmapset_id": 456212,
+	"beatmap_md5": "0ee95aa2718e4f106cdd36a8e58a1fa9",
+	"title": "Candy Luv",
 	"mode": "osu",
 	"mode_int": 0,
 	"status": "ranked",
-	"total_lenght": 228,
-	"author_id": 4754771,
-	"author_name": "Asaiga",
-	"diff": "Akitoshi's Insane",
-	"star_rating": 4.91066,
-	"bpm": 190,
-	"od": 8,
-	"ar": 9,
-	"cs": 4,
-	"hp": 5.5,
-	"max_combo": 1208,
+	"total_lenght": 181,
+	"author_id": 3178418,
+	"author_name": "pishifat",
+	"cover": "https://assets.ppy.sh/beatmaps/456212/covers/cover.jpg?1622103831",
+	"diff": "Insane",
+	"star_rating": 4.06623,
+	"bpm": 130,
+	"od": 7,
+	"ar": 8,
+	"cs": 5,
+	"hp": 6,
+	"max_combo": 784,
 	"scores": [
 		{
-			"id": 4,
-			"score": 249674,
-			"acc": 93.42508,
+			"id": 2,
+			"score": 268113,
+			"pp": 34.454,
+			"acc": 93.92523,
 			"mods_int": 536870912,
 			"mods": "V2",
-			"n300": 699,
+			"n300": 491,
 			"n100": 33,
-			"n50": 17,
-			"nmiss": 14,
+			"n50": 3,
+			"nmiss": 8,
 			"grade": "A",
 			"perfect": false,
-			"max_combo": 252,
-			"map_md5": "644d7a8cd82e09b03bb48c21e963e826",
+			"max_combo": 209,
+			"play_time": "2025-12-23T17:59:40.000Z",
 			"player": {
 				"id": 3,
 				"name": "henrique",
 				"safe_name": "henrique",
 				"rank": 0,
-				"pp": 78,
-				"acc": 94.58208,
-				"pfp": "https://a.ppy.sh/3",
-				"a_count": 2,
+				"pp": 35,
+				"acc": 93.9252,
+				"pfp": "https://a.bpy.local/3",
+				"banner": "https://assets.ppy.sh/user-profile-covers/3.jpg",
+				"a_count": 1,
 				"s_count": 0,
 				"ss_count": 0,
 				"sh_count": 0,
 				"ssh_count": 0,
-				"total_score": 2731931,
-				"ranked_score": 615351,
-				"max_combo": 584,
-				"playtime": 726
+				"level": 0,
+				"total_score": 1040907,
+				"ranked_score": 268113,
+				"max_combo": 209,
+				"playtime": 367,
+				"playcount": 0
 			}
-		}, ...
+		}
 	]
 }
 ```
@@ -238,18 +250,19 @@ Retorna a lista de melhores jogadores paginada.
 		"pfp": "https://a.bpy.local/3",
 		"banner": "https://assets.ppy.sh/user-profile-covers/3.jpg",
 		"rank": 1,
-		"pp": 78,
-		"acc": 94.58208,
-		"playtime": 726,
-		"max_combo": 584,
-		"total_score": 2731931,
-		"ranked_score": 615351,
+		"pp": 35,
+		"acc": 93.9252,
+		"playtime": 367,
+		"playcount": 2,
+		"max_combo": 209,
+		"total_score": 1040907,
+		"ranked_score": 268113,
+		"level": 5.6198309090909095,
 		"ss_count": 0,
 		"ssh_count": 0,
 		"s_count": 0,
 		"sh_count": 0,
-		"a_count": 2,
-		"top_100": []
+		"a_count": 1
 	}
 ]
 ```
@@ -308,7 +321,7 @@ Gera um novo código de convite.
 **Body (JSON):**
 ```json
 {
-    "id": "{id_do_discord_de_quem_criou}"
+    "id": "{id_do_discord_de_quem_criou | id_do_game}"
 }
 ```
 **Resposta:**

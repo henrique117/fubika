@@ -1,3 +1,4 @@
+import IBeatmap from "./beatmap.interface";
 import IPlayer from "./player.interface";
 
 export default interface IScore {
@@ -15,7 +16,9 @@ export default interface IScore {
     perfect: boolean;
     max_combo: number;
 
-    map_md5: string;
+    play_time: Date;
+
+    beatmap: Omit<IBeatmap, 'scores'>
 
     player: IPlayer;
 }

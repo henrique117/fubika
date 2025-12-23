@@ -23,5 +23,5 @@ export default interface IBeatmap {
     hp: number;
     max_combo: number;
 
-    scores?: IScore[];
+    scores?: Omit<IScore, 'beatmap'>[];
 }

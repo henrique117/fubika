@@ -1,11 +1,9 @@
+import prisma from "../../utils/prisma";
 import IBeatmap from "../../interfaces/beatmap.interface";
 import IBeatmapset from "../../interfaces/beatmapset.interface";
 import IScore from "../../interfaces/score.interface";
 import osuApiClient from "../../utils/axios";
 import { getModString } from "../../utils/getModString";
-import { calculateLevel } from "../../utils/level";
-import prisma from "../../utils/prisma";
-import { getLastActivity, getPlayerPlaycount } from "../user/user.service";
 import { SearchBeatmaps } from "./beatmap.schema";
 
 const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
@@ -20,7 +18,7 @@ const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
         total_lenght: data.total_length,
         author_id: data.user_id,
         author_name: data.beatmapset?.creator || 'Desconhecido',
-        cover: data.beatmapset.covers.cover,
+        cover: data.beatmapset?.covers?.cover || '',
         diff: data.version,
         star_rating: data.difficulty_rating,
         bpm: data.bpm,
@@ -29,7 +27,7 @@ const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
         cs: data.cs,
         hp: data.drain,
         max_combo: data.max_combo,
-        scores: [] 
+        scores: []
     };
 };
 
@@ -41,7 +39,6 @@ const mapOsuBeatmapsetToDomain = (data: any): IBeatmapset => {
         cover: data.covers?.cover || '',
         author_id: String(data.user_id),
         title: data.title,
-        
         beatmaps: (data.beatmaps || []).map((beatmap: any) => {
             return mapOsuBeatmapToDomain({
                 ...beatmap,
@@ -51,7 +48,51 @@ const mapOsuBeatmapsetToDomain = (data: any): IBeatmapset => {
     };
 };
 
-const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<IScore[]> => {
+const mapDatabaseToScoreWithoutMap = (row: any): Omit<IScore, 'beatmap'> => {
+    return {
+        id: Number(row.score_id), 
+        score: Number(row.score_val),
+        pp: row.score_pp || 0,
+        acc: row.score_acc,
+        mods_int: row.mods,
+        mods: getModString(row.mods),
+        n300: row.n300,
+        n100: row.n100,
+        n50: row.n50,
+        nmiss: row.nmiss,
+        grade: row.grade,
+        perfect: Boolean(row.perfect),
+        max_combo: row.max_combo,
+        play_time: row.play_time,
+
+        player: {
+            id: row.userid,
+            name: row.name,
+            safe_name: row.safe_name,
+            rank: 0, 
+            pp: row.user_pp || 0,
+            acc: row.user_acc || 0,
+            pfp: `https://a.${process.env.DOMAIN}/${row.userid}`,
+            banner: `https://assets.ppy.sh/user-profile-covers/${row.userid}.jpg`,
+
+            a_count: row.a_count || 0,
+            s_count: row.s_count || 0,
+            ss_count: row.x_count || 0,
+            sh_count: row.sh_count || 0,
+            ssh_count: row.xh_count || 0,
+            
+            level: 0, 
+
+            total_score: Number(row.user_tscore || 0),
+            ranked_score: Number(row.user_rscore || 0),
+            max_combo: row.user_max_combo || 0,
+            playtime: row.playtime || 0,
+            playcount: 0
+        }
+    };
+};
+
+const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<IScore, 'beatmap'>[]> => {
     
     let bmap_md5 = knownMd5;
     
@@ -92,29 +133,29 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<IScor
                 s.perfect,
                 s.map_md5,
                 s.mode, 
+                s.play_time,
                 ROW_NUMBER() OVER (
                     PARTITION BY s.userid 
                     ORDER BY s.score DESC
                 ) as rn
             FROM scores s
+            -- Filtra pelo MD5 e Status (2=Ranked, 3=BestV2) e Mod V2
             WHERE s.map_md5 = ${bmap_md5} AND (s.status = 2 OR s.status = 3) AND (s.mods & 536870912) > 0
         )
         SELECT 
             rs.*,
             u.name, 
             u.safe_name,
-            u.last_activity,
+            u.latest_activity as last_activity,
+            
             st.pp as user_pp,
             st.acc as user_acc,
             st.tscore as user_tscore,
             st.rscore as user_rscore,
             st.max_combo as user_max_combo,
             st.playtime,
-            st.x_count,    
-            st.xh_count,   
-            st.s_count,    
-            st.sh_count,   
-            st.a_count     
+            st.x_count, st.xh_count, st.s_count, st.sh_count, st.a_count
+
         FROM RankedScores rs
         JOIN users u ON rs.userid = u.id
         LEFT JOIN stats st ON u.id = st.id AND st.mode = rs.mode
@@ -127,7 +168,7 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<IScor
         return [];
     }
 
-    return await Promise.all(mapLBRaw.map((row) => mapDatabaseToScore(row)));
+    return mapLBRaw.map((row) => mapDatabaseToScoreWithoutMap(row));
 }
 
 export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
@@ -139,7 +180,7 @@ export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
         }
 
         const bmap = mapOsuBeatmapToDomain(response.data);
-
+        
         const map_lb = await getBeatmapLB(input.id, bmap.beatmap_md5);
 
         return { 
@@ -168,50 +209,3 @@ export const getBeatmapset = async (input: SearchBeatmaps): Promise<IBeatmapset>
         throw err;
     }
 }
-
-export const mapDatabaseToScore = async (row: any): Promise<IScore> => {
-    const totalScoreNumber = Number(row.user_tscore);
-
-    return {
-        id: Number(row.score_id), 
-        score: Number(row.score_val),
-        pp: row.score_pp || 0,
-        acc: row.score_acc,
-        mods_int: row.mods,
-        mods: getModString(row.mods),
-        n300: row.n300,
-        n100: row.n100,
-        n50: row.n50,
-        nmiss: row.nmiss,
-        grade: row.grade,
-        perfect: Boolean(row.perfect),
-        max_combo: row.max_combo,
-        map_md5: row.map_md5,
-
-        player: {
-            id: row.userid,
-            name: row.name,
-            safe_name: row.safe_name,
-            rank: 0, 
-            pp: row.user_pp || 0,
-            acc: row.user_acc || 0,
-            pfp: `https://a.${process.env.DOMAIN}/${row.userid}`,
-
-            a_count: row.a_count || 0,
-            s_count: row.s_count || 0,
-            ss_count: row.x_count || 0,
-            sh_count: row.sh_count || 0,
-            ssh_count: row.xh_count || 0,
-
-            level: calculateLevel(totalScoreNumber),
-
-            total_score: Number(row.user_tscore || 0),
-            ranked_score: Number(row.user_rscore || 0),
-            max_combo: row.user_max_combo || 0,
-            playtime: row.playtime || 0,
-            playcount: await getPlayerPlaycount(row.userid),
-
-            last_activity: getLastActivity(row.last_activity)
-        }
-    };
-};

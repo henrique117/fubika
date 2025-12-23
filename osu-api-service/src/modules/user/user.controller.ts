@@ -44,21 +44,35 @@ export const handleUserReq = async (
     res: FastifyReply
 ) => {
     try {
-        const userId = Number(req.params.id);
+        const rawId = req.params.id;
 
-        if (isNaN(userId)) {
-            return res.code(400).send({ error: "O ID fornecido não é um número válido." });
+        if (!/^\d+$/.test(rawId)) {
+            return res.code(400).send({ error: "O ID fornecido não é válido (apenas números)." });
         }
 
-        const user = await getUserStats(userId);
+        let user;
+
+        if (rawId.length > 15) {
+            user = await getUserStats({ discord_id: rawId });
+        } else {
+            user = await getUserStats({ id: Number(rawId) });
+        }
 
         return res.code(200).send(user);
 
     } catch (err: any) {
-        if (err.message === "Usuário não encontrado" || err.message === "Usuário inválido (Bot ou Bancho)") {
-            return res.code(404).send({ error: err.message });
+        console.error("Erro ao buscar usuário:", err);
+
+        if (err.message === "Usuário não encontrado" || err.message.includes("inválido")) {
+            return res.code(404).send({ 
+                error: "Not Found", 
+                message: err.message 
+            });
         }
 
-        return res.code(500).send({ error: "Erro interno ao buscar dados do usuário." });
+        return res.code(500).send({ 
+            error: "Internal Server Error",
+            message: "Erro interno ao buscar dados do usuário." 
+        });
     }
 }

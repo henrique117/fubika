@@ -126,25 +126,29 @@ export const createUserStats = async (playerId: number): Promise<void> => {
     });
 }
 
-export const getUserStats = async (playerId: number, mode: number = 0): Promise<IPlayer> => {
+type UserFilter = { id: number } | { discord_id: string };
 
-    if (playerId < 3) throw new Error("Usuário inválido (Bot ou Bancho)");
+export const getUserStats = async (filter: UserFilter, mode: number = 0): Promise<IPlayer> => {
 
     const user = await prisma.users.findUnique({
-        where: { id: playerId }
+        where: filter as any
     });
 
     if (!user) throw new Error("Usuário não encontrado");
+    
+    if (user.id < 3) throw new Error("Usuário inválido (Bot ou Bancho)");
+
+    const playerId = user.id;
 
     const stats = await prisma.stats.findUnique({
-        where: {
-            id_mode: { id: playerId, mode: mode }
+        where: { 
+            id_mode: { id: playerId, mode: mode } 
         }
     });
 
     const userStats = stats || {
-        pp: 0, acc: 0, tscore: 0n, rscore: 0n,
-        max_combo: 0, playtime: 0,
+        pp: 0, acc: 0, tscore: 0n, rscore: 0n, 
+        max_combo: 0, playtime: 0, 
         x_count: 0, xh_count: 0, s_count: 0, sh_count: 0, a_count: 0
     };
 
@@ -173,13 +177,13 @@ export const getUserStats = async (playerId: number, mode: number = 0): Promise<
         id: user.id,
         name: user.name,
         safe_name: user.safe_name,
-        pfp: `https://a.ppy.sh/${user.id}`,
+        pfp: `https://a.${process.env.DOMAIN}/${user.id}`,
         banner: `https://assets.ppy.sh/user-profile-covers/${user.id}.jpg`,
-
+        
         rank: rank,
         pp: userStats.pp,
         acc: userStats.acc,
-
+        
         playtime: userStats.playtime,
         max_combo: userStats.max_combo,
         total_score: Number(userStats.tscore),

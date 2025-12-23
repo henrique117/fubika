@@ -27,7 +27,7 @@ const loginUserSchema = z.object({
 export type LoginUserInput = z.infer<typeof loginUserSchema>;
 
 const getUserSchema = z.object({
-    id: z.int("Campo obrigatório")
+    id: z.string()
 });
 
 export type GetUserInput = z.infer<typeof getUserSchema>;

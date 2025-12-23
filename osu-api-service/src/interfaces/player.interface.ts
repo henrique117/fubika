@@ -16,6 +16,8 @@ export default interface IPlayer {
     sh_count: number;
     ssh_count: number;
 
+    level: number;
+
     total_score: number;
     ranked_score: number;
     max_combo: number;

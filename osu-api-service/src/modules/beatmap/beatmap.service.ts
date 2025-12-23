@@ -3,6 +3,7 @@ import IBeatmapset from "../../interfaces/beatmapset.interface";
 import IScore from "../../interfaces/score.interface";
 import osuApiClient from "../../utils/axios";
 import { getModString } from "../../utils/getModString";
+import { calculateLevel } from "../../utils/level";
 import prisma from "../../utils/prisma";
 import { getLastActivity, getPlayerPlaycount } from "../user/user.service";
 import { SearchBeatmaps } from "./beatmap.schema";
@@ -169,6 +170,8 @@ export const getBeatmapset = async (input: SearchBeatmaps): Promise<IBeatmapset>
 }
 
 export const mapDatabaseToScore = async (row: any): Promise<IScore> => {
+    const totalScoreNumber = Number(row.user_tscore);
+
     return {
         id: Number(row.score_id), 
         score: Number(row.score_val),
@@ -199,6 +202,8 @@ export const mapDatabaseToScore = async (row: any): Promise<IScore> => {
             ss_count: row.x_count || 0,
             sh_count: row.sh_count || 0,
             ssh_count: row.xh_count || 0,
+
+            level: calculateLevel(totalScoreNumber),
 
             total_score: Number(row.user_tscore || 0),
             ranked_score: Number(row.user_rscore || 0),

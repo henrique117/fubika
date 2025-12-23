@@ -7,6 +7,7 @@ import { checkInvite, useInvite } from "../invite/invite.service";
 import { CreateUserInput, LoginUserInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
+import { calculateLevel } from "../../utils/level";
 
 const toSafeName = (name: string): string => {
     return name.trim().toLowerCase().replace(/ /g, '_');
@@ -201,6 +202,8 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         take: 100
     });
 
+    const totalScoreNumber = Number(userStats.tscore);
+
     return {
         id: user.id,
         name: user.name,
@@ -217,6 +220,8 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         max_combo: userStats.max_combo,
         total_score: Number(userStats.tscore),
         ranked_score: Number(userStats.rscore),
+
+        level: calculateLevel(totalScoreNumber),
 
         ss_count: userStats.x_count,
         ssh_count: userStats.xh_count,

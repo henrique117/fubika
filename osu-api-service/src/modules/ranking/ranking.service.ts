@@ -2,6 +2,7 @@ import prisma from "../../utils/prisma";
 import IPlayer from "../../interfaces/player.interface";
 import { GetGlobalRankInput } from "./ranking.schema";
 import { getPlayerPlaycount } from "../user/user.service";
+import { calculateLevel } from "../../utils/level";
 
 export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<IPlayer[]> => {
     
@@ -28,6 +29,7 @@ export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<I
 
     return Promise.all(leaderboardRaw.map(async (row, index) => {
         const currentRank = ((page - 1) * itemsPerPage) + index + 1;
+        const totalScoreNumber = Number(row.tscore);
 
         return {
             id: row.user.id,
@@ -45,6 +47,8 @@ export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<I
             max_combo: row.max_combo,
             total_score: Number(row.tscore),
             ranked_score: Number(row.rscore),
+
+            level: calculateLevel(totalScoreNumber),
 
             ss_count: row.x_count,
             ssh_count: row.xh_count,

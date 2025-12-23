@@ -1,9 +1,14 @@
+# --- Regras Globais ---
+# Ignora qualquer pasta __pycache__ em qualquer lugar do projeto
+__pycache__/
+# Ignora qualquer arquivo .pyc em qualquer lugar
+*.pyc
+
 # --- Arquivos da Raiz (Global) ---
 .env
 
 # --- Serviço: Bancho (Python) ---
 osu-bancho-service/.vscode
-osu-bancho-service/__pycache__/
 osu-bancho-service/config.py
 osu-bancho-service/.data
 osu-bancho-service/_testing/

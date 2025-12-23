@@ -13,6 +13,7 @@ export default interface IBeatmap {
     author_id: number;
     author_name: string;
     diff: string;
+    cover: string;
 
     star_rating: number;
     bpm: number;

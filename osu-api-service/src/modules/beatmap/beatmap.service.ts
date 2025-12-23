@@ -18,6 +18,7 @@ const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
         total_lenght: data.total_length,
         author_id: data.user_id,
         author_name: data.beatmapset?.creator || 'Desconhecido',
+        cover: data.beatmapset.covers.cover,
         diff: data.version,
         star_rating: data.difficulty_rating,
         bpm: data.bpm,

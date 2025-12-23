@@ -38,12 +38,11 @@
 
 .imgCat {
     position: absolute;
-    width: 70%;
+    width: 25%;
     height: auto;
-    max-height: 500px;
-
-    left: -20%;
-    top: 70px;
+    max-height: 339px;
+    
+    bottom: -35px;
 }
 
 .speechBubble {
@@ -60,6 +59,7 @@
     left: 220px;
     border-radius: 15px;
     transform: rotate(10deg);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
 }
 
 .speechBubble::after {

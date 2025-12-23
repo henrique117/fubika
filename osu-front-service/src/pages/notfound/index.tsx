@@ -10,7 +10,7 @@ const NotFoundPage: React.FC = () => {
                     <img src="/text_404.svg" alt="Texto 404 Not Found" className={style.imgNotFound} />
                 </div>
                 <div className={style.containerRight} >
-                    <img src="/cat.svg" alt="Gato de corpo inteiro com o olho fechado" className={style.imgCat} />
+                    <img src="/cat.png" alt="Gato de corpo inteiro com o olho fechado" className={style.imgCat} />
                     <div className={style.speechBubble} >
                         <h2 className={style.text} >Verifique se você<br />escreveu as informações<br />corretamente!</h2>
                     </div>

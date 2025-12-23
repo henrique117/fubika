@@ -258,7 +258,7 @@ Retorna a lista de melhores jogadores paginada.
 ## 🤖 Discord Integration (`/api/discord`)
 
 Rotas usadas pelo Bot do Discord para vincular contas.
-**Autenticação Geral:** Obrigatória (Recomendado usar API Key do Bot).
+**Autenticação Geral:** Não necessária.
 
 ### `POST /api/discord/createlink`
 Inicia o processo de vinculação. O servidor envia um código in-game para o usuário.

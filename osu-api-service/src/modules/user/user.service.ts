@@ -5,6 +5,8 @@ import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import { checkInvite, useInvite } from "../invite/invite.service";
 import { CreateUserInput, LoginUserInput } from "./user.schema";
+import { ptBR } from "date-fns/locale";
+import { formatDistance } from "date-fns";
 
 const toSafeName = (name: string): string => {
     return name.trim().toLowerCase().replace(/ /g, '_');
@@ -28,6 +30,32 @@ const mapProfileScore = (row: any): Omit<IScore, 'player'> => {
         map_md5: row.map_md5,
     };
 };
+
+export const getLastActivity = (unixTimestamp: number): string => {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - unixTimestamp;
+    
+    if (diff < 300) {
+        return "Online";
+    }
+
+    const date = new Date(unixTimestamp * 1000);
+
+    return formatDistance(date, new Date(), { 
+        addSuffix: true,
+        locale: ptBR 
+    });
+}
+
+export const getPlayerPlaycount = async (player_id: number): Promise<number> => {
+    const playcount = await prisma.scores.count({
+        where: {
+            userid: player_id
+        }
+    })
+    
+    return playcount;
+}
 
 export const createUser = async (input: CreateUserInput) => {
 
@@ -185,6 +213,7 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         acc: userStats.acc,
         
         playtime: userStats.playtime,
+        playcount: await getPlayerPlaycount(user.id),
         max_combo: userStats.max_combo,
         total_score: Number(userStats.tscore),
         ranked_score: Number(userStats.rscore),
@@ -194,6 +223,8 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         s_count: userStats.s_count,
         sh_count: userStats.sh_count,
         a_count: userStats.a_count,
+
+        last_activity: getLastActivity(user.latest_activity),
 
         top_100: topScoresRaw.map(mapProfileScore)
     };

@@ -4,6 +4,7 @@ import IScore from "../../interfaces/score.interface";
 import osuApiClient from "../../utils/axios";
 import { getModString } from "../../utils/getModString";
 import prisma from "../../utils/prisma";
+import { getLastActivity, getPlayerPlaycount } from "../user/user.service";
 import { SearchBeatmaps } from "./beatmap.schema";
 
 const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
@@ -101,6 +102,7 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<IScor
             rs.*,
             u.name, 
             u.safe_name,
+            u.last_activity,
             st.pp as user_pp,
             st.acc as user_acc,
             st.tscore as user_tscore,
@@ -124,7 +126,7 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<IScor
         return [];
     }
 
-    return mapLBRaw.map((row) => mapDatabaseToScore(row));
+    return await Promise.all(mapLBRaw.map((row) => mapDatabaseToScore(row)));
 }
 
 export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
@@ -166,7 +168,7 @@ export const getBeatmapset = async (input: SearchBeatmaps): Promise<IBeatmapset>
     }
 }
 
-export const mapDatabaseToScore = (row: any): IScore => {
+export const mapDatabaseToScore = async (row: any): Promise<IScore> => {
     return {
         id: Number(row.score_id), 
         score: Number(row.score_val),
@@ -201,7 +203,10 @@ export const mapDatabaseToScore = (row: any): IScore => {
             total_score: Number(row.user_tscore || 0),
             ranked_score: Number(row.user_rscore || 0),
             max_combo: row.user_max_combo || 0,
-            playtime: row.playtime || 0
+            playtime: row.playtime || 0,
+            playcount: await getPlayerPlaycount(row.userid),
+
+            last_activity: getLastActivity(row.last_activity)
         }
     };
 };

@@ -20,6 +20,9 @@ export default interface IPlayer {
     ranked_score: number;
     max_combo: number;
     playtime: number;
+    playcount: number;
+
+    last_activity?: string;
 
     top_100?: Omit<IScore, 'player'>[];
 }

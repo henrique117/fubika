@@ -15,7 +15,7 @@ const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
         mode: data.mode,
         mode_int: data.mode_int,
         status: data.status,
-        total_lenght: data.total_length,
+        total_length: data.total_length,
         author_id: data.user_id,
         author_name: data.beatmapset?.creator || 'Desconhecido',
         cover: data.beatmapset?.covers?.cover || '',
@@ -73,7 +73,7 @@ const mapDatabaseToScoreWithoutMap = (row: any): Omit<IScore, 'beatmap'> => {
             pp: row.user_pp || 0,
             acc: row.user_acc || 0,
             pfp: `https://a.${process.env.DOMAIN}/${row.userid}`,
-            banner: `https://assets.ppy.sh/user-profile-covers/${row.userid}.jpg`,
+            banner: `https://assets.${process.env.DOMAIN}/user-profile-covers/${row.userid}.jpg`,
 
             a_count: row.a_count || 0,
             s_count: row.s_count || 0,

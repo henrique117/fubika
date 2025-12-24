@@ -9,7 +9,7 @@ export default interface IBeatmap {
     mode: string;
     mode_int: number;
     status: string;
-    total_lenght: number;
+    total_length: number;
     author_id: number;
     author_name: string;
     diff: string;

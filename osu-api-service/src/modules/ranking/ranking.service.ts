@@ -35,7 +35,7 @@ export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<I
             id: row.user.id,
             name: row.user.name,
             safe_name: row.user.safe_name,
-            pfp: `https://a.${process.env.DOMAIN}/${row.user.id}`,
+            pfp: `https://a.${process.env.DOMAIN}/${row.user.id}.jpeg`,
             banner: `https://assets.ppy.sh/user-profile-covers/${row.user.id}.jpg`,
             
             rank: currentRank,

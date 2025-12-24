@@ -26,5 +26,5 @@ export default interface IPlayer {
 
     last_activity?: string;
 
-    top_100?: Omit<IScore, 'player'>[];
+    top_200?: Omit<IScore, 'player'>[];
 }

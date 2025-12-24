@@ -4,7 +4,7 @@ import IBeatmap from "../../interfaces/beatmap.interface";
 import { getModString } from "../../utils/getModString";
 import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
-import osuApiClient from "../../utils/axios"; // Import do cliente da API
+import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
 import { CreateUserInput, LoginUserInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
@@ -40,7 +40,7 @@ const mapOsuApiDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
         mode: data.mode,
         mode_int: data.mode_int,
         status: data.status,
-        total_lenght: data.total_length,
+        total_length: data.total_length,
         author_id: data.user_id, 
         author_name: data.beatmapset?.creator || 'Desconhecido',
         cover: data.beatmapset?.covers?.cover || '',
@@ -75,7 +75,7 @@ const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player
             mode: 'osu',
             mode_int: 0,
             status: 'unknown',
-            total_lenght: 0,
+            total_length: 0,
             author_id: 0,
             author_name: 'Desconhecido',
             cover: '',
@@ -232,7 +232,7 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
             AND s.status = 2 -- Ranked/Passed
             AND s.pp > 0
         ORDER BY s.pp DESC
-        LIMIT 100;
+        LIMIT 200;
     `;
 
     const totalScoreNumber = Number(userStats.tscore);
@@ -268,6 +268,6 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
 
         last_activity: getLastActivity(user.latest_activity),
 
-        top_100: populatedScores
+        top_200: populatedScores
     };
 }

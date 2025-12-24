@@ -1,0 +1,223 @@
+.pageWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 100px;
+}
+
+.card {
+    width: 90%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    align-items: center;
+    background-color: var(--color-background-dark);
+    border-radius: 15px;
+}
+
+.cardHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-verde-baitola);
+    width: 100%;
+    border-radius: 15px 15px 0px 0px;
+    height: 70px;
+    padding-inline: 20px;
+    gap: 20px;
+}
+
+.headerImg {
+    max-height: 40px;
+    width: auto;
+    opacity: 0.5;
+}
+
+.headerTitle {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.cardBody {
+    width: 100%;
+    height: 380px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.cardBody::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(19, 17, 15, 0.65);
+    z-index: 1;
+}
+
+.cardFooter {
+    width: 100%;
+    height: 40px;
+    background-color: var(--color-verde-baitola);
+    border-radius: 0px 0px 15px 15px;
+    opacity: 0.65;
+}
+
+.cardLB {
+    width: 100%;
+}
+
+.lbHeader {
+    width: 100%;
+    height: 350px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 7px;
+}
+
+.lbTitle {
+    background-color: #39AD9B;
+    padding: 10px 20px;
+    border-radius: 6px;
+}
+
+.lbTitle h2 {
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+}
+
+.catBody, .catHead {
+    position: absolute;
+    opacity: 0.5;
+    width: auto;
+}
+
+.catBody {
+    max-height: 291px;
+    left: 5%;
+    bottom: -2%;
+    transform: scaleX(-1);
+}
+
+.catHead {
+    max-height: 140px;
+    right: 5%;
+    bottom: 20%;
+    transform: rotate(12deg);
+}
+
+.leaderboardContainer {
+    width: 100%;
+}
+
+.tableHeader {
+    display: flex;
+    padding: 5px 0px;
+    background-color: inherit;
+    color: var(--color-branco);
+    font-size: 8px;
+    font-weight: bold;
+    align-items: center;
+    gap: 15px;
+    padding-inline: 20px;
+}
+
+.colRank {
+    width: 15px;
+    text-align: center;
+}
+
+.colPlayer { 
+    flex: 1;
+    display: flex; 
+    align-items: center; 
+    min-width: 100px;
+    padding-left: 10px;
+    overflow: hidden;
+}
+
+.colPP { 
+    width: 80px; 
+    text-align: center; 
+    flex-shrink: 0;
+}
+
+.colAcc { 
+    width: 40px; 
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.colMods {
+    width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.colMaxCombo {
+    width: 59px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.col300, .col100, .col50, .colX {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.rowsContainer {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    padding-inline: 20px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.playerRow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 30px;
+    background-color: var(--color-background);
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 10px;
+    border-radius: 15px;
+    gap: 15px;
+}
+
+.ppValue, .statValue {
+    font-size: 10px;
+    color: var(--color-branco);
+}
+
+.nameInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.username {
+    font-size: 10px;
+}
+
+.grade {
+    max-width: 15px;
+    height: auto;
+    width: 100%;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

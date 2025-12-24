@@ -42,7 +42,7 @@ Autentica o usuário e retorna o token JWT.
 ```
 
 ### `GET /api/user/:id`
-Busca informações de um usuário específico. Pode ser usado o ID do Discord também como parâmetro.
+Busca informações de um usuário específico. Pode ser usado o ID do Discord ou o nome do osu (safe name, sem caracteres especiais ou espaço) também como parâmetro.
 **Autenticação:** Obrigatória.
 
 **Exemplo de Uso:**
@@ -70,7 +70,7 @@ Busca informações de um usuário específico. Pode ser usado o ID do Discord t
 	"sh_count": 0,
 	"a_count": 1,
 	"last_activity": "há 38 minutos",
-	"top_100": [
+	"top_200": [
 		{
 			"id": 2,
 			"score": 268113,
@@ -94,7 +94,7 @@ Busca informações de um usuário específico. Pode ser usado o ID do Discord t
 				"mode": "osu",
 				"mode_int": 0,
 				"status": "ranked",
-				"total_lenght": 181,
+				"total_length": 181,
 				"author_id": 3178418,
 				"author_name": "pishifat",
 				"cover": "https://assets.ppy.sh/beatmaps/456212/covers/cover.jpg?1622103831",
@@ -109,6 +109,120 @@ Busca informações de um usuário específico. Pode ser usado o ID do Discord t
 			}
 		}, ...
 	]
+}
+```
+
+### `GET /api/user/:id/recent`
+Busca as scores recentes do usuário. Pode ser usado o ID do Discord ou o nome do osu (safe name, sem caracteres especiais ou espaço) também como parâmetro.
+**Autenticação:** Obrigatória.
+
+**Exemplo de Uso:**
+`GET /api/user/3/recent`
+**Resposta:**
+```json
+[
+	{
+		"id": 2,
+		"score": 73455,
+		"pp": 50.089,
+		"acc": 96.15385,
+		"max_combo": 92,
+		"mods_int": 536870912,
+		"mods": "V2",
+		"n300": 86,
+		"n100": 4,
+		"n50": 1,
+		"nmiss": 0,
+		"grade": "F",
+		"perfect": false,
+		"play_time": "2025-12-24T17:40:45.000Z",
+		"beatmap": {
+			"beatmap_id": 345642,
+			"beatmapset_id": 87188,
+			"beatmap_md5": "ca477a0a2cf6007d38bbb4d0e2ae5036",
+			"title": "NEW Astronomas",
+			"mode": "osu",
+			"mode_int": 0,
+			"status": "ranked",
+			"total_length": 122,
+			"author_id": 2198472,
+			"author_name": "Charles445",
+			"cover": "https://assets.ppy.sh/beatmaps/87188/covers/cover.jpg?1650618918",
+			"diff": "Priti's Hyper",
+			"star_rating": 4.0067,
+			"bpm": 160,
+			"od": 6,
+			"ar": 8,
+			"cs": 4,
+			"hp": 5,
+			"max_combo": 660
+		}
+	}, ...
+]
+```
+
+### `GET /api/user/:id/map/:mapId`
+Busca a melhor score de um player em determinado mapa. Pode ser usado o ID do Discord ou o nome do osu (safe name, sem caracteres especiais ou espaço) também como parâmetro.
+**Autenticação:** Obrigatória.
+
+**Exemplo de Uso:**
+`GET /api/user/3/map/345642`
+**Resposta:**
+```json
+{
+	"id": 1,
+	"score": 356317,
+	"pp": 34.717,
+	"acc": 95.13705,
+	"max_combo": 260,
+	"mods_int": 536870912,
+	"mods": "V2",
+	"n300": 352,
+	"n100": 19,
+	"n50": 2,
+	"nmiss": 4,
+	"grade": "A",
+	"perfect": false,
+	"play_time": "2025-12-24T17:08:16.000Z",
+	"beatmap": {
+		"beatmap_id": 345642,
+		"beatmapset_id": 87188,
+		"beatmap_md5": "ca477a0a2cf6007d38bbb4d0e2ae5036",
+		"title": "NEW Astronomas",
+		"mode": "osu",
+		"mode_int": 0,
+		"status": "ranked",
+		"total_length": 122,
+		"author_id": 2198472,
+		"author_name": "Charles445",
+		"cover": "https://assets.ppy.sh/beatmaps/87188/covers/cover.jpg?1650618918",
+		"diff": "Priti's Hyper",
+		"star_rating": 4.0067,
+		"bpm": 160,
+		"od": 6,
+		"ar": 8,
+		"cs": 4,
+		"hp": 5,
+		"max_combo": 660
+	},
+	"player": {
+		"id": 3,
+		"name": "henrique",
+		"safe_name": "henrique",
+		"pfp": "https://a.bpy.local/3",
+		"rank": 0,
+		"pp": 0,
+		"acc": 0,
+		"a_count": 0,
+		"s_count": 0,
+		"ss_count": 0,
+		"sh_count": 0,
+		"ssh_count": 0,
+		"total_score": 0,
+		"ranked_score": 0,
+		"max_combo": 0,
+		"playtime": 0
+	}
 }
 ```
 ---
@@ -133,7 +247,7 @@ Busca informações de uma dificuldade específica de um mapa.
 	"mode": "osu",
 	"mode_int": 0,
 	"status": "ranked",
-	"total_lenght": 181,
+	"total_length": 181,
 	"author_id": 3178418,
 	"author_name": "pishifat",
 	"cover": "https://assets.ppy.sh/beatmaps/456212/covers/cover.jpg?1622103831",

@@ -1,56 +1,36 @@
 import React from 'react'
 import style from './style.module.css'
-import { ButtonGradientComponent, WrapperComponent } from '../../components/components.export'
+import { WrapperComponent } from '../../components/components.export'
 import { Link } from 'react-router-dom'
 
 const HowToConnect: React.FC = () => {
     return (
         <WrapperComponent>
             <div className={style.pageWrapper}>
-                <div className={style.loginCard}>
+                <div className={style.card}>
                     <Link to='/'>
                         <button className={style.backButton}>
                             <img src="arrow_icon.svg" alt="" />
                         </button>
                     </Link>
 
-                    <div className={style.logoContainer}>
-                        <img src="/logo_entrar.svg" alt="Entrar" className={style.logoSvg} />
+                    <h1 className={style.title}>Como conectar?</h1>
+
+                    <div className={style.instructions}>
+                        <ul className={style.dashedList}>
+                            <li>Localize o arquivo do osu! .exe em seu computador;</li>
+                            <li>Clique com o botão direito sobre o osu! .exe e duplique o osu! .exe;</li>
+                            <li>Após duplicar o arquivo, clique como botão direito e vá em propriedades;</li>
+                            <li>Nas propriedades adicione “ADICIONAR AQ O COMANDO<br />PARA INSERIR NAS PROPRIEDADES” no destino (igual ao exemplo abaixo);</li>
+                        </ul>
+                        <img src="example.svg" alt="" className={style.image} />
+                        <ul className={style.dashedList}>
+                            <li>Clique no botão aplicar e logo em seguida o OK;</li>
+                            <li>Feche a janela das propriedades do arquivo da cópia que você fez a alteração;</li>
+                            <li>Abra o arquivo do jogo no qual você fez as modificações;</li>
+                            <li>Aproveite o Fubika!</li>
+                        </ul>
                     </div>
-
-                    <form className={style.formContainer}>
-
-                        <div className={style.inputGroup}>
-                            <label htmlFor="user" className={style.label}>Nome de usuário</label>
-                            <input
-                                type="text"
-                                id="user"
-                                placeholder="ManfaceEnjoyer"
-                                className={style.input}
-                            />
-                        </div>
-
-                        <div className={style.inputGroup}>
-                            <label htmlFor="pass" className={style.label}>Senha</label>
-                            <input
-                                type="password"
-                                id="pass"
-                                placeholder="••••••••••••"
-                                className={style.input}
-                            />
-                        </div>
-                    </form>
-
-                    <Link to='/forgotpass' className={style.forgotPassword}>
-                        <a href="#">
-                            Esqueceu a senha?
-                        </a>
-                    </Link>
-
-                    <div className={style.entrarButton}>
-                        <ButtonGradientComponent text='Entrar' />
-                    </div>
-
                 </div>
             </div>
         </WrapperComponent>

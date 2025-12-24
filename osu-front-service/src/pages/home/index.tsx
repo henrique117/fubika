@@ -83,7 +83,7 @@ const Home: React.FC = () => {
                             </div>
                         </div>
                         <div className={style.btnWrapper}>
-                            <Link to='/' style={{ textDecoration: 'none' }}>
+                            <Link to='/howtoconnect' style={{ textDecoration: 'none' }}>
                                 <ButtonComponent text="Como conectar?" />
                             </Link>
                             <div className={style.ornamentsWrapper}>

@@ -5,7 +5,7 @@ import crypto from "crypto";
 
 export const startLinkProcess = async (input: CreateDiscordLink) => {
     const user = await prisma.users.findFirst({
-        where: { safe_name: input.osu_name.toLowerCase().replace(/ /g, '_') }
+        where: { safe_name: input.osu_name.trim().toLowerCase().replace(/ /g, '_') }
     });
 
     if (!user) {

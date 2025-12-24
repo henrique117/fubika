@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { ForgotPassPage, HomePage, HowToConnectPage, LoginPage, NotFoundPage, RedefinePassPage, RegisterPage } from '../pages/pages.export'
+import { ForgotPassPage, GlobalRankingPage, HomePage, HowToConnectPage, LoginPage, NotFoundPage, RedefinePassPage, RegisterPage } from '../pages/pages.export'
 
 const router = createBrowserRouter([
     {
@@ -25,6 +25,10 @@ const router = createBrowserRouter([
     {
         path: '/howtoconnect',
         element: <HowToConnectPage />
+    },
+    {
+        path: '/ranking',
+        element: <GlobalRankingPage />
     },
     {
         path: '*',

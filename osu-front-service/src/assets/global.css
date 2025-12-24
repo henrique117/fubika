@@ -29,11 +29,10 @@
     font-style: normal;
 }
 
-a, input, h2, p, span, label {
+a, input, h2, p, span, label, div {
     font-family: 'Caviar Dreams', sans-serif;
     font-weight: normal;
     font-style: normal;
-    line-height: auto;
     color: var(--color-branco);
 }
 
@@ -41,6 +40,5 @@ h1 {
     font-family: 'Cute Dino', sans-serif;
     font-weight: normal;
     font-style: normal;
-    line-height: auto;
     color: var(--color-branco);
 }

@@ -28,6 +28,7 @@ export const handleCreateDiscordLink = async (
             return res.status(409).send({ error: "Este usuário já está vinculado a um Discord." });
         }
 
+        console.error(err)
         return res.status(500).send({ error: "Erro interno ao processar vinculação." });
     }
 }

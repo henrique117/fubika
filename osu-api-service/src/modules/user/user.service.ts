@@ -6,7 +6,7 @@ import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
-import { CreateUserInput, LoginUserInput, ScoreQueryInput } from "./user.schema";
+import { CreateUserInput, LoginUserInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
 import { calculateLevel } from "../../utils/level";
@@ -220,7 +220,6 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
             s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
             s.play_time, s.map_md5, s.mode, s.status,
             
-            -- Pegamos o ID do mapa fazendo join pelo hash MD5
             m.id as map_id,
             m.set_id as map_set_id
 
@@ -229,7 +228,7 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         WHERE 
             s.userid = ${playerId} 
             AND s.mode = ${mode}
-            AND s.status = 2 -- Ranked/Passed
+            AND s.status = 2
             AND s.pp > 0
         ORDER BY s.pp DESC
         LIMIT 200;
@@ -289,8 +288,6 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
             s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
             s.play_time, s.map_md5, s.mode, s.status,
             
-            -- Pegamos dados do mapa via JOIN para garantir que temos o ID para a API
-            -- e dados de fallback caso a API falhe
             m.id as map_id,
             m.set_id as map_set_id,
             m.title as map_title,
@@ -304,7 +301,6 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
         WHERE 
             s.userid = ${user.id} 
             AND s.mode = ${mode}
-            -- Sem filtro de status, queremos ver as últimas tentativas mesmo
         ORDER BY s.play_time DESC
         LIMIT ${limit};
     `;
@@ -314,4 +310,89 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
     );
 
     return populatedScores;
+}
+
+export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, input: ScoreQueryModeInput) => {
+    const { mode } = input;
+
+    const user = await prisma.users.findUnique({ where: filter as any });
+    if (!user) throw new Error("Usuário não encontrado");
+
+    let mapMd5 = "";
+
+    const localMap = await prisma.maps.findFirst({
+        where: { id: bmap_id },
+        select: { md5: true }
+    });
+
+    if (localMap) {
+        mapMd5 = localMap.md5;
+    } else {
+        try {
+            const response = await osuApiClient.get(`/beatmaps/${bmap_id}`);
+            if (response.data?.checksum) {
+                mapMd5 = response.data.checksum;
+            }
+        } catch (error) {
+            console.error("Erro ao buscar MD5 do mapa na API:", error);
+        }
+    }
+
+    if (!mapMd5) {
+        return null; 
+    }
+
+    const bestScoreRaw = await prisma.$queryRaw<any[]>`
+        SELECT 
+            s.id as score_id, 
+            s.score as score_val, 
+            s.pp as score_pp, 
+            s.acc as score_acc, 
+            s.max_combo, s.mods, 
+            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
+            s.play_time, s.map_md5, s.mode, s.status,
+            
+            -- Forçamos o ID do mapa que veio do parâmetro para o mapper usar na API
+            ${bmap_id} as map_id,
+            
+            -- Campos de fallback do banco local (caso o mapper da API falhe)
+            m.set_id as map_set_id,
+            m.title as map_title,
+            m.version as map_version,
+            m.creator as map_creator,
+            m.diff as map_diff,
+            m.status as map_status,
+            m.total_length as map_total_length,
+            m.bpm as map_bpm,
+            m.cs as map_cs, m.ar as map_ar, m.od as map_od, m.hp as map_hp,
+            m.max_combo as map_max_combo
+
+        FROM scores s
+        LEFT JOIN maps m ON s.map_md5 = m.md5
+        WHERE 
+            s.userid = ${user.id} 
+            AND s.map_md5 = ${mapMd5}
+            AND s.mode = ${mode}
+            AND s.status = 2 -- Apenas scores passados/rankeados
+        ORDER BY s.pp DESC, s.score DESC
+        LIMIT 1;
+    `;
+
+    if (!bestScoreRaw || bestScoreRaw.length === 0) {
+        return null;
+    }
+
+    const scoreWithoutPlayer = await mapProfileScoreWithApiMap(bestScoreRaw[0]);
+
+    return {
+        ...scoreWithoutPlayer,
+        player: {
+            id: user.id,
+            name: user.name,
+            safe_name: user.safe_name,
+            pfp: `https://a.${process.env.DOMAIN}/${user.id}`,
+            rank: 0, pp: 0, acc: 0, a_count: 0, s_count: 0, ss_count: 0, sh_count: 0, ssh_count: 0,
+            total_score: 0, ranked_score: 0, max_combo: 0, playtime: 0
+        }
+    };
 }

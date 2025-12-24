@@ -38,3 +38,16 @@ export const scoreQuerySchema = z.object({
 });
 
 export type ScoreQueryInput = z.infer<typeof scoreQuerySchema>;
+
+export const scoreQueryModeSchema = z.object({
+    mode: z.coerce.number().int().min(0).max(8).default(0),
+});
+
+export type ScoreQueryModeInput = z.infer<typeof scoreQueryModeSchema>;
+
+const getUserMapSchema = z.object({
+    id: z.string(),
+    map: z.coerce.number().int()
+});
+
+export type GetUserMapInput = z.infer<typeof getUserMapSchema>;

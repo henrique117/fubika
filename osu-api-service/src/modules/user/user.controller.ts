@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUser, getUserRecent, getUserStats, loginUser } from "./user.service";
-import { CreateUserInput, GetUserInput, LoginUserInput, ScoreQueryInput, scoreQuerySchema } from "./user.schema";
+import { createUser, getUserBestOnMap, getUserRecent, getUserStats, loginUser } from "./user.service";
+import { CreateUserInput, GetUserInput, GetUserMapInput, LoginUserInput, ScoreQueryInput, ScoreQueryModeInput, scoreQueryModeSchema, scoreQuerySchema } from "./user.schema";
+import z from "zod";
 
 const toSafeName = (name: string) => name.trim().toLowerCase().replace(/ /g, '_');
 
@@ -107,5 +108,49 @@ export const handleUserRecentReq = async (
         }
 
         return res.code(500).send({ error: "Erro interno ao buscar scores recentes." });
+    }
+}
+
+export const handleUserBestOnMapReq = async (
+    req: FastifyRequest<{ Params: GetUserMapInput, Querystring: ScoreQueryModeInput }>,
+    res: FastifyReply
+) => {
+    try {
+        const rawParam = req.params.id;
+        const bmapId = Number(req.params.map);
+
+        const query = scoreQueryModeSchema.parse(req.query);
+
+        let scoreResult;
+
+        if (/^\d+$/.test(rawParam)) {
+            if (rawParam.length > 15) {
+                scoreResult = await getUserBestOnMap({ discord_id: rawParam }, bmapId, query);
+            } else {
+                scoreResult = await getUserBestOnMap({ id: Number(rawParam) }, bmapId, query);
+            }
+        } else {
+            const safeName = toSafeName(rawParam);
+            scoreResult = await getUserBestOnMap({ safe_name: safeName }, bmapId, query);
+        }
+
+        if (scoreResult === null || scoreResult === undefined) {
+            return res.code(404).send({ message: "Nenhum score encontrado para este mapa." });
+        }
+
+        return res.code(200).send(scoreResult);
+
+    } catch (err: any) {
+        console.error("Erro ao buscar score:", err);
+
+        if (err instanceof z.ZodError) {
+             return res.code(400).send({ error: "Parâmetros inválidos", details: err.format() });
+        }
+
+        if (err.message === "Usuário não encontrado" || err.message.includes("inválido") || err.message === "Mapa não encontrado no banco de dados.") {
+            return res.code(404).send({ error: err.message });
+        }
+
+        return res.code(500).send({ error: "Erro interno ao buscar score." });
     }
 }

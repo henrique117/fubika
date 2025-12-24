@@ -114,6 +114,8 @@ services:
     command: sh -c "npx prisma migrate deploy && node dist/server.js"
     env_file:
       - .env
+    volumes:
+      - ./osu-bancho-service/.data:/app/.data
 
 volumes:
   data:

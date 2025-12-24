@@ -1,6 +1,8 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUser, getUserStats, loginUser } from "./user.service";
-import { CreateUserInput, GetUserInput, LoginUserInput } from "./user.schema";
+import { createUser, getUserRecent, getUserStats, loginUser } from "./user.service";
+import { CreateUserInput, GetUserInput, LoginUserInput, ScoreQueryInput, scoreQuerySchema } from "./user.schema";
+
+const toSafeName = (name: string) => name.trim().toLowerCase().replace(/ /g, '_');
 
 export const handleUserLogin = async (req: FastifyRequest<{ Body: LoginUserInput }>, res: FastifyReply) => {
     try {
@@ -44,35 +46,66 @@ export const handleUserReq = async (
     res: FastifyReply
 ) => {
     try {
-        const rawId = req.params.id;
+        const rawParam = req.params.id;
 
-        if (!/^\d+$/.test(rawId)) {
-            return res.code(400).send({ error: "O ID fornecido não é válido (apenas números)." });
+        let userResult;
+
+        if (/^\d+$/.test(rawParam)) {
+            if (rawParam.length > 15) {
+                userResult = await getUserStats({ discord_id: rawParam });
+            } else {
+                userResult = await getUserStats({ id: Number(rawParam) });
+            }
         }
 
-        let user;
-
-        if (rawId.length > 15) {
-            user = await getUserStats({ discord_id: rawId });
-        } else {
-            user = await getUserStats({ id: Number(rawId) });
+        else {
+            const safeName = toSafeName(rawParam);
+            userResult = await getUserStats({ safe_name: safeName });
         }
 
-        return res.code(200).send(user);
+        return res.code(200).send(userResult);
 
     } catch (err: any) {
         console.error("Erro ao buscar usuário:", err);
 
         if (err.message === "Usuário não encontrado" || err.message.includes("inválido")) {
-            return res.code(404).send({ 
-                error: "Not Found", 
-                message: err.message 
-            });
+            return res.code(404).send({ error: err.message });
         }
 
-        return res.code(500).send({ 
-            error: "Internal Server Error",
-            message: "Erro interno ao buscar dados do usuário." 
-        });
+        return res.code(500).send({ error: "Erro interno ao buscar dados do usuário." });
+    }
+}
+
+export const handleUserRecentReq = async (
+    req: FastifyRequest<{ Params: GetUserInput, Querystring: ScoreQueryInput }>,
+    res: FastifyReply
+) => {
+    try {
+        const rawParam = req.params.id;
+        const query = scoreQuerySchema.parse(req.query); 
+
+        let userRecentScores;
+        
+        if (/^\d+$/.test(rawParam)) {
+            if (rawParam.length > 15) {
+                userRecentScores = await getUserRecent({ discord_id: rawParam }, query);
+            } else {
+                userRecentScores = await getUserRecent({ id: Number(rawParam) }, query);
+            }
+        } else {
+            const safeName = toSafeName(rawParam);
+            userRecentScores = await getUserRecent({ safe_name: safeName }, query);
+        }
+
+        return res.code(200).send(userRecentScores);
+
+    } catch (err: any) {
+        console.error("Erro ao buscar recent scores:", err);
+
+        if (err.message === "Usuário não encontrado" || err.message.includes("inválido")) {
+            return res.code(404).send({ error: err.message });
+        }
+
+        return res.code(500).send({ error: "Erro interno ao buscar scores recentes." });
     }
 }

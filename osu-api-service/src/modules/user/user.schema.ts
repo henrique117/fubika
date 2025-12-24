@@ -31,3 +31,10 @@ const getUserSchema = z.object({
 });
 
 export type GetUserInput = z.infer<typeof getUserSchema>;
+
+export const scoreQuerySchema = z.object({
+    mode: z.coerce.number().int().min(0).max(8).default(0),
+    limit: z.coerce.number().int().min(1).max(100).default(5)
+});
+
+export type ScoreQueryInput = z.infer<typeof scoreQuerySchema>;

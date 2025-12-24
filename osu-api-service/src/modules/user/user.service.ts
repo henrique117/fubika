@@ -6,7 +6,7 @@ import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
-import { CreateUserInput, LoginUserInput } from "./user.schema";
+import { CreateUserInput, LoginUserInput, ScoreQueryInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
 import { calculateLevel } from "../../utils/level";
@@ -178,7 +178,7 @@ export const createUserStats = async (playerId: number): Promise<void> => {
     await prisma.stats.createMany({ data: statsData });
 }
 
-type UserFilter = { id: number } | { discord_id: string };
+type UserFilter = { id: number } | { discord_id: string } | { safe_name: string };
 
 export const getUserStats = async (filter: UserFilter, mode: number = 0): Promise<IPlayer> => {
 
@@ -270,4 +270,48 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
 
         top_200: populatedScores
     };
+}
+
+export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) => {
+    const { mode, limit } = input;
+    
+    const user = await prisma.users.findUnique({ where: filter as any });
+    if (!user) throw new Error("Usuário não encontrado");
+    if (user.id < 3) throw new Error("Usuário inválido (Bot ou Bancho)");
+
+    const recentScoresRaw = await prisma.$queryRaw<any[]>`
+        SELECT 
+            s.id as score_id, 
+            s.score as score_val, 
+            s.pp as score_pp, 
+            s.acc as score_acc, 
+            s.max_combo, s.mods, 
+            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
+            s.play_time, s.map_md5, s.mode, s.status,
+            
+            -- Pegamos dados do mapa via JOIN para garantir que temos o ID para a API
+            -- e dados de fallback caso a API falhe
+            m.id as map_id,
+            m.set_id as map_set_id,
+            m.title as map_title,
+            m.version as map_version,
+            m.creator as map_creator,
+            m.diff as map_diff,
+            m.status as map_status
+
+        FROM scores s
+        INNER JOIN maps m ON s.map_md5 = m.md5
+        WHERE 
+            s.userid = ${user.id} 
+            AND s.mode = ${mode}
+            -- Sem filtro de status, queremos ver as últimas tentativas mesmo
+        ORDER BY s.play_time DESC
+        LIMIT ${limit};
+    `;
+
+    const populatedScores = await Promise.all(
+        recentScoresRaw.map(row => mapProfileScoreWithApiMap(row))
+    );
+
+    return populatedScores;
 }

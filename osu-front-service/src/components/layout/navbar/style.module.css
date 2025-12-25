@@ -41,6 +41,10 @@
     font-family: 'Comic Sans MS', cursive, sans-serif; 
 }
 
+.logo:hover {
+    cursor: pointer;
+}
+
 .navLinks {
     display: flex;
     align-items: center;

@@ -1,5 +1,6 @@
 import React from 'react'
 import style from './style.module.css'
+import { Link } from 'react-router-dom'
 
 interface NavbarProps {
     userId?: number
@@ -22,9 +23,9 @@ const Navbar: React.FC<NavbarProps> = ({ userId }) => {
             <div className={style.container}>
                 
                 <div className={style.leftSection}>
-                    <div className={style.logo}>
+                    <Link to='/' className={style.logo}>
                         <img src="/logo_fubika.svg" alt="Logo" />
-                    </div>
+                    </Link>
 
                     <nav className={style.navLinks}>
                         <a href="/mapas">mapas</a>

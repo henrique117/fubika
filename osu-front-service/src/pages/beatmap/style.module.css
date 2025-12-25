@@ -60,6 +60,230 @@
     z-index: 1;
 }
 
+.collection,
+.mapStats,
+.buttons {
+    position: absolute;
+    z-index: 2;
+}
+
+.collection {
+    left: 20px;
+    top: 20px;
+}
+
+.mapdiffs {
+    width: auto;
+    height: 40px;
+    border-radius: 10px;
+    background-color: rgba(19, 17, 15, 0.5);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    margin-bottom: 5px;
+}
+
+.otherMap {
+    width: 23px;
+    height: 23px;
+
+}
+
+.diffSR {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.diffSR h2 {
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.diffSR span {
+    font-size: 5px;
+    color: #FFF600;
+}
+
+.mapStats {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    right: 20px;
+    top: 20px;
+    max-width: 231px;
+    width: 40%;
+    height: 280px;
+}
+
+.mapStatus {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+}
+
+.mapStatus h2 {
+    padding: 8.5px 10px;
+    text-align: center;
+    background-color: rgba(19, 17, 15, 0.5);
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 10px;
+    letter-spacing: 1px;
+    text-transform: capitalize;
+}
+
+.mapPreview,
+.mapNumbers,
+.mapGraphs,
+.mapSucess {
+    width: 100%;
+    background-color: rgba(19, 17, 15, 0.5);
+    border-radius: 10px;
+}
+
+.mapPreview,
+.mapNumbers {
+    height: 33px;
+}
+
+.mapGraphs {
+    height: 120px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 20px;
+    box-sizing: border-box;
+}
+
+.statRow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+    color: var(--color-branco);
+}
+
+.statLabel {
+    width: 77px;
+    white-space: nowrap;
+    font-weight: bold;
+    font-size: 8px;
+}
+
+.progressBarBase {
+    flex: 1;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progressBarFill {
+    height: 100%;
+    background-color: #dddddd;
+    border-radius: 10px;
+    transition: width 0.5s ease-out;
+}
+
+.statValue {
+    width: 8px;
+    text-align: right;
+    font-size: 8px !important;
+    font-weight: bold;
+}
+
+.mapSucess {
+    height: 49px;
+}
+
+.mapPreview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.mapNumbers {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.mapNumbers div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 17%;
+}
+
+.mapNumbers div img {
+    background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);;
+    padding: 2px;
+    border-radius: 50%;
+}
+
+.mapNumbers div span {
+    font-size: 8px;
+    font-weight: bold;
+    color: #FFBB00;
+}
+
+.buttons {
+    left: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 45%;
+    margin-top: 15px;
+}
+
+.btn {
+    height: 45px;
+    background-color: #3685CF;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+    background-color: #4da0e9;
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btnSquare {
+    width: 45px;
+    flex-shrink: 0;
+}
+
+.btnWide {
+    flex: 1;
+    padding: 0 15px;
+    justify-content: space-between;
+}
+
+.btnText {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+}
+
 .cardFooter {
     width: 100%;
     height: 40px;
@@ -95,7 +319,8 @@
     width: 100%;
 }
 
-.catBody, .catHead {
+.catBody,
+.catHead {
     position: absolute;
     opacity: 0.5;
     width: auto;
@@ -136,23 +361,23 @@
     text-align: center;
 }
 
-.colPlayer { 
+.colPlayer {
     flex: 1;
-    display: flex; 
-    align-items: center; 
+    display: flex;
+    align-items: center;
     min-width: 100px;
     padding-left: 10px;
     overflow: hidden;
 }
 
-.colPP { 
-    width: 80px; 
-    text-align: center; 
+.colPP {
+    width: 80px;
+    text-align: center;
     flex-shrink: 0;
 }
 
-.colAcc { 
-    width: 40px; 
+.colAcc {
+    width: 40px;
     text-align: center;
     flex-shrink: 0;
 }
@@ -169,7 +394,10 @@
     flex-shrink: 0;
 }
 
-.col300, .col100, .col50, .colX {
+.col300,
+.col100,
+.col50,
+.colX {
     width: 20px;
     text-align: center;
     flex-shrink: 0;
@@ -197,7 +425,8 @@
     gap: 15px;
 }
 
-.ppValue, .statValue {
+.ppValue,
+.statValue {
     font-size: 10px;
     color: var(--color-branco);
 }

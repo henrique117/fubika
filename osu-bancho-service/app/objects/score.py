@@ -369,13 +369,9 @@ class Score:
         assert self.player is not None
         assert self.bmap is not None
 
-        if self.bmap.status == 0: 
+        if self.bmap.status <= 0:
             self.status = SubmissionStatus.SUBMITTED
-            self.pp = 0.0
             return
-        
-        if self.bmap.status != 2:
-            self.pp = 0.0
 
         SCORE_V2_BIT = 536870912
         is_current_v2 = (self.mods & SCORE_V2_BIT) != 0
@@ -385,7 +381,6 @@ class Score:
             map_md5=self.bmap.md5,
             mode=self.mode,
             status=SubmissionStatus.BEST,
-            limit=1
         )
         current_best = recs_best[0] if recs_best else None
 
@@ -394,16 +389,22 @@ class Score:
             map_md5=self.bmap.md5,
             mode=self.mode,
             status=SubmissionStatus.BEST_V2,
-            limit=1
         )
         current_best_v2 = recs_best_v2[0] if recs_best_v2 else None
+        
+        is_better_than_global = False
+        
+        if self.bmap.status == 2:
+            is_better_than_global = not current_best or self.pp > current_best["pp"]
+        else:
+            is_better_than_global = not current_best or self.score > current_best["score"]
 
-        if not current_best or self.pp > current_best["pp"]:
+        if is_better_than_global:
             self.status = SubmissionStatus.BEST
             
             if current_best:
                 prev = await Score.from_sql(current_best["id"])
-                self.prev_best = prev
+                self.prev_best = prev 
                 
                 is_prev_v2 = (prev.mods & SCORE_V2_BIT) != 0
                 

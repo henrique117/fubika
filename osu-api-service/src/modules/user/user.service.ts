@@ -224,7 +224,8 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
             s.play_time, s.map_md5, s.mode, s.status,
             
             m.id as map_id,
-            m.set_id as map_set_id
+            m.set_id as map_set_id,
+            m.status
 
         FROM scores s
         INNER JOIN maps m ON s.map_md5 = m.md5
@@ -233,6 +234,7 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
             AND s.mode = ${mode}
             AND s.status = 2
             AND s.pp > 0
+            AND m.status = 2
         ORDER BY s.pp DESC
         LIMIT 200;
     `;

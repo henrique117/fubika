@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
                     <nav className={style.navLinks}>
                         <Link to="/mapas">mapas</Link>
                         <span className={style.separator}>|</span>
-                        <Link to="/rankings">colocações</Link>
+                        <Link to="/ranking">colocações</Link>
                         <span className={style.separator}>|</span>
                         <Link to="/help">ajuda</Link>
                     </nav>

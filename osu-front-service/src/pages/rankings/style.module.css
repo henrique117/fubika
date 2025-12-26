@@ -88,7 +88,7 @@
 }
 
 .modeBtn:hover {
-    cursor: not-allowed;
+    cursor: pointer;
 }
 
 .activeMode {
@@ -149,7 +149,6 @@
     align-items: center;
     height: 30px;
     background-color: var(--color-background);
-    cursor: pointer;
     text-decoration: none;
     color: inherit;
     margin-bottom: 10px;

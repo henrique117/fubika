@@ -19,6 +19,7 @@ const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
         author_id: data.user_id,
         author_name: data.beatmapset?.creator || 'Desconhecido',
         cover: data.beatmapset?.covers?.cover || '',
+        thumbnail: data.beatmapset?.covers?.['list@2x'] || '',
         diff: data.version,
         star_rating: data.difficulty_rating,
         bpm: data.bpm,
@@ -37,6 +38,7 @@ const mapOsuBeatmapsetToDomain = (data: any): IBeatmapset => {
         playcount: data.play_count,
         favourite_count: data.favourite_count,
         cover: data.covers?.cover || '',
+        thumbnail: data.covers?.['list@2x'] || '',
         author_id: String(data.user_id),
         title: data.title,
         beatmaps: (data.beatmaps || []).map((beatmap: any) => {

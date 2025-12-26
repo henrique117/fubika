@@ -14,6 +14,7 @@ export default interface IBeatmap {
     author_name: string;
     diff: string;
     cover: string;
+    thumbnail: string;
 
     star_rating: number;
     bpm: number;

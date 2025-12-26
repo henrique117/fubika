@@ -8,6 +8,7 @@ export default interface IBeatmapset {
     favourite_count: number;
 
     cover: string;
+    thumbnail: string;
     author_id: string;
     beatmaps: IBeatmap[];
 }

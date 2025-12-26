@@ -295,33 +295,43 @@ class Score:
     async def calculate_placement(self) -> int:
         assert self.bmap is not None
 
-        SCORE_V2_BIT = 536870912 
+        SCORE_V2_BIT = 536870912
         
-        if self.mode >= GameMode.RELAX_OSU:
+        am_i_v2 = (self.mods & SCORE_V2_BIT) != 0
+
+        if self.mode >= GameMode.RELAX_OSU and self.bmap.status in (2):
             scoring_metric = "pp"
             score = self.pp
         else:
             scoring_metric = "score" 
             score = self.score
 
-        query = (
-            "SELECT COUNT(*) AS c FROM scores s "
-            "INNER JOIN users u ON u.id = s.userid "
-            "WHERE s.map_md5 = :map_md5 AND s.mode = :mode "
-            "AND u.priv & 1 "
-            "AND s.status IN (2, 3) " 
-            "AND (s.mods & :v2_mod) != 0 "
+        query = [
+            f"SELECT COUNT(*) AS c FROM scores s ",
+            "INNER JOIN users u ON u.id = s.userid ",
+            "WHERE s.map_md5 = :map_md5 AND s.mode = :mode ",
+            "AND u.priv & 1 ",
             f"AND s.{scoring_metric} > :score "
-        )
+        ]
+        
+        params = {
+            "map_md5": self.bmap.md5,
+            "mode": self.mode,
+            "score": score,
+        }
+
+        if am_i_v2:
+            query.append("AND s.status IN (2, 3)") 
+            query.append("AND (s.mods & :v2_mod) != 0") 
+            params["v2_mod"] = SCORE_V2_BIT
+        else:
+            query.append("AND s.status = 2")
+
+        full_query = "".join(query)
 
         num_better_scores: int | None = await app.state.services.database.fetch_val(
-            query,
-            {
-                "map_md5": self.bmap.md5,
-                "mode": self.mode,
-                "score": score,
-                "v2_mod": SCORE_V2_BIT
-            },
+            full_query,
+            params,
             column=0,
         )
         
@@ -359,6 +369,11 @@ class Score:
         assert self.player is not None
         assert self.bmap is not None
 
+        if self.bmap.status not in (2):
+            self.status = SubmissionStatus.SUBMITTED
+            self.pp = 0.0
+            return
+
         SCORE_V2_BIT = 536870912
         is_current_v2 = (self.mods & SCORE_V2_BIT) != 0
 
@@ -367,6 +382,7 @@ class Score:
             map_md5=self.bmap.md5,
             mode=self.mode,
             status=SubmissionStatus.BEST,
+            limit=1
         )
         current_best = recs_best[0] if recs_best else None
 
@@ -375,6 +391,7 @@ class Score:
             map_md5=self.bmap.md5,
             mode=self.mode,
             status=SubmissionStatus.BEST_V2,
+            limit=1
         )
         current_best_v2 = recs_best_v2[0] if recs_best_v2 else None
 
@@ -397,7 +414,7 @@ class Score:
                             
                             await app.state.services.database.execute(
                                 "UPDATE scores SET status = :status WHERE id = :id",
-                                {"status": prev_v2_old.status, "id": prev_v2_old.id}
+                                {"status": prev_v2_old.status.value, "id": prev_v2_old.id}
                             )
                     else:
                         prev.status = SubmissionStatus.SUBMITTED
@@ -406,7 +423,7 @@ class Score:
                 
                 await app.state.services.database.execute(
                     "UPDATE scores SET status = :status WHERE id = :id",
-                    {"status": prev.status, "id": prev.id}
+                    {"status": prev.status.value, "id": prev.id}
                 )
 
         elif is_current_v2:
@@ -420,7 +437,7 @@ class Score:
                     
                     await app.state.services.database.execute(
                         "UPDATE scores SET status = :status WHERE id = :id",
-                        {"status": prev_v2.status, "id": prev_v2.id}
+                        {"status": prev_v2.status.value, "id": prev_v2.id}
                     )
             else:
                 self.status = SubmissionStatus.SUBMITTED

@@ -369,10 +369,13 @@ class Score:
         assert self.player is not None
         assert self.bmap is not None
 
-        if self.bmap.status != 2:
+        if self.bmap.status == 0: 
             self.status = SubmissionStatus.SUBMITTED
             self.pp = 0.0
             return
+        
+        if self.bmap.status != 2:
+            self.pp = 0.0
 
         SCORE_V2_BIT = 536870912
         is_current_v2 = (self.mods & SCORE_V2_BIT) != 0

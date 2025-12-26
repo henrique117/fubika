@@ -6,6 +6,7 @@ import Fastify from "fastify";
 import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./modules/barrel";
 import prisma from "./utils/prisma";
 import fastifyJwt from "@fastify/jwt";
+import cors from "@fastify/cors";
 import rankingRoutes from "./modules/ranking/ranking.route";
 import apikeyRoutes from "./modules/apikey/apikey.route";
 
@@ -28,6 +29,12 @@ server.get('/ping', async () => {
 async function main() {
     await server.register(fastifyJwt, {
         secret: process.env.JWT_SECRET || 'aaabbbccc'
+    });
+
+    await server.register(cors, { 
+        origin: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
     });
 
     await server.register(userRoutes, { prefix: 'api/user' });

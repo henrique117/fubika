@@ -8,7 +8,7 @@
 .loginCard {
     background-color: var(--color-background-dark);
     width: 100%;
-    max-height: 486px;
+    min-height: 500px;
     max-width: 720px;
     padding: 17px 60px 40px 60px;
     border-radius: 20px;
@@ -97,7 +97,182 @@
     margin-top: 10px;
     transition: color 0.2s;
 }
+.pageWrapper {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+}
 
+.loginCard {
+    background-color: var(--color-background-dark);
+    width: 100%;
+    min-height: 500px; 
+    max-width: 720px;
+    padding: 17px 60px 40px 60px;
+    border-radius: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
+}
+
+.backButton {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.backButton:hover {
+    opacity: 1;
+}
+
+.logoContainer {
+    margin-bottom: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.logoSvg {
+    height: auto;
+    width: auto;
+    max-height: 100px;
+}
+
+.generalError {
+    width: 100%;
+    background-color: rgba(255, 102, 102, 0.1);
+    border: 1px solid #ff6666;
+    color: #ff6666;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.formContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.label {
+    font-size: 17.5px;
+    margin-bottom: 10px;
+    font-weight: 300;
+    color: white;
+}
+
+.input {
+    width: 100%;
+    max-width: 337px;
+    height: 45px;
+    background-color: var(--color-background);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    color: #e0e0e0;
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+    transition: background 0.2s;
+}
+
+.input:focus {
+    background-color: #333;
+}
+
+.input::placeholder {
+    color: #666;
+}
+
+.passwordWrapper {
+    position: relative;
+    width: 100%;
+    max-width: 337px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.passwordWrapper .input {
+    width: 100%;
+    max-width: 100%;
+    padding-right: 45px;
+    padding-left: 45px;
+}
+
+.eyeButton {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    padding: 0;
+    outline: none;
+    height: 100%;
+    top: 0;
+    z-index: 10;
+}
+
+.eyeButton:hover {
+    color: #ccc;
+}
+
+.forgotPassword {
+    text-align: center;
+    font-size: 14px;
+    text-decoration: none;
+    margin-top: 20px;
+    color: #888;
+    transition: color 0.2s;
+}
+
+.forgotPassword:hover {
+    color: #ccc;
+    text-decoration: underline;
+}
+
+.entrarButton {
+    height: 100%;
+    max-height: 25px;
+    width: 100%;
+    max-width: 95px;
+    margin-top: 30px;
+}
+
+@media (max-width: 600px) {
+    .loginCard {
+        width: 90%;
+        padding: 30px 20px;
+        margin-top: 20px;
+    }
+    
+    .input, .passwordWrapper {
+        max-width: 100%;
+    }
+}
 .forgotPassword:hover {
     color: #bbb;
     text-decoration: underline;

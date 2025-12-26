@@ -8,7 +8,7 @@
 .registerCard {
     background-color: var(--color-background-dark);
     width: 100%;
-    max-height: 727px;
+    min-height: 727px;
     max-width: 720px;
     padding: 17px 60px 40px 60px;
     border-radius: 20px;
@@ -144,6 +144,32 @@
     width: 100%;
     max-width: 82px;
     margin-top: 20px;
+}
+
+.generalError {
+    width: 100%;
+    background-color: rgba(255, 102, 102, 0.1);
+    border: 1px solid #ff6666;
+    color: #ff6666;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.inputError {
+    border: 1px solid #ff6666 !important;
+    background-color: rgba(255, 102, 102, 0.05) !important;
+}
+
+.errorText {
+    color: #ff6666;
+    font-size: 12px;
+    margin-top: 5px;
+    width: 100%;
+    text-align: center;
+    font-weight: 500;
 }
 
 @media (max-width: 600px) {

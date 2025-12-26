@@ -1,18 +1,10 @@
 import React, { createContext, useState, useEffect, useContext } from 'react'
 import { api } from '../services/api'
 
-interface User {
-    id: number
-    name: string
-    safe_name: string
-    priv: number
-    pfp: string
-}
-
 interface AuthContextData {
     signed: boolean
-    user: User | null
-    signIn: (token: string, user: User) => void
+    user: any | null
+    signIn: (token: string, user: any) => void
     signOut: () => void
     loading: boolean
 }
@@ -20,23 +12,44 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null)
+    const [user, setUser] = useState<any | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const storagedToken = localStorage.getItem('osu_token')
-        const storagedUser = localStorage.getItem('osu_user')
+        const validateToken = async () => {
+            const storagedToken = localStorage.getItem('osu_token')
+            const storagedUser = localStorage.getItem('osu_user')
 
-        if (storagedToken && storagedUser) {
-            // (Opcional) Aqui você poderia validar o token na API: api.get('/user/me')...
-            setUser(JSON.parse(storagedUser))
+            if (storagedToken && storagedUser) {
+                api.defaults.headers.common['Authorization'] = `Bearer ${storagedToken}`
+                
+                setUser(JSON.parse(storagedUser))
+
+                try {
+                    const response = await api.get('/user/me')
+
+                    setUser(response.data)
+                    localStorage.setItem('osu_user', JSON.stringify(response.data))
+
+                } catch (error) {
+                    console.error("Sessão expirada ou token inválido.", error)
+                    signOut()
+                }
+            } else {
+                signOut()
+            }
+
+            setLoading(false)
         }
-        setLoading(false)
+
+        validateToken()
     }, [])
 
-    const signIn = (token: string, userData: User) => {
-        localStorage.setItem('osu_token', token);
+    const signIn = (token: string, userData: any) => {
+        localStorage.setItem('osu_token', token)
         localStorage.setItem('osu_user', JSON.stringify(userData))
+        
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
         
         setUser(userData)
     }
@@ -44,6 +57,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signOut = () => {
         localStorage.removeItem('osu_token')
         localStorage.removeItem('osu_user')
+        
+        delete api.defaults.headers.common['Authorization']
+        
         setUser(null)
     }
 

@@ -1,14 +1,90 @@
 import React, { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import style from './style.module.css'
-import { ButtonGradientComponent, WrapperComponent } from '../../components/components.export'
-import { Link } from 'react-router-dom'
+import { WrapperComponent, ButtonGradientComponent } from '../../components/components.export'
+import { api } from '../../services/api'
+
+interface FormErrors {
+    name?: string
+    email?: string
+    password?: string
+    key?: string
+    general?: string
+}
 
 const Register: React.FC = () => {
+    const navigate = useNavigate()
+
+    const [email, setEmail] = useState('')
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+    const [inviteCode, setInviteCode] = useState('')
+
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const [loading, setLoading] = useState(false)
+    
+    const [errors, setErrors] = useState<FormErrors>({})
 
     const togglePassword = () => setShowPassword(!showPassword)
     const toggleConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword)
+
+    const validateForm = () => {
+        const newErrors: FormErrors = {}
+        
+        if (!username || username.length < 3) {
+            newErrors.name = "Nome de usuário muito curto (min 3 chars)."
+        }
+        
+        if (!email || !email.includes('@')) {
+            newErrors.email = "Insira um e-mail válido."
+        }
+
+        if (!password || password.length < 6) {
+            newErrors.password = "A senha deve ter no mínimo 6 caracteres."
+        }
+
+        if (password !== confirmPassword) {
+            newErrors.password = "As senhas não coincidem."
+        }
+
+        if (!inviteCode) {
+            newErrors.key = "A chave de acesso é obrigatória."
+        }
+
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
+    }
+
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setErrors({})
+
+        if (!validateForm()) return
+
+        try {
+            setLoading(true)
+            
+            await api.post('/user/register', {
+                name: username,
+                email: email,
+                password: password,
+                key: inviteCode
+            })
+
+            alert('Conta criada com sucesso! Faça login.')
+            navigate('/login')
+
+        } catch (err: any) {
+            const errorData = err.response?.data
+            const msg = errorData?.message || errorData?.error || 'Erro ao criar conta.'
+            
+            setErrors({ general: msg })
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <WrapperComponent>
@@ -16,7 +92,7 @@ const Register: React.FC = () => {
                 <div className={style.registerCard}>
                     <Link to='/'>
                         <button className={style.backButton}>
-                            <img src="arrow_icon.svg" alt="" />
+                            <img src="arrow_icon.svg" alt="Voltar" />
                         </button>
                     </Link>
 
@@ -24,16 +100,25 @@ const Register: React.FC = () => {
                         <img src="/logo_registro.svg" alt="Registro" className={style.logoSvg} />
                     </div>
 
-                    <form className={style.formContainer}>
+                    {errors.general && (
+                        <div className={style.generalError}>
+                            {errors.general}
+                        </div>
+                    )}
+
+                    <form className={style.formContainer} onSubmit={handleRegister}>
 
                         <div className={style.inputGroup}>
                             <label htmlFor="email" className={style.label}>E-mail</label>
                             <input
                                 type="email"
                                 id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="orlandoalmeida0000@gmail.com"
-                                className={style.input}
+                                className={`${style.input} ${errors.email ? style.inputError : ''}`}
                             />
+                            {errors.email && <span className={style.errorText}>{errors.email}</span>}
                         </div>
 
                         <div className={style.inputGroup}>
@@ -41,9 +126,12 @@ const Register: React.FC = () => {
                             <input
                                 type="text"
                                 id="user"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 placeholder="ManfaceEnjoyer"
-                                className={style.input}
+                                className={`${style.input} ${errors.name ? style.inputError : ''}`}
                             />
+                            {errors.name && <span className={style.errorText}>{errors.name}</span>}
                         </div>
 
                         <div className={style.inputGroup}>
@@ -52,11 +140,13 @@ const Register: React.FC = () => {
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     id="pass"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••••••"
-                                    className={style.input}
+                                    className={`${style.input} ${errors.password ? style.inputError : ''}`}
                                 />
                                 <button 
-                                    type="button"
+                                    type="button" 
                                     onClick={togglePassword} 
                                     className={style.eyeButton}
                                     tabIndex={-1}
@@ -68,6 +158,7 @@ const Register: React.FC = () => {
                                     )}
                                 </button>
                             </div>
+                            {errors.password && <span className={style.errorText}>{errors.password}</span>}
                         </div>
 
                         <div className={style.inputGroup}>
@@ -76,6 +167,8 @@ const Register: React.FC = () => {
                                 <input
                                     type={showConfirmPassword ? "text" : "password"}
                                     id="pass_confirm"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                     placeholder="••••••••••••"
                                     className={style.input}
                                 />
@@ -99,20 +192,21 @@ const Register: React.FC = () => {
                             <input
                                 type="text"
                                 id="key"
+                                value={inviteCode}
+                                onChange={(e) => setInviteCode(e.target.value)}
                                 placeholder="ABCDEFGH"
-                                className={style.input}
+                                className={`${style.input} ${errors.key ? style.inputError : ''}`}
                             />
+                            {errors.key && <span className={style.errorText}>{errors.key}</span>}
                         </div>
                     </form>
                     
                     <Link to='/login' className={style.forgotPassword}>
-                        <a href="#">
-                            Já tem uma conta? Entre agora
-                        </a>
+                        Já tem uma conta? Entre agora
                     </Link>
 
-                    <div className={style.entrarButton}>
-                        <ButtonGradientComponent text='Registrar' />
+                    <div className={style.entrarButton} onClick={!loading ? handleRegister : undefined}>
+                        <ButtonGradientComponent text={loading ? 'Carregando...' : 'Registrar'} />
                     </div>
                     
                 </div>

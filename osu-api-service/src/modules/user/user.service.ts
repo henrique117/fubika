@@ -149,7 +149,7 @@ export const createUser = async (input: CreateUserInput) => {
     return { user };
 }
 
-export const loginUser = async (input: LoginUserInput) => {
+export const loginUser = async (input: LoginUserInput): Promise<IPlayer> => {
     const { name, password } = input;
     const safeName = toSafeName(name);
 
@@ -161,9 +161,10 @@ export const loginUser = async (input: LoginUserInput) => {
 
     const isPasswordValid = await verifyPassword(password, user.pw_bcrypt);
     if (!isPasswordValid) throw new Error('Usuário ou senha inválidos');
+    
     if ((user.priv & 1) === 0) throw new Error('Esta conta está restrita/banida.');
 
-    return user;
+    return await getUserStats({ id: user.id }, 0);
 }
 
 export const createUserStats = async (playerId: number): Promise<void> => {

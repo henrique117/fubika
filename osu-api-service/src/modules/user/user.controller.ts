@@ -14,12 +14,12 @@ export const handleUserLogin = async (req: FastifyRequest<{ Body: LoginUserInput
         const token = req.server.jwt.sign({
             id: user.id,
             name: user.name,
-            priv: user.priv
+            priv: 1
         }, {
             expiresIn: '7d'
         });
 
-        return res.send({ token });
+        return res.send({ token, user });
 
     } catch (err: any) {
         return res.code(401).send({ message: err.message });

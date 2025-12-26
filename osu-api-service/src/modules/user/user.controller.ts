@@ -154,3 +154,16 @@ export const handleUserBestOnMapReq = async (
         return res.code(500).send({ error: "Erro interno ao buscar score." });
     }
 }
+
+export const handleGetMe = async (req: FastifyRequest, res: FastifyReply) => {
+    try {
+        const userFromToken = req.user as { id: number };
+
+        const userProfile = await getUserStats({ id: userFromToken.id });
+
+        return res.send(userProfile);
+
+    } catch (err) {
+        return res.status(500).send({ error: "Erro ao buscar perfil." });
+    }
+}

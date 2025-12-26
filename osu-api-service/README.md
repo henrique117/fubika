@@ -377,7 +377,7 @@ Retorna a lista de melhores jogadores paginada.
 		"s_count": 0,
 		"sh_count": 0,
 		"a_count": 1
-	}
+	}, ...
 ]
 ```
 ---

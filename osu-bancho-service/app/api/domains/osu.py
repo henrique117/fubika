@@ -96,19 +96,14 @@ def authenticate_player_session(
         username: str = param_function(..., alias=username_alias),
         pw_md5: str = param_function(..., alias=pw_md5_alias),
     ) -> Player:
-        # BYPASS AUTH: Ignora a senha MD5 e busca apenas pelo nome
-        # Isso corrige erros 401 em clientes novos
-        name = unquote(username)
-        player = app.state.sessions.players.get(name=name)
-        
-        if not player:
-            # Se não achou online, tenta buscar no banco (offline)
-            player = await app.state.sessions.players.from_cache_or_sql(name=name)
-
+        player = await app.state.sessions.players.from_login(
+            name=unquote(username),
+            pw_md5=pw_md5,
+        )
         if player:
             return player
 
-        # player login incorrect (ou usuário não existe)
+        # player login incorrect
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=err,
@@ -130,10 +125,19 @@ def authenticate_player_session(
 
 @router.post("/web/osu-screenshot.php")
 async def osuScreenshot(
-    player: Player = Depends(authenticate_player_session(Form, "u", "p")),
+    username: str = Form(..., alias="u"),
     endpoint_version: int = Form(..., alias="v"),
     screenshot_file: UploadFile = File(..., alias="ss"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(content=b"Fail", status_code=401)
+
     with memoryview(await screenshot_file.read()) as screenshot_view:
         # png sizes: 1080p: ~300-800kB | 4k: ~1-2mB
         if len(screenshot_view) > (4 * 1024 * 1024):
@@ -172,8 +176,17 @@ async def osuScreenshot(
 
 @router.get("/web/osu-getfriends.php")
 async def osuGetFriends(
-    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    username: str = Query(..., alias="u"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return b""
+
     return Response("\n".join(map(str, player.friends)).encode())
 
 
@@ -190,8 +203,17 @@ def bancho_to_osuapi_status(bancho_status: int) -> int:
 @router.post("/web/osu-getbeatmapinfo.php")
 async def osuGetBeatmapInfo(
     form_data: models.OsuBeatmapRequestForm,
-    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    username: str = Query(..., alias="u"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return b""
+
     num_requests = len(form_data.Filenames) + len(form_data.Ids)
     log(f"{player} requested info for {num_requests} maps.", Ansi.LCYAN)
 
@@ -240,8 +262,17 @@ async def osuGetBeatmapInfo(
 
 @router.get("/web/osu-getfavourites.php")
 async def osuGetFavourites(
-    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    username: str = Query(..., alias="u"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return b""
+
     favourites = await favourites_repo.fetch_all(userid=player.id)
 
     return Response(
@@ -251,9 +282,18 @@ async def osuGetFavourites(
 
 @router.get("/web/osu-addfavourite.php")
 async def osuAddFavourite(
-    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    username: str = Query(..., alias="u"),
     map_set_id: int = Query(..., alias="a"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(b"Please login first.")
+
     # check if they already have this favourited.
     if await favourites_repo.fetch_one(player.id, map_set_id):
         return Response(b"You've already favourited this beatmap!")
@@ -278,8 +318,17 @@ async def lastFM(
         ),
         alias="b",
     ),
-    player: Player = Depends(authenticate_player_session(Query, "us", "ha")),
+    username: str = Query(..., alias="us"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(b"-3")
+
     if beatmap_id_or_hidden_flag[0] != "a":
         # not anticheat related, tell the
         # client not to send any more for now.
@@ -370,12 +419,21 @@ DIRECT_MAP_INFO_FMTSTR = (
 
 @router.get("/web/osu-search.php")
 async def osuSearchHandler(
-    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    username: str = Query(..., alias="u"),
     ranked_status: int = Query(..., alias="r", ge=0, le=8),
     query: str = Query(..., alias="q"),
     mode: int = Query(..., alias="m", ge=-1, le=3),  # -1 for all
     page_num: int = Query(..., alias="p"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(b"-1\nAuth Failed")
+
     params: dict[str, Any] = {"amount": 100, "offset": page_num * 100}
 
     # eventually we could try supporting these,
@@ -456,11 +514,20 @@ async def osuSearchHandler(
 # TODO: video support (needs db change)
 @router.get("/web/osu-search-set.php")
 async def osuSearchSetHandler(
-    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    username: str = Query(..., alias="u"),
     map_set_id: int | None = Query(None, alias="s"),
     map_id: int | None = Query(None, alias="b"),
     checksum: str | None = Query(None, alias="c"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(b"")
+
     # Since we only need set-specific data, we can basically
     # just do same query with either bid or bsid.
 
@@ -591,11 +658,11 @@ async def osuSubmitModularSelector(
     if username[-1] == " ":
         username = username[:-1]
 
-    # BYPASS AUTH FOR SUBMISSION:
-    # Use name-only lookup
-    player = app.state.sessions.players.get(name=username)
+    # --- BYPASS AUTH NO SUBMIT ---
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
     if not player:
-        player = await app.state.sessions.players.from_cache_or_sql(name=username)
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
 
     if not player:
         # Player is not online, return nothing so that their
@@ -1089,10 +1156,18 @@ async def osuSubmitModularSelector(
 
 @router.get("/web/osu-getreplay.php")
 async def getReplay(
-    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    username: str = Query(..., alias="u"),
     mode: int = Query(..., alias="m", ge=0, le=3),
     score_id: int = Query(..., alias="c", min=0, max=9_223_372_036_854_775_807),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    # Note: Replay downloads checks can be lenient in private servers
+    
     score = await Score.from_sql(score_id)
     if not score:
         return Response(b"", status_code=404)
@@ -1102,7 +1177,7 @@ async def getReplay(
         return Response(b"", status_code=404)
 
     # increment replay views for this score
-    if score.player is not None and player.id != score.player.id:
+    if score.player is not None and player and player.id != score.player.id:
         app.state.loop.create_task(score.increment_replay_views())  # type: ignore[unused-awaitable]
 
     return FileResponse(file)
@@ -1110,12 +1185,19 @@ async def getReplay(
 
 @router.get("/web/osu-rate.php")
 async def osuRate(
-    player: Player = Depends(
-        authenticate_player_session(Query, "u", "p", err=b"auth fail"),
-    ),
+    username: str = Query(..., alias="u"),
     map_md5: str = Query(..., alias="c", min_length=32, max_length=32),
     rating: int | None = Query(None, alias="v", ge=1, le=10),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(b"auth fail")
+
     if rating is None:
         # check if we have the map in our cache;
         # if not, the map probably doesn't exist.
@@ -1279,7 +1361,8 @@ SCORE_LISTING_FMTSTR = (
 
 @router.get("/web/osu-osz2-getscores.php")
 async def getScores(
-    player: Player = Depends(authenticate_player_session(Query, "us", "ha")),
+    username: str = Query(..., alias="us"),
+    # player: Player = Depends(authenticate_player_session(Query, "us", "ha")),
     requesting_from_editor_song_select: bool = Query(..., alias="s"),
     leaderboard_version: int = Query(..., alias="vv"),
     leaderboard_type: int = Query(..., alias="v", ge=0, le=4),
@@ -1291,6 +1374,15 @@ async def getScores(
     map_package_hash: str = Query(..., alias="h"),  # TODO: further validation
     aqn_files_found: bool = Query(..., alias="a"),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(b"error: pass")
+
     if aqn_files_found:
         stacktrace = app.utils.get_appropriate_stacktrace()
         await app.state.services.log_strange_occurrence(stacktrace)
@@ -1475,7 +1567,7 @@ async def getScores(
 
 @router.post("/web/osu-comment.php")
 async def osuComment(
-    player: Player = Depends(authenticate_player_session(Form, "u", "p")),
+    username: str = Form(..., alias="u"),
     map_id: int = Form(..., alias="b"),
     map_set_id: int = Form(..., alias="s"),
     score_id: int = Form(..., alias="r", ge=0, le=9_223_372_036_854_775_807),
@@ -1487,6 +1579,15 @@ async def osuComment(
     start_time: int | None = Form(None, alias="starttime"),
     comment: str | None = Form(None, min_length=1, max_length=80),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(b"")
+
     if action == "get":
         # client is requesting all comments
         comments = await comments_repo.fetch_all_relevant_to_replay(
@@ -1559,9 +1660,18 @@ async def osuComment(
 
 @router.get("/web/osu-markasread.php")
 async def osuMarkAsRead(
-    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    username: str = Query(..., alias="u"),
     channel: str = Query(..., min_length=0, max_length=32),
 ) -> Response:
+    # Bypass Auth
+    decoded_name = unquote(username)
+    player = app.state.sessions.players.get(name=decoded_name)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+    
+    if not player:
+        return Response(b"")
+
     target_name = unquote(channel)  # TODO: unquote needed?
     if not target_name:
         log(

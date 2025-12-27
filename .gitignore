@@ -32,3 +32,8 @@ osu-bancho-service/logs.log
 # --- Serviço: API (Node/Prisma) ---
 osu-api-service/node_modules/
 osu-api-service/.env
+
+# --- Serviço: Bot (Discord) ---
+fubas-bot/node_modules
+fubas-bot/dist
+fubas-bot/.env

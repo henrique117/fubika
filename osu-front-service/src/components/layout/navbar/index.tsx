@@ -6,7 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 const Navbar: React.FC = () => {
     const { signed, user, signOut } = useAuth()
 
-    const userAvatar = signed && user ? `https://a.bpy.local/${user.id}` : 'https://a.bpy.local/0'
+    const userAvatar = signed && user ? `https://a.fubika.com.br/${user.id}` : 'https://a.fubika.com.br/0'
 
     return (
         <header className={style.header}>

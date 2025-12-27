@@ -1,20 +1,14 @@
 services:
-  ## shared services
-
   mysql:
     image: mysql:9.1.0
-    ports:
-      - "${DB_PORT}:3306"
     environment:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_HOST: ${DB_HOST}
       MYSQL_TCP_PORT: ${DB_PORT}
-      # A senha de root é necessária para o Prisma criar shadow databases se precisar
       MYSQL_ROOT_PASSWORD: "123456" 
     volumes:
-      # REMOVIDO: O base.sql antigo. O Prisma vai criar o banco agora.
       - db-data:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u${DB_USER} -p${DB_PASS}"]
@@ -25,34 +19,25 @@ services:
 
   redis:
     image: redis:7.2-alpine
-    # ports:
-    #   - ${REDIS_PORT}:${REDIS_PORT}
     user: root
     volumes:
       - redis-data:/data
     command: >
       sh -c 'if [ -n "${REDIS_PASS}" ]; then redis-server --requirepass "${REDIS_PASS}"; else redis-server; fi'
 
-  ## application services
-
   bancho:
     container_name: osu-bancho
-    # AQUI MUDOU: Aponta para a pasta do serviço Python
     build: ./osu-bancho-service
-    ports:
-      - "${APP_PORT}:${APP_PORT}"
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_started
-      # Espera a API rodar as migrations antes de subir
       api:
         condition: service_started
     tty: true
     init: true
     volumes:
-      # AQUI MUDOU: Monta apenas a pasta do serviço, não a raiz toda
       - ./osu-bancho-service:/srv/root
       - ./osu-bancho-service/.data:/srv/root/.data
     environment:
@@ -95,13 +80,9 @@ services:
 
   api: 
     container_name: osu-api
-    # AQUI MUDOU: Aponta para a pasta do serviço Node/Prisma
     build: ./osu-api-service
     restart: always
-    ports:
-      - "${API_PORT}:${API_PORT}"
     environment:
-      # URL interna do Docker usando 'mysql' como host e user 'root' para ter permissão total
       - DATABASE_URL=mysql://root:123456@mysql:3306/${DB_NAME}
       - JWT_SECRET=${JWT_SECRET:-changeme}
       - PORT=${API_PORT}
@@ -110,14 +91,46 @@ services:
         condition: service_healthy
     networks:
       - default
-    # Comando para rodar as migrations (criar tabelas/seed) e depois subir o server
     command: sh -c "npx prisma migrate deploy && node dist/server.js"
     env_file:
       - .env
     volumes:
       - ./osu-bancho-service/.data:/app/.data
 
+  web:
+    container_name: osu-web
+    build:
+      context: ./osu-front-service
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=https://api.${DOMAIN}
+    depends_on:
+      - api
+    restart: always
+
+  caddy:
+    image: caddy:latest
+    container_name: osu-caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN}
+      - APP_PORT=${APP_PORT} 
+      - API_PORT=${API_PORT}
+    depends_on:
+      - web
+      - api
+      - bancho
+
 volumes:
   data:
   db-data:
   redis-data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,49 @@
+{
+    # Opções globais
+    # debug # Descomente se precisar ver logs detalhados
+	email hassis.moreira117@gmail.com
+}
+
+# 1. O SITE PRINCIPAL (Frontend/React)
+{$DOMAIN}, www.{$DOMAIN} {
+    encode gzip
+    # Manda para o container 'web' na porta 80 (onde o Nginx interno está ouvindo)
+    reverse_proxy web:80
+}
+
+# 2. A API (Backend)
+api.{$DOMAIN} {
+    encode gzip
+    # Manda para o container 'api'. 
+    # Se sua API roda na porta 3000 internamente, pode por 'api:3000' direto, ou usar a variável.
+    reverse_proxy api:{$API_PORT}
+}
+
+# 3. BANCHO (Servidor do Jogo - Chat, Multi, Scores)
+c.{$DOMAIN}, ce.{$DOMAIN}, c4.{$DOMAIN}, osu.{$DOMAIN} {
+    encode gzip
+    
+    # Manda para o container 'bancho' na porta do jogo (geralmente 10000)
+    reverse_proxy bancho:{$APP_PORT} {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-Port {server_port}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Aumenta limite de upload para replays grandes
+    request_body {
+        max_size 20MB
+    }
+}
+
+# 4. AVATARES (a.dominio)
+# Truque: Em vez de tentar ler o arquivo do disco (que é difícil no Docker),
+# mandamos o Bancho servir a imagem. É mais fácil e funciona igual.
+a.{$DOMAIN} {
+    reverse_proxy bancho:{$APP_PORT}
+}
+
+# 5. ASSETS (assets.dominio)
+assets.{$DOMAIN} {
+    reverse_proxy bancho:{$APP_PORT}
+}

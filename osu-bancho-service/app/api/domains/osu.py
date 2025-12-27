@@ -1269,7 +1269,8 @@ SCORE_LISTING_FMTSTR = (
 
 @router.get("/web/osu-osz2-getscores.php")
 async def getScores(
-    player: Player = Depends(authenticate_player_session(Query, "us", "ha")),
+    username: str = Query(..., alias="us"),
+    # player: Player = Depends(authenticate_player_session(Query, "us", "ha")),
     requesting_from_editor_song_select: bool = Query(..., alias="s"),
     leaderboard_version: int = Query(..., alias="vv"),
     leaderboard_type: int = Query(..., alias="v", ge=0, le=4),
@@ -1281,6 +1282,8 @@ async def getScores(
     map_package_hash: str = Query(..., alias="h"),  # TODO: further validation
     aqn_files_found: bool = Query(..., alias="a"),
 ) -> Response:
+    player = app.state.sessions.players.get(name=username)
+
     if aqn_files_found:
         stacktrace = app.utils.get_appropriate_stacktrace()
         await app.state.services.log_strange_occurrence(stacktrace)
@@ -1291,6 +1294,12 @@ async def getScores(
         return Response(b"-1|false")
     if map_md5 in app.state.cache.needs_update:
         return Response(b"1|false")
+    
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=username)
+
+    if not player:
+        return Response(b"error: pass")
 
     if mods_arg & Mods.RELAX:
         if mode_arg == 3:  # rx!mania doesn't exist

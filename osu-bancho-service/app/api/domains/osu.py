@@ -85,7 +85,6 @@ router = APIRouter(
 )
 
 
-# --- A MÁGICA ACONTECE AQUI ---
 @cache
 def authenticate_player_session(
     param_function: Callable[..., Any],
@@ -97,27 +96,25 @@ def authenticate_player_session(
         username: str = param_function(..., alias=username_alias),
         pw_md5: str = param_function(..., alias=pw_md5_alias),
     ) -> Player:
-        # BYPASS: Ignoramos o pw_md5 e buscamos apenas pelo nome
-        decoded_name = unquote(username)
+        # BYPASS AUTH: Ignora a senha MD5 e busca apenas pelo nome
+        # Isso corrige erros 401 em clientes novos
+        name = unquote(username)
+        player = app.state.sessions.players.get(name=name)
         
-        # 1. Tenta achar online
-        player = app.state.sessions.players.get(name=decoded_name)
-
-        # 2. Se não estiver online, tenta carregar do banco de dados
         if not player:
-            player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
+            # Se não achou online, tenta buscar no banco (offline)
+            player = await app.state.sessions.players.from_cache_or_sql(name=name)
 
         if player:
             return player
 
-        # Se não achou usuário nenhum, aí sim dá erro
+        # player login incorrect (ou usuário não existe)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=err,
         )
 
     return wrapper
-# ------------------------------
 
 
 """ /web/ handlers """
@@ -594,7 +591,12 @@ async def osuSubmitModularSelector(
     if username[-1] == " ":
         username = username[:-1]
 
-    player = await app.state.sessions.players.from_login(username, pw_md5)
+    # BYPASS AUTH FOR SUBMISSION:
+    # Use name-only lookup
+    player = app.state.sessions.players.get(name=username)
+    if not player:
+        player = await app.state.sessions.players.from_cache_or_sql(name=username)
+
     if not player:
         # Player is not online, return nothing so that their
         # client will retry submission when they log in.

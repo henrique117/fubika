@@ -7,7 +7,7 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_HOST: ${DB_HOST}
       MYSQL_TCP_PORT: ${DB_PORT}
-      MYSQL_ROOT_PASSWORD: "123456" 
+      MYSQL_ROOT_PASSWORD: "123456"
     volumes:
       - db-data:/var/lib/mysql
     healthcheck:
@@ -78,7 +78,7 @@ services:
       - DEVELOPER_MODE=${DEVELOPER_MODE}
       - DB_USE_SSL=${DB_USE_SSL}
 
-  api: 
+  api:
     container_name: osu-api
     build: ./osu-api-service
     restart: always
@@ -119,9 +119,10 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+      - ./osu-bancho-service/.data:/srv/root/.data
     environment:
       - DOMAIN=${DOMAIN}
-      - APP_PORT=${APP_PORT} 
+      - APP_PORT=${APP_PORT}
       - API_PORT=${API_PORT}
     depends_on:
       - web

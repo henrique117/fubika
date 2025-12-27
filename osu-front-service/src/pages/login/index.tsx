@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, Navigate } from 'react-router-dom'
 import style from './style.module.css'
 import { ButtonGradientComponent, WrapperComponent } from '../../components/components.export'
 import { api } from '../../services/api'
@@ -7,7 +7,11 @@ import { useAuth } from '../../contexts/AuthContext'
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate()
-    const { signIn } = useAuth()
+    const { signIn, signed } = useAuth()
+    
+    if (signed) {
+        return <Navigate to="/" replace />;
+    }
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')

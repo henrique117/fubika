@@ -1,5 +1,14 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import { BeatmapPage, ForgotPassPage, GlobalRankingPage, HomePage, HowToConnectPage, LoginPage, NotFoundPage, RedefinePassPage, RegisterPage } from '../pages/pages.export'
+import PrivateRoute from './private'
+
+const ProtectedLayout = () => {
+    return (
+        <PrivateRoute>
+            <Outlet />
+        </PrivateRoute>
+    )
+}
 
 const router = createBrowserRouter([
     {
@@ -27,12 +36,17 @@ const router = createBrowserRouter([
         element: <HowToConnectPage />
     },
     {
-        path: '/ranking',
-        element: <GlobalRankingPage />
-    },
-    {
-        path: '/beatmap',
-        element: <BeatmapPage />
+        element: <ProtectedLayout />,
+        children: [
+            {
+                path: '/ranking',
+                element: <GlobalRankingPage />
+            },
+            {
+                path: '/beatmap',
+                element: <BeatmapPage />
+            },
+        ]
     },
     {
         path: '*',

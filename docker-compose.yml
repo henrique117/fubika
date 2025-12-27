@@ -129,14 +129,14 @@ services:
       - api
       - bancho
 
-    bot:
+  bot:
     container_name: fubas-bot
     build: ./fubas-bot
     restart: always
     environment:
-      - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - CLIENT_ID=${DISCORD_CLIENT_ID}
-      - GUILD_ID=${DISCORD_GUILD_ID}
+      - TOKEN=${TOKEN}
+      - CLIENT_ID=${CLIENT_ID}
+      - API_KEY=${API_KEY}
 
 volumes:
   data:

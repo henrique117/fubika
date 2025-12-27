@@ -8,11 +8,11 @@ build:
 
 # Sobe tudo rebuildando as imagens (Garante que o código novo da API e Bancho entrem em vigor)
 run:
-	docker compose up --build bancho mysql redis api web caddy
+	docker compose up --build
 
 # Sobe tudo em background (modo detached)
 run-bg:
-	docker compose up -d --build bancho mysql redis api web caddy
+	docker compose up -d --build
 
 # Para tudo e remove os containers
 stop:

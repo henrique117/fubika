@@ -1,19 +1,75 @@
-# bancho.py
+# 🚀 Fubika - Private osu! Server
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/osuAkatsuki/bancho.py/master.svg)](https://results.pre-commit.ci/latest/github/osuAkatsuki/bancho.py/master)
-[![Discord](https://discordapp.com/api/guilds/748687781605408908/widget.png?style=shield)](https://discord.gg/ShEQgUx)
+<div align="center">
+    <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+    <img src="https://img.shields.io/badge/FastAPI-005863?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+    <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+    <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis">
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+    <br>
+    <img src="https://img.shields.io/badge/License-All_Rights_Reserved-red?style=flat-square" alt="License">
+    <a href="https://discord.gg/rUCxPEBjB8">
+        <img src="https://img.shields.io/discord/748687781605408908?color=7289DA&label=Discord&logo=discord&logoColor=white&style=flat-square" alt="Discord">
+    </a>
+</div>
 
-**bancho.py** is an in-progress osu! server implementation for developers of all levels
-of experience interested in hosting their own osu private server instance(s).
+---
 
-the project is developed primarily by the [Akatsuki](https://akatsuki.gg/) team,
-and our aim is to create the most easily maintainable, reliable, and feature-rich
-osu! server implementation available.
+## 🇧🇷 Português
 
-If you are interested in running or contributing to **bancho.py**, you should head over to the **[bancho.py wiki](https://github.com/osuAkatsuki/bancho.py/wiki)**.
+**Fubika** é uma implementação customizada de servidor de osu!, baseada no projeto `bancho.py`. Este servidor foi desenvolvido com o objetivo de oferecer uma experiência estável, performática e com padrões de código modernos para a nossa comunidade privada.
 
-## License
+### ⚠️ Fase Beta & Reset Geral
+Atualmente, o servidor encontra-se em **Fase Beta**. O foco está na estabilização das funcionalidades core (login, scores, performance). 
 
-**bancho.py** is licensed under the [MIT License](https://opensource.org/license/mit/). Please see the [LICENSE](https://github.com/osuAkatsuki/bancho.py/blob/master/LICENSE) file for more information.
+> **Aviso Importante:** Ao final desta fase, haverá um **RESET TOTAL** de todos os dados (contas, ranks e scores) para o lançamento oficial.
+
+### 🎮 Como Conectar
+Para jogar no Fubika, utilize o cliente oficial do osu! com a seguinte flag no atalho:
+```text
+-devserver fubika.com.br
+```
+
+---
+
+## 🇺🇸 English
+
+**Fubika** is a customized osu! server implementation based on the `bancho.py` project. This server was developed to provide a stable, high-performance experience with modern coding standards for our private community.
+
+### ⚠️ Beta Phase & General Reset
+The server is currently in **Beta Phase**. Our focus is on stabilizing core functionalities (login, scores, performance).
+
+> **Important Notice:** At the end of this phase, a **FULL RESET** of all data (accounts, ranks, and scores) will occur for the official launch.
+
+### 🎮 How to Connect
+To play on Fubika, use the official osu! client with the following flag in your shortcut:
+```text
+-devserver fubika.com.br
+```
+
+---
+
+## 🛠️ Tecnologias Utilizadas / Tech Stack
+
+* **Backend:** [Python](https://www.python.org/) 3.11+ com [FastAPI](https://fastapi.tiangolo.com/).
+* **Database:** [MySQL](https://www.mysql.com/) para dados persistentes e [Redis](https://redis.io/) para cache de alta velocidade.
+* **Infrastructure:** [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/) para containerização.
+* **Reverse Proxy:** [Caddy](https://caddyserver.com/) para gerenciamento de SSL e roteamento.
+
+---
+
+## ⚖️ Licença e Créditos / License and Credits
+
+### Original Project
+Fubika is a derivative work based on [**bancho.py**](https://github.com/osuAkatsuki/bancho.py), originally developed by the **Akatsuki** team ([cmyui](https://github.com/cmyui)). The base code is licensed under the **MIT License**.
+
+### Fubika Customizations
+As modificações, arquitetura de arquivos e lógica específica da versão **Fubika** são de **Direitos Reservados (Copyright © 2026)**. Este repositório é tornado público exclusivamente para fins de **portfólio profissional**.
+
+> *All Fubika-specific modifications and logic are **All Rights Reserved**. This repository is public for **portfolio purposes only**.*
+
+Consulte o arquivo `LICENSE` para mais detalhes.
+
+<div align="center">
+    Desenvolvido por Henrique Assis Moreira (Iccy) e equipe.
+</div>

@@ -2,13 +2,14 @@
     width: 100%;
     height: 60px;
     background: linear-gradient(var(--color-azul-baitola) 0%, var(--color-verde-baitola) 100%);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: center;
     align-items: center;
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     position: fixed;
+    top: 0;
     z-index: 1000;
 }
 
@@ -27,47 +28,29 @@
     gap: 20px;
 }
 
-.logo {
-    font-size: 32px;
-    font-weight: bold;
-    background: inherit;
-    color: #2dd4bf;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Comic Sans MS', cursive, sans-serif; 
-}
-
-.logo:hover {
-    cursor: pointer;
+.logo img {
+    height: 35px;
+    width: auto;
 }
 
 .navLinks {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
     font-size: 14px;
-    font-weight: 300;
+    font-weight: 500;
 }
 
 .navLinks a {
     color: white;
     text-decoration: none;
     opacity: 0.9;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
 }
 
 .navLinks a:hover {
     opacity: 1;
-    text-decoration: underline;
-}
-
-.separator {
-    opacity: 0.5;
-    font-size: 12px;
+    color: #2dd4bf;
 }
 
 .rightSection {
@@ -89,24 +72,18 @@
     padding: 8px 12px 8px 35px;
     color: white;
     font-size: 14px;
-    outline: none;
     width: 150px;
-    transition: width 0.3s ease, background 0.3s;
-}
-
-.searchInput::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    transition: width 0.3s ease;
 }
 
 .searchInput:focus {
-    background: rgba(0, 0, 0, 0.3);
     width: 200px;
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .searchIcon {
     position: absolute;
     left: 10px;
-    color: rgba(255, 255, 255, 0.8);
     pointer-events: none;
 }
 
@@ -131,15 +108,138 @@
     transition: opacity 0.2s;
 }
 
-.iconButton:hover {
-    opacity: 1;
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.profile img {
+.avatarTrigger {
     width: 36px;
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.2);
     cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.menuToggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.mobileOnly {
+    display: none;
+}
+
+.authLinks {
+    display: flex;
+    gap: 15px; 
+    align-items: center; 
+    margin-left: 10px;
+}
+
+.loginLink {
+    color: white;
+    text-decoration: none; 
+    font-weight: 600; 
+    font-size: 14px; 
+    opacity: 0.9;
+}
+
+.registerLink {
+    color: white;
+    background: transparent; 
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.4); 
+}
+
+@media (max-width: 768px) {
+    .mobileOnly {
+        display: block;
+        width: 100%;
+    }
+
+    .avatarTrigger {
+        display: none;
+    }
+
+    .menuToggle {
+        display: flex;
+    }
+
+    .navLinks {
+        display: none;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: #1a1a1a;
+        flex-direction: column;
+        padding: 20px 0;
+        gap: 0;
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .navActive {
+        display: flex;
+    }
+
+    .navLinks a {
+        width: 100%;
+        padding: 15px 25px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 16px;
+    }
+
+    .searchWrapperInside {
+        padding: 10px 20px;
+    }
+    
+    .searchWrapperInside .searchInput {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .profileInside {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .profileInside img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+
+    .logoutBtn {
+        width: 100%;
+        padding: 15px 25px;
+        text-align: left;
+        background: none;
+        border: none;
+        color: #ff6666;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 16px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .searchWrapper, 
+    .actionButtons .iconButton, 
+    .separator {
+        display: none !important;
+    }
 }

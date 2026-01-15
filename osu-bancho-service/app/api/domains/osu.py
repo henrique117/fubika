@@ -1562,8 +1562,8 @@ async def getScores(
         ],
     )
 
-    return Response("\n".join(response_lines).encode())
-
+    content = "\n".join(response_lines).strip()
+    return Response(content.encode("utf-8"))
 
 @router.post("/web/osu-comment.php")
 async def osuComment(

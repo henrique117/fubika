@@ -37,3 +37,6 @@ osu-api-service/.env
 fubas-bot/node_modules
 fubas-bot/dist
 fubas-bot/.env
+
+# --- Certificados Caddy ---
+root.crt

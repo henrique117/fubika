@@ -23,7 +23,7 @@ const HowToConnect: React.FC = () => {
                             <li>Após duplicar o arquivo, clique como botão direito e vá em propriedades;</li>
                             <li>Nas propriedades adicione “ADICIONAR AQ O COMANDO<br />PARA INSERIR NAS PROPRIEDADES” no destino (igual ao exemplo abaixo);</li>
                         </ul>
-                        <img src="example.svg" alt="" className={style.image} />
+                        <img src="example.png" alt="" className={style.image} />
                         <ul className={style.dashedList}>
                             <li>Clique no botão aplicar e logo em seguida o OK;</li>
                             <li>Feche a janela das propriedades do arquivo da cópia que você fez a alteração;</li>

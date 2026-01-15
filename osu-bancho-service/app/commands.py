@@ -2471,6 +2471,8 @@ class CommandResponse(TypedDict):
     resp: str | None
     hidden: bool
 
+"""
+
 
 async def process_commands(
     player: Player,
@@ -2532,4 +2534,4 @@ async def process_commands(
                 # no message to return
                 return {"resp": None, "hidden": False}
 
-    return None """
+    return None

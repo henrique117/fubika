@@ -32,12 +32,17 @@ const Register: React.FC = () => {
 
     const validateForm = () => {
         const newErrors: FormErrors = {}
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
         
         if (!username || username.length < 3) {
             newErrors.name = "Nome de usuário muito curto (min 3 chars)."
         }
+
+        if (username.length > 15) {
+            newErrors.name = "Nome de usuário muito longo (max 15 chars)."
+        }
         
-        if (!email || !email.includes('@')) {
+        if (!email || !emailRegex.test(email)) {
             newErrors.email = "Insira um e-mail válido."
         }
 

@@ -1,43 +1,42 @@
 {
-    # Opções globais
-    # debug # Descomente se precisar ver logs detalhados
-	email hassis.moreira117@gmail.com
+    email hassis.moreira117@gmail.com
+    # debug 
 }
 
-# 1. O SITE PRINCIPAL (Frontend/React)
+# 1. O SITE PRINCIPAL
 {$DOMAIN}, www.{$DOMAIN} {
+    {$TLS_OPTS}
     encode gzip
-    # Manda para o container 'web' na porta 80 (onde o Nginx interno está ouvindo)
     reverse_proxy web:80
 }
 
-# 2. A API (Backend)
+# 2. A API
 api.{$DOMAIN} {
+    {$TLS_OPTS}
     encode gzip
-    # Manda para o container 'api'. 
-    # Se sua API roda na porta 3000 internamente, pode por 'api:3000' direto, ou usar a variável.
     reverse_proxy api:{$API_PORT}
 }
 
-# 3. BANCHO (Servidor do Jogo - Chat, Multi, Scores)
+# 3. BANCHO
 c.{$DOMAIN}, ce.{$DOMAIN}, c4.{$DOMAIN}, osu.{$DOMAIN}, b.{$DOMAIN} {
+    {$TLS_OPTS}
     reverse_proxy bancho:{$APP_PORT} {
         header_up X-Real-IP {remote_host}
     }
 }
 
-# 4. AVATARES (a.dominio)
-# Truque: Em vez de tentar ler o arquivo do disco (que é difícil no Docker),
-# mandamos o Bancho servir a imagem. É mais fácil e funciona igual.
+# 4. AVATARES
 a.{$DOMAIN} {
+    {$TLS_OPTS}
     encode gzip
     root * /srv/root/.data/avatars
     file_server
     try_files {path} {path}.png {path}.jpg {path}.jpeg {path}.gif /default.jpg
 }
 
-# 5. ASSETS (assets.dominio)
+# 5. ASSETS
 assets.{$DOMAIN} {
+    {$TLS_OPTS}
     encode gzip
     root * /srv/root/.data/assets
     file_server

@@ -361,10 +361,10 @@ class SendMessage(BasePacket):
                 ),
             )
 
-        """ if msg.startswith(app.settings.COMMAND_PREFIX):
+        if msg.startswith(app.settings.COMMAND_PREFIX):
             cmd = await commands.process_commands(player, t_chan, msg)
-        else: """
-        cmd = None
+        else:
+            cmd = None
 
         if cmd:
             # a command was triggered.

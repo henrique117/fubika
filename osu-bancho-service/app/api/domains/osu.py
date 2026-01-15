@@ -1373,7 +1373,9 @@ async def getScores(
     map_package_hash: str = Query(..., alias="h"),  # TODO: further validation
     aqn_files_found: bool = Query(..., alias="a"),
 ) -> Response:
+    # Bypass
     decoded_name = unquote(username)
+    print(f"[DEBUG] Username: {username}, Decoded: {decoded_name}")
     player = app.state.sessions.players.get(name=decoded_name)
 
     if not player:

@@ -1360,7 +1360,7 @@ SCORE_LISTING_FMTSTR = (
 
 @router.get("/web/osu-osz2-getscores.php")
 async def getScores(
-    username: str = Query(..., alias="us"),
+    username: str = Query(..., alias="u"),
     # player: Player = Depends(authenticate_player_session(Query, "us", "ha")),
     requesting_from_editor_song_select: bool = Query(..., alias="s"),
     leaderboard_version: int = Query(..., alias="vv"),

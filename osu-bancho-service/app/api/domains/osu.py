@@ -78,12 +78,10 @@ BEATMAPS_PATH = SystemPath.cwd() / ".data/osu"
 REPLAYS_PATH = SystemPath.cwd() / ".data/osr"
 SCREENSHOTS_PATH = SystemPath.cwd() / ".data/ss"
 
-
 router = APIRouter(
     tags=["osu! web API"],
     default_response_class=Response,
 )
-
 
 @cache
 def authenticate_player_session(
@@ -96,14 +94,25 @@ def authenticate_player_session(
         username: str = param_function(..., alias=username_alias),
         pw_md5: str = param_function(..., alias=pw_md5_alias),
     ) -> Player:
+        decoded_name = unquote(username)
+
         player = await app.state.sessions.players.from_login(
-            name=unquote(username),
+            name=decoded_name,
             pw_md5=pw_md5,
         )
         if player:
             return player
 
-        # player login incorrect
+        if " " in decoded_name:
+            alt_name = decoded_name.replace(" ", "+")
+            
+            player = await app.state.sessions.players.from_login(
+                name=alt_name,
+                pw_md5=pw_md5,
+            )
+            if player:
+                return player
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=err,
@@ -1360,8 +1369,7 @@ SCORE_LISTING_FMTSTR = (
 
 @router.get("/web/osu-osz2-getscores.php")
 async def getScores(
-    username: str = Query(..., alias="us"),
-    # player: Player = Depends(authenticate_player_session(Query, "us", "ha")),
+    player: Player = Depends(authenticate_player_session(Query, "us", "ha")),
     requesting_from_editor_song_select: bool = Query(..., alias="s"),
     leaderboard_version: int = Query(..., alias="vv"),
     leaderboard_type: int = Query(..., alias="v", ge=0, le=4),
@@ -1373,16 +1381,7 @@ async def getScores(
     map_package_hash: str = Query(..., alias="h"),  # TODO: further validation
     aqn_files_found: bool = Query(..., alias="a"),
 ) -> Response:
-    # Bypass
-    decoded_name = unquote(username)
-    print(f"[DEBUG] Username: {username}, Decoded: {decoded_name}")
-    player = app.state.sessions.players.get(name=decoded_name)
-
     if not player:
-        player = await app.state.sessions.players.from_cache_or_sql(name=decoded_name)
-    
-    if not player:
-        print("[DEBUG] error: pass")
         return Response(b"error: pass")
 
     if aqn_files_found:
@@ -1392,10 +1391,8 @@ async def getScores(
     # check if this md5 has already been  cached as
     # unsubmitted/needs update to reduce osu!api spam
     if map_md5 in app.state.cache.unsubmitted:
-        print("[DEBUG] -1|false")
         return Response(b"-1|false")
     if map_md5 in app.state.cache.needs_update:
-        print("[DEBUG] 1|false")
         return Response(b"1|false")
 
     if mods_arg & Mods.RELAX:
@@ -1435,7 +1432,6 @@ async def getScores(
         if has_set_id and map_set_id not in app.state.cache.beatmapset:
             # set not cached, it doesn't exist
             app.state.cache.unsubmitted.add(map_md5)
-            print("[DEBUG] -1|false")
             return Response(b"-1|false")
 
         map_filename = unquote_plus(map_filename)  # TODO: is unquote needed?
@@ -1469,7 +1465,6 @@ async def getScores(
             # add this map to the unsubmitted cache, so
             # that we don't have to make this request again.
             app.state.cache.unsubmitted.add(map_md5)
-            print("[DEBUG] -1|false")
             return Response(b"-1|false")
 
     # we've found a beatmap for the request.
@@ -1480,7 +1475,6 @@ async def getScores(
     if bmap.status < RankedStatus.Ranked:
         # only show leaderboards for ranked,
         # approved, qualified, or loved maps.
-        print(f"[DEBUG] {int(bmap.status)}|false")
         return Response(f"{int(bmap.status)}|false".encode())
 
     # fetch scores & personal best
@@ -1570,8 +1564,6 @@ async def getScores(
     )
 
     content = "\n".join(response_lines).strip()
-
-    print(f"[DEBUG] {content}")
 
     return Response(
         content.encode("utf-8"),
@@ -1713,7 +1705,7 @@ async def osuSeasonal() -> Response:
 async def banchoConnect(
     # NOTE: this is disabled as this endpoint can be called
     #       before a player has been granted a session
-    # player: Player = Depends(authenticate_player_session(Query, "u", "h")),
+    player: Player = Depends(authenticate_player_session(Query, "u", "h")),
     osu_ver: str = Query(..., alias="v"),
     active_endpoint: str | None = Query(None, alias="fail"),
     net_framework_vers: str | None = Query(None, alias="fx"),  # delimited by |

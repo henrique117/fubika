@@ -1563,6 +1563,9 @@ async def getScores(
     )
 
     content = "\n".join(response_lines).strip()
+
+    print(f"[DEBUG RESPONSE]: {content!r}") 
+
     return Response(
         content.encode("utf-8"),
         media_type="text/plain"

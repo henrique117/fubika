@@ -1,13 +1,27 @@
 import { Link } from 'react-router-dom'
 import style from './style.module.css'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const Navbar: React.FC = () => {
     const { signed, user, signOut } = useAuth()
     const [menuOpen, setMenuOpen] = useState(false)
 
     const userAvatar = signed && user ? `https://a.fubika.com.br/${user.id}` : 'https://a.fubika.com.br/0'
+    useEffect(() => {
+        let resizeTimer: number;
+        
+        const handleResize = () => {
+            document.body.classList.add('no-transition');
+            clearTimeout(resizeTimer);
+            resizeTimer = window.setTimeout(() => {
+                document.body.classList.remove('no-transition');
+            }, 400);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <header className={style.header}>

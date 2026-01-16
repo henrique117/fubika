@@ -8,13 +8,14 @@ const HowToConnect: React.FC = () => {
         <WrapperComponent>
             <div className={style.pageWrapper}>
                 <div className={style.card}>
+                    <header className={style.headerContainer}>
                     <Link to='/'>
                         <button className={style.backButton}>
                             <img src="arrow_icon.svg" alt="" />
                         </button>
                     </Link>
-
                     <h1 className={style.title}>Como conectar?</h1>
+                    </header>
 
                     <div className={style.instructions}>
                         <ul className={style.dashedList}>

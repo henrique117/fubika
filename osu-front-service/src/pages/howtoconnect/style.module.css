@@ -19,6 +19,10 @@
     border-radius: 15px;
 }
 
+.headerContainer {
+    display: contents; 
+}
+
 .backButton {
     position: absolute;
     top: 20px;
@@ -42,6 +46,8 @@
     width: 100%;
     height: 13%;
     font-size: 48px;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .instructions {
@@ -57,7 +63,8 @@
     flex-direction: column;
     justify-content: space-evenly;
     height: 100%;
-    width: 90%;
+    width: 80%;
+
 }
 
 .dashedList li {
@@ -68,4 +75,44 @@
 .image {
     width: 70%;
     height: auto;
+}
+
+@media (max-width: 768px) {
+    .headerContainer {
+        display: flex;
+        align-items: center;     
+        justify-content: center; 
+        position: relative;       
+        width: 100%;
+        height: 7%;    
+        padding: 15px;          
+    }
+    .title {
+        align-items: flex-start;
+        font-size: 28px;
+
+    }
+
+    .dashedList li {
+        font-size: 15.5px;
+        font-weight: bold;
+    }
+
+    .image {
+        width: 90%;
+        height: auto;
+    }
+
+    .backButton {
+        position:unset;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+
+  
+
 }

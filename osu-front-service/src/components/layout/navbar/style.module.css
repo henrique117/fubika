@@ -177,7 +177,7 @@
     }
 
     .navLinks {
-        display: none;
+        display: flex;
         position: absolute;
         top: 60px;
         left: 0;
@@ -187,10 +187,22 @@
         padding: 20px 0;
         gap: 0;
         box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+
+        /* anim */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-30px); 
+        transition: transform 0.4s ease, opacity 0.4s ease, visibility 0.4s;
+        pointer-events: none; 
+        overflow: hidden;
     }
 
     .navActive {
-        display: flex;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0); 
+        padding: 20px 0;
+        pointer-events: auto;
     }
 
     .navLinks a {

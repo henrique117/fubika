@@ -8,7 +8,7 @@ import { SearchBeatmaps } from "./beatmap.schema";
 
 const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
     return {
-        artist: data.artist,
+        artist: data.beatmapset?.artist || 'Desconhecido',
         beatmap_id: data.id,
         beatmapset_id: data.beatmapset_id,
         beatmap_md5: data.checksum,

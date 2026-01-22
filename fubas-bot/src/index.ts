@@ -45,7 +45,7 @@ for (const folder of commandFolders) {
         if ('data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command)
         } else {
-            console.warn(`[AVISO] O comando em ${filePath} nÃ£o tem "data" ou "execute".`)
+            console.warn(`[AVISO] O comando em ${filePath} não tem "data" ou "execute".`)
         }
     }
 }
@@ -63,11 +63,22 @@ client.on('interactionCreate', async interaction => {
     try {
         await command.execute(interaction)
     } catch (error) {
-        console.error(error)
+        console.error(`Erro ao executar comando ${interaction.commandName}:`, error)
+        
+        const errorPayload = { content: 'Houve um erro ao executar esse comando!', ephemeral: true }
+
         if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: 'Houve um erro ao executar esse comando!', ephemeral: true })
+            await interaction.followUp(errorPayload).catch(e => console.error("Erro no followUp:", e))
         } else {
-            await interaction.reply({ content: 'Houve um erro ao executar esse comando!', ephemeral: true })
+            try {
+                await interaction.reply(errorPayload)
+            } catch (err: any) {
+                if (err.code === 40060) {
+                    await interaction.followUp(errorPayload).catch(e => console.error("Erro no followUp de recuperação:", e))
+                } else {
+                    console.error("Erro no reply:", err)
+                }
+            }
         }
     }
 })

@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, Compo
 
 export default async function embedPagination(interaction: CommandInteraction | Message, pages: EmbedBuilder[], string: string = "", disapear: boolean = false, time: number = 40000, attachment?: AttachmentBuilder): Promise<void> {
     
-    const sendResponse = async (payload: any): Promise<Message> => {
+    const sendResponse = async (payload: any): Promise<any> => {
         if (interaction instanceof CommandInteraction) {
             if (interaction.deferred || interaction.replied) {
                 return await interaction.editReply(payload)
@@ -54,7 +54,7 @@ export default async function embedPagination(interaction: CommandInteraction | 
 
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(first, prev, pageCount, next, last)
     
-    let msg: Message
+    let msg: any
 
     try {
         msg = await sendResponse({ 
@@ -63,6 +63,10 @@ export default async function embedPagination(interaction: CommandInteraction | 
             components: [buttons],
             files: attachment ? [attachment] : []
         })
+
+        if (!msg.createMessageComponentCollector && interaction instanceof CommandInteraction) {
+            msg = await interaction.fetchReply();
+        }
 
         const collector = msg.createMessageComponentCollector({
             componentType: ComponentType.Button,

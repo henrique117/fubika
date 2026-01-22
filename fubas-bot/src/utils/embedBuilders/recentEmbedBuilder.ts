@@ -27,6 +27,8 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
         ? `~~${score.pp.toLocaleString('en-US', options)}PP~~` // Crossed
         : `${score.pp.toLocaleString('en-US', options)}PP`
 
+    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+
     return new EmbedBuilder()
         .setAuthor({
             name: `${player.name}: ${player.pp.toLocaleString('en-US')}pp (#${player.rank})`,
@@ -34,7 +36,7 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
             url: player.url
         }) //                                           Mudar --->  beatmap.star_rating.toLocaleString('en-US', options)}
         .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
-        .setURL(beatmap.url)
+        .setURL(mapUrl)
         .setColor(COLORS.blue)
         .setThumbnail(beatmap.thumbnail)
         .setDescription(`

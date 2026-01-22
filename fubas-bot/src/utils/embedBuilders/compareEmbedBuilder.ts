@@ -22,6 +22,8 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
         return score.player.id === player.id
     })
 
+    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+
     // Caso não haja scores do player no mapa
     if (!score)        
         return new EmbedBuilder()
@@ -31,7 +33,7 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
             url: player.url
             })
             .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
-            .setURL(beatmap.url)
+            .setURL(mapUrl)
             .setColor(COLORS.blue)
             .setThumbnail(beatmap.thumbnail)
             .setDescription('Este player ainda não possui scores no mapa!')

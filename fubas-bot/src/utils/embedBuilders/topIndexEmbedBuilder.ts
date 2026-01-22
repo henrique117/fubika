@@ -25,8 +25,8 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
             iconURL: URLS.fubikaIcon,
             url: player.url
         }) //                                       Mudar --->  score.star_rating.toLocaleString('en-US', options)}
-        .setTitle(`[${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]](https://fubika.com.br/beatmap/${beatmap.beatmap_id})`)
-        .setURL(beatmap.url)
+        .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
+        .setURL(`https://fubika.com.br/beatmap/${beatmap.beatmap_id}`)
         .setColor(COLORS.blue)
         .setThumbnail(beatmap.thumbnail)
         .setDescription(`

@@ -7,7 +7,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName('osu-link')
         .setDescription('Vincula seu discord a uma conta do servidor')
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName('nick')
                 .setDescription('Nick do Fubika')
                 .setRequired(true)
@@ -16,13 +16,13 @@ export default {
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
-        try{
-            
-            const insertedNick = interaction.options.getString('nick', true) // Pega o nick fornecido no comando
-            const { message } = await postCreateLink(interaction.user.id, insertedNick)
-            
+        try {
+
+            const insertedNick: string = interaction.options.getString('nick', true) // Pega o nick fornecido no comando
+            const { message } = await postCreateLink(interaction.user.id, insertedNick.replace(" ", "_").toLowerCase())
+
             const followUpEmbed = await defaultEmbedBuilder(message + '\nEnvie-o em minha DM para concluir a vinculação!')
-            
+
             await interaction.followUp({
                 ephemeral: true,
                 embeds: [followUpEmbed]
@@ -30,7 +30,7 @@ export default {
 
             const dmChannel = await interaction.user.createDM()
             await dmChannel.send('**Insira seu código:**')
-            
+
             // --- Loop coletor do postCheckLink ---
             let tries = 0
             const maxTries = 3
@@ -64,8 +64,8 @@ export default {
                 } catch (error: any) {
                     tries++
 
-                    if (loadingMsg) 
-                        await loadingMsg.delete().catch(() => {})
+                    if (loadingMsg)
+                        await loadingMsg.delete().catch(() => { })
 
                     if (error instanceof Map || error.message?.includes('time')) {
                         await dmChannel.send('⏰ **Tempo esgotado**\nUse o comando no servidor novamente.')
@@ -87,22 +87,22 @@ export default {
             // Lógica para dar cargo verificado e notificar #verificados
             const member = interaction.member as GuildMember
             const channel = interaction.guild?.channels.cache.get(GUILD_CONFIG.channels.verificados) as TextChannel
-            
-            try{
-                if (member) 
+
+            try {
+                if (member)
                     await member.roles.add(GUILD_CONFIG.roles.verificado)
-                
+
                 if (channel) {
-                await channel.send({
-                    content: `${member} verificou com \`${insertedNick}\``,
-                })
+                    await channel.send({
+                        content: `${member} verificou com \`${insertedNick}\``,
+                    })
                 }
 
-            }catch(error){
+            } catch (error) {
                 console.error("Erro ao processar cargo/aviso de verificação:", error)
             }
-            
-        }catch(error){
+
+        } catch (error) {
             let message
             if (String(error).includes('Usuário não encontrado'))
                 message = `Usuário \`${interaction.options.getString('nick')}\` não encontrado!`

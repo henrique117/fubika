@@ -17,14 +17,14 @@ export default {
         
         try{
             
-            const insertedPlayer = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
+            const insertedPlayer: string = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
             const player = (insertedPlayer === null)
                 ? await getPlayer(interaction.user.id) // Player não foi fornecido
-                : await getPlayer(insertedPlayer) // Player fornecido
+                : await getPlayer(insertedPlayer.replace(" ", "_").toLowerCase()) // Player fornecido
 
             const [ score ] = (insertedPlayer === null)
                 ? await getRecentScore(interaction.user.id) // Player não foi fornecido
-                : await getRecentScore(insertedPlayer) // Player fornecido
+                : await getRecentScore(insertedPlayer.replace(" ", "_").toLowerCase()) // Player fornecido
 
             // Caso o player ainda não possua scores
             if (!score) { 

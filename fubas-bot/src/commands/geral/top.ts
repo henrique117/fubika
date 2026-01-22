@@ -26,7 +26,7 @@ export default {
             const insertedPlayer = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
             const player = (insertedPlayer === null)
                 ? await getPlayer(interaction.user.id) // Player não foi fornecido
-                : await getPlayer(insertedPlayer) // Player fornecido
+                : await getPlayer(insertedPlayer.replace(" ", "_").toLowerCase()) // Player fornecido
 
             const insertedIndex = interaction.options.getNumber('index') // Pega o index fornecido (ou não) no comando
             

@@ -36,6 +36,7 @@ const mapOsuBeatmapsetToDomain = (data: any): IBeatmapset => {
     return {
         beatmapset_id: data.id,
         playcount: data.play_count,
+        artist: data.artist,
         favourite_count: data.favourite_count,
         cover: data.covers?.cover || '',
         thumbnail: data.covers?.['list@2x'] || '',

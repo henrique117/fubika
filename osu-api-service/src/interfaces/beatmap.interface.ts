@@ -1,6 +1,7 @@
 import IScore from "./score.interface";
 
 export default interface IBeatmap {
+    artist: string;
     beatmap_id: number;
     beatmapset_id: number;
     beatmap_md5: string;

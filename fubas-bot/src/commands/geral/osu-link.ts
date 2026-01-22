@@ -18,7 +18,7 @@ export default {
 
         try {
 
-            const insertedNick: string = interaction.options.getString('nick', true) // Pega o nick fornecido no comando
+            const insertedNick = interaction.options.getString('nick', true) // Pega o nick fornecido no comando
             const { message } = await postCreateLink(interaction.user.id, insertedNick.replace(" ", "_").toLowerCase())
 
             const followUpEmbed = await defaultEmbedBuilder(message + '\nEnvie-o em minha DM para concluir a vinculação!')

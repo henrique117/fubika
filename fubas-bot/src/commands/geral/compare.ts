@@ -22,7 +22,7 @@ export default {
         
         try{
             
-            const insertedPlayer: string = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
+            const insertedPlayer = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
             const player = (insertedPlayer === null)
                 ? await getPlayer(interaction.user.id) // Player não foi fornecido
                 : await getPlayer(insertedPlayer.replace(" ", "_").toLowerCase()) // Player fornecido

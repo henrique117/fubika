@@ -13,7 +13,7 @@ const gradeMap: Record<string, string> = {
 }
 
 export function scoreGradeToEmoji(scoreGrade: string): string {
-    return gradeMap[scoreGrade] ?? '';
+    return gradeMap[scoreGrade] ?? ''
 }
 
 export function applyModsToStats(bpm: number, lengthSeconds: number, mods: string) {
@@ -28,7 +28,7 @@ export function applyModsToStats(bpm: number, lengthSeconds: number, mods: strin
     return {
         bpm: Math.round(bpm * speedMultiplier),
         length: Math.round(lengthSeconds / speedMultiplier)
-    };
+    }
 }
 
 
@@ -48,5 +48,5 @@ export function formatTime(seconds: number): string {
 
 
 export function capitalizeFirstLetter(s: string): string {
-    return s.charAt(0).toUpperCase() + s.slice(1);
+    return s.charAt(0).toUpperCase() + s.slice(1)
 }

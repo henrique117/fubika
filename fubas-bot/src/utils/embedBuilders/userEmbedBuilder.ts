@@ -6,7 +6,7 @@ export default async function userEmbedBuilder(player: IPlayer): Promise<{ embed
 
     const options = {
         maximumFractionDigits: 2 
-    };
+    }
 
     const avatarAttachment = new AttachmentBuilder(player.pfp, { name: 'profile.png' })
     const displayLastActivity = player.last_activity === "Online" ? "Online no Fubika" : `Última vez online ${player.last_activity} no Fubika`
@@ -37,7 +37,7 @@ export default async function userEmbedBuilder(player: IPlayer): Promise<{ embed
         .setFooter({ 
             text: displayLastActivity, 
             iconURL: displayLastActivityIcon
-        });
+        })
 
     return { embed, attachment: avatarAttachment }
 }

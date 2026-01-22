@@ -61,17 +61,17 @@ export default async function top200EmbedsBuilder(player: IPlayer): Promise<{ em
             if (tempTitle.length + tempDiff.length + 3 > MAX_TOTAL) {
                 
                 if (tempDiff.length > MAX_DIFF) {
-                    tempDiff = tempDiff.substring(0, MAX_DIFF - 3) + "...";
+                    tempDiff = tempDiff.substring(0, MAX_DIFF - 3) + "..."
                 }
 
-                const spaceForTitle = MAX_TOTAL - (tempDiff.length + 3);
+                const spaceForTitle = MAX_TOTAL - (tempDiff.length + 3)
 
                 if (tempTitle.length > spaceForTitle) {
-                    tempTitle = tempTitle.substring(0, Math.max(0, spaceForTitle - 3)) + "...";
+                    tempTitle = tempTitle.substring(0, Math.max(0, spaceForTitle - 3)) + "..."
                 }
             } // --------------------------
 
-            const fullDisplay = `${tempTitle} [${tempDiff}]`;
+            const fullDisplay = `${tempTitle} [${tempDiff}]`
 
             // Linha 1: #Número Título [Diff] [Stars★]  MUDAR --->  **[fullDisplay](${score.beatmap.url)** V score.star_rating V
             const line1 = `**#${position} ${fullDisplay}** [${score.beatmap.star_rating.toLocaleString('en-US', options)}★]`

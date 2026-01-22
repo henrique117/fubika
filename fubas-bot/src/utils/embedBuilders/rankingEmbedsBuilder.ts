@@ -40,7 +40,7 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
             .setFooter({
                 text: `Page 1/1`, 
                 iconURL: getModeIcon(mode)
-            });
+            })
         embeds.push(embed)
         return embeds
     }

@@ -1,6 +1,6 @@
-import { getPlayer } from "../../services/apiCalls";
+import { getPlayer } from "../../services/apiCalls"
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js"
-import { top200EmbedsBuilder, embedPagination, topIndexEmbedBuilder, defaultEmbedBuilder, noIndexScoresEmbedBuilder } from "../../utils/utils.export";
+import { top200EmbedsBuilder, embedPagination, topIndexEmbedBuilder, defaultEmbedBuilder, noIndexScoresEmbedBuilder } from "../../utils/utils.export"
 
 export default {
     data: new SlashCommandBuilder()
@@ -60,13 +60,13 @@ export default {
             }
 
         }catch(error){
-            let mensagem
+            let message
             if (String(error).includes('Usuário não encontrado')) // Player não encontrado
-                mensagem = `Player \`${interaction.options.getString('player')}\` não encontrado!`
+                message = `Player \`${interaction.options.getString('player')}\` não encontrado!`
             else
-                mensagem = String(error) // Outro erro
+                message = String(error) // Outro erro
 
-            const embed = await defaultEmbedBuilder(mensagem)
+            const embed = await defaultEmbedBuilder(message)
 
             await interaction.editReply({ embeds: [embed] })
         }

@@ -70,5 +70,5 @@ ${scoreGradeToEmoji(score.grade)} **${displayMods}${tab}${score.score.toLocaleSt
         .setFooter({ 
             text: `Mapset by ${beatmap.author_name} • ${capitalizeFirstLetter(beatmap.status)}`,
             iconURL: URLS.std
-        });
+        })
 }

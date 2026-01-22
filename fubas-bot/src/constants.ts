@@ -1,12 +1,22 @@
+export const GUILD_CONFIG = {
+    roles: {
+        verificado: "1450593806079623168"
+    },
+    channels: {
+        verificados: "1460449847898538005",
+        fubas_logs: "1450644955830943877",
+    }
+} as const
+
 export const URLS = {
-    fubikaIcon: 'https://i.imgur.com/F7FEYaG.png',
-    std: 'https://i.imgur.com/jhR2Swe.png',
-    taiko: 'https://i.imgur.com/D0asi8p.png',
-    ctb: 'https://i.imgur.com/FOA0rJP.png',
-    mania: 'https://i.imgur.com/aqP3Yjt.png',
-    greenDot: 'https://www.freepnglogos.com/uploads/dot-png/green-dot-clip-art-clkerm-vector-clip-art-online-10.png',
-    redDot: 'https://www.freepnglogos.com/uploads/dot-png/red-glossy-dot-clip-art-clkerm-vector-clip-art-18.png'
-} as const;
+    fubikaIcon: "https://i.imgur.com/F7FEYaG.png",
+    std: "https://i.imgur.com/jhR2Swe.png",
+    taiko: "https://i.imgur.com/D0asi8p.png",
+    ctb: "https://i.imgur.com/FOA0rJP.png",
+    mania: "https://i.imgur.com/aqP3Yjt.png",
+    greenDot: "https://www.freepnglogos.com/uploads/dot-png/green-dot-clip-art-clkerm-vector-clip-art-online-10.png",
+    redDot: "https://www.freepnglogos.com/uploads/dot-png/red-glossy-dot-clip-art-clkerm-vector-clip-art-18.png"
+} as const
 
 export const EMOJIS = {
     // Ranks
@@ -23,7 +33,7 @@ export const EMOJIS = {
     // Others
     miss: "<:miss:1451028123553497281>",
     bpm: "BPM"
-} as const;
+} as const
 
 export const COLORS = { // Cores utilizadas no fubika
     purple: "#773887",
@@ -33,4 +43,4 @@ export const COLORS = { // Cores utilizadas no fubika
     white: "#FFFFFF",
     black: "#191715",
     brown: "#2C2825"
-} as const;
+} as const

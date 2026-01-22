@@ -7,7 +7,6 @@ export async function getPlayer(id: string): Promise<IPlayer>{
     try{
         const response = await osuApiClient.get(`user/${id}`)
 
-
         return response.data
 
     }catch(error){
@@ -99,7 +98,7 @@ export async function postCheckLink(id: string, code: string) {
     }
 }
 
-export async function postInvite(id: string) {
+export async function postCreateInvite(id: string) {
     
     try{
         const response = await osuApiClient.post(`invite/create`, { id: id })
@@ -109,7 +108,26 @@ export async function postInvite(id: string) {
     }catch(error){
         const message = getApiErrorMessage(error)
 
-        console.log("Erro no postInvite:", message)
+        console.log("Erro no CreateInvite:", message)
+        throw new Error(message)
+    }
+}
+
+export async function postGenerateApiKey(id: string, application_name: string) {
+    
+    try{
+        const response = await osuApiClient.post(`api/key`, {
+            id: id,
+            id_target: id,
+            name: application_name
+        })
+
+        return response.data
+
+    }catch(error){
+        const message = getApiErrorMessage(error)
+
+        console.log("Erro no postGenerateApiKey:", message)
         throw new Error(message)
     }
 }

@@ -29,7 +29,7 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
         .setFooter({ 
             text: 'Mode: osu!',
             iconURL: URLS.std
-        });
+        })
 
         embeds.push(embed)
         return embeds
@@ -46,7 +46,7 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
                 throw new Error("Some player data are missing")
             }
 
-            const position = i + index + 1; // Posição do score
+            const position = i + index + 1 // Posição do score
             const displayMods = score.mods === '' ? '' : `+${score.mods}`
             const displayMiss = score.nmiss > 0 ? `${score.nmiss}${EMOJIS.miss}` : ''
             // Linha 1: #Número Usuário: Score [Combo] Mods  VVV **[${score.player.name}](${score.player.url}):** <--- Mudar
@@ -55,7 +55,7 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
             const line2 = `${scoreGradeToEmoji(score.grade)} **${score.pp.toLocaleString('en-US', options)}pp** • ${score.acc.toLocaleString('en-US', options)}% • ${displayMiss}${time(new Date(score.play_time), TimestampStyles.RelativeTime)}`
             // Junta as duas linhas
             return `${line1}\n${line2}`
-        }).join('\n'); // Junta todos os scores
+        }).join('\n') // Junta todos os scores
         
         const embed = new EmbedBuilder()
         .setAuthor({ 
@@ -69,9 +69,9 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
         .setFooter({ 
             text: `Page ${Math.floor(i / scoresPerPage) + 1}/${Math.ceil(beatmap.scores.length / scoresPerPage)} • Mode: osu!`,
             iconURL: URLS.std
-        });
+        })
         
-        embeds.push(embed); // Adiciona à lista de embeds
+        embeds.push(embed) // Adiciona à lista de embeds
     }
 
     return embeds

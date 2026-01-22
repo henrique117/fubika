@@ -8,7 +8,7 @@ export default {
         .setDescription('Exibe o ranking do servidor')
         .addStringOption(option => 
             option.setName('mode')
-                .setDescription('Nick do player')
+                .setDescription('Modo de jogo')
                 .setRequired(false)
                 .addChoices(
                     { name: 'osu', value: '0' },

@@ -1,6 +1,6 @@
-import { EmbedBuilder, AttachmentBuilder } from "discord.js";
-import { IPlayer } from "../../interfaces/interfaces.export";
-import { URLS, COLORS } from "../../constants";
+import { EmbedBuilder, AttachmentBuilder } from "discord.js"
+import { IPlayer } from "../../interfaces/interfaces.export"
+import { URLS, COLORS } from "../../constants"
 
 export async function defaultEmbedBuilder(description: string): Promise<EmbedBuilder> {
 

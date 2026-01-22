@@ -5,6 +5,7 @@ const client_secret = process.env.OSU_CLIENT_SECRET;
 
 let cachedAccessToken: string | null = null;
 let tokenExpirationTime = 0;
+let tokenRequest: Promise<string> | null = null;
 
 const osuAuthClient = axios.create({
     baseURL: 'https://osu.ppy.sh/oauth/token',
@@ -26,31 +27,37 @@ export const getApiAuthToken = async (): Promise<string> => {
         return cachedAccessToken;
     }
 
-    try {
-        const response = await osuAuthClient.post('', {
-            client_id,
-            client_secret,
-            grant_type: 'client_credentials',
-            scope: 'public'
-        });
+    if (tokenRequest) return tokenRequest;
 
-        const { access_token, expires_in } = response.data;
+    tokenRequest = (async () => {
+        try {
+            const response = await osuAuthClient.post('', {
+                client_id,
+                client_secret,
+                grant_type: 'client_credentials',
+                scope: 'public'
+            });
 
-        cachedAccessToken = access_token;
-        tokenExpirationTime = now + (expires_in * 1000);
+            const { access_token, expires_in } = response.data;
 
-        return access_token;
-    } catch (err) {
-        console.error("❌ Falha ao obter token do osu!:", err);
-        throw err;
-    }
+            cachedAccessToken = access_token;
+            tokenExpirationTime = now + (expires_in * 1000);
+
+            return access_token;
+        } catch (err) {
+            console.error("❌ Falha ao obter token do osu!:", err);
+            throw err;
+        } finally {
+            tokenRequest = null;
+        }
+    })();
+
+    return tokenRequest;
 };
 
 osuApiClient.interceptors.request.use(async (config) => {
     const token = await getApiAuthToken();
-    
     config.headers.Authorization = `Bearer ${token}`;
-    
     return config;
 }, (err) => {
     return Promise.reject(err);

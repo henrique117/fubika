@@ -97,12 +97,12 @@
 }
 
 .diffSR h2 {
-    font-size: 10px;
+    font-size: 15px;
     font-weight: bold;
 }
 
 .diffSR span {
-    font-size: 5px;
+    font-size: 10px;
     color: #FFF600;
 }
 
@@ -128,12 +128,13 @@
 .mapStatus h2 {
     padding: 8.5px 10px;
     text-align: center;
-    background-color: rgba(19, 17, 15, 0.5);
+    background-color: rgba(25, 23, 21, 0.85); /* Figma */
     font-size: 14px;
     font-weight: bold;
     border-radius: 10px;
     letter-spacing: 1px;
     text-transform: capitalize;
+    margin-bottom: 10px;
 }
 
 .mapPreview,
@@ -141,13 +142,19 @@
 .mapGraphs,
 .mapSucess {
     width: 100%;
-    background-color: rgba(19, 17, 15, 0.5);
+    background-color: rgba(25, 23, 21, 0.85); /* Figma */
     border-radius: 10px;
+    margin-bottom: 3px;
 }
 
 .mapPreview,
 .mapNumbers {
-    height: 33px;
+    height: 50px;
+}
+
+.mapNumbers img {
+    width: 18px;
+    height: 18px;
 }
 
 .mapGraphs {
@@ -160,6 +167,33 @@
     box-sizing: border-box;
 }
 
+.mapHeaderInfo {
+    position: absolute;
+    z-index: 2;
+    margin-top: 250px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    /* Para ler bem sobre a cover */
+}
+
+.mapTitle {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+}
+
+.mapArtist {
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
 .statRow {
     display: flex;
     align-items: center;
@@ -169,10 +203,11 @@
 }
 
 .statLabel {
-    width: 77px;
+    width: 50%;
     white-space: nowrap;
+    font-family: 'Caviar Dreams', sans-serif;
     font-weight: bold;
-    font-size: 8px;
+    font-size: 10px;
 }
 
 .progressBarBase {
@@ -193,12 +228,13 @@
 .statValue {
     width: 8px;
     text-align: right;
-    font-size: 8px !important;
+    font-size: 10px !important;
     font-weight: bold;
 }
 
 .mapSucess {
     height: 49px;
+    margin-bottom: 0 !important;
 }
 
 .mapPreview {
@@ -212,7 +248,8 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: center;
+    gap: 10px;
 }
 
 .mapNumbers div {
@@ -220,17 +257,19 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    width: 17%;
+    /* width: 17%; */
 }
 
 .mapNumbers div img {
-    background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);;
+    background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
+    ;
     padding: 2px;
     border-radius: 50%;
 }
 
 .mapNumbers div span {
-    font-size: 8px;
+    font-size: 10px;
+    padding-left: 5px;
     font-weight: bold;
     color: #FFBB00;
 }
@@ -255,7 +294,7 @@
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover {
@@ -298,7 +337,7 @@
 
 .lbHeader {
     width: 100%;
-    height: 350px;
+    height: 290px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -427,7 +466,7 @@
 
 .ppValue,
 .statValue {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--color-branco);
 }
 
@@ -438,7 +477,7 @@
 }
 
 .username {
-    font-size: 10px;
+    font-size: 15px;
 }
 
 .grade {
@@ -449,4 +488,159 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.emptyState {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+    color: var(--color-branco);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .pageWrapper {
+        padding-top: 80px;
+        /* Reduz o topo no mobile */
+    }
+
+    .card {
+        width: 95%;
+        /* Ocupa quase toda a largura */
+    }
+
+    /* Aumentamos a altura para não esmagar os elementos absolutos */
+    .cardBody {
+        height: 580px;
+    }
+
+    /* Estatísticas (Barras e Números) */
+    .mapStats {
+        width: 90%;
+        max-width: none;
+        right: 5%;
+        top: 80px;
+        /* Move para baixo da seleção de diffs */
+        height: auto;
+        gap: 10px;
+    }
+
+    .lbHeader {
+        width: 100%;
+        height: 200px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        margin-bottom: 7px;
+    }
+
+    /* Nome da Música e Artista */
+    .mapHeaderInfo {
+        margin-top: 0;
+        /* Reseta a margem do desktop */
+        bottom: 90px;
+        /* Posiciona acima dos botões */
+        left: 15px;
+        width: 90%;
+    }
+
+    .mapTitle {
+        font-size: 20px;
+        /* Diminui o título para não quebrar */
+    }
+
+    .mapArtist {
+        font-size: 14px;
+    }
+
+    /* Botões de Ação */
+    .buttons {
+        width: 92%;
+        left: 4%;
+        bottom: 15px;
+        gap: 5px;
+    }
+
+    .statLabel {
+        font-family: 'Caviar Dreams', sans-serif;
+        width: 50%;
+        white-space: nowrap;
+        font-weight: normal;
+        font-size: 16px;
+    }
+
+    .progressBarBase {
+        flex: 1;
+        height: 6px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .btnText {
+        display: none;
+        /* Esconde o texto "Download" para caber os ícones em telas pequenas */
+    }
+
+    .btnWide {
+        justify-content: center;
+        /* Centraliza o ícone já que não tem texto */
+    }
+
+    /* --- Ajustes da Leaderboard --- */
+
+    /* Esconde colunas de hits (300, 100, 50, X) que não cabem no mobile */
+    .col300,
+    .col100,
+    .col50,
+    .colX {
+        display: none;
+    }
+
+    .playerRow {
+        gap: 8px;
+        /* Diminui o espaçamento entre colunas */
+        padding-inline: 0px !important;
+    }
+
+    .tableHeader {
+        gap: 8px;
+        /* Diminui o espaçamento entre colunas */
+        padding-inline: 8px !important;
+    }
+
+    .colPlayer {
+        min-width: 80px;
+        /* Garante espaço para o nome */
+    }
+
+    .username {
+        font-size: 12px;
+    }
+
+    .colPP {
+        width: 60px;
+    }
+
+    .colMaxCombo {
+        width: 50px;
+        text-align: left;
+    }
+
+    /* Ajuste dos Gatos decorativos para não cobrirem o texto */
+    .catBody {
+        max-height: 180px;
+        left: 2%;
+    }
+
+    .catHead {
+        max-height: 80px;
+        right: 2%;
+    }
 }

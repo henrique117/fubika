@@ -22,10 +22,10 @@ export default {
         
         try{
             
-            const insertedPlayer = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
+            const insertedPlayer: string = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
             const player = (insertedPlayer === null)
                 ? await getPlayer(interaction.user.id) // Player não foi fornecido
-                : await getPlayer(insertedPlayer) // Player fornecido
+                : await getPlayer(insertedPlayer.replace(" ", "_").toLowerCase()) // Player fornecido
 
             const insertedBeatmap = interaction.options.getString('beatmap', true) // Pega o link ou id do beatmap fornecido no comando
             const beatmap = (insertedBeatmap.includes('/'))

@@ -8,6 +8,7 @@ import { SearchBeatmaps } from "./beatmap.schema";
 
 const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
     return {
+        artist: data.beatmapset?.artist || 'Desconhecido',
         beatmap_id: data.id,
         beatmapset_id: data.beatmapset_id,
         beatmap_md5: data.checksum,
@@ -36,6 +37,7 @@ const mapOsuBeatmapsetToDomain = (data: any): IBeatmapset => {
     return {
         beatmapset_id: data.id,
         playcount: data.play_count,
+        artist: data.artist,
         favourite_count: data.favourite_count,
         cover: data.covers?.cover || '',
         thumbnail: data.covers?.['list@2x'] || '',

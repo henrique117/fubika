@@ -19,6 +19,8 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
     // + OTHERS SCORES ON THE BEATMAP POSTERIORMENTE
     const displayMods = score.mods === '' ? '' : `+${score.mods}`
 
+    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+
     return new EmbedBuilder()
         .setAuthor({ 
             name: `${player.name}: ${player.pp}pp (#${player.rank})`, 
@@ -26,7 +28,7 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
             url: player.url
         }) //                                       Mudar --->  score.star_rating.toLocaleString('en-US', options)}
         .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
-        .setURL(`https://fubika.com.br/beatmap/${beatmap.beatmap_id}`)
+        .setURL(mapUrl)
         .setColor(COLORS.blue)
         .setThumbnail(beatmap.thumbnail)
         .setDescription(`

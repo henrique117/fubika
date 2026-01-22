@@ -33,6 +33,7 @@ export const getLastActivity = (unixTimestamp: number): string => {
 
 const mapOsuApiDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
     return {
+        artist: data.artist || data.beatmapset?.artist || 'Artista desconhecido',
         beatmap_id: data.id,
         beatmapset_id: data.beatmapset_id,
         beatmap_md5: data.checksum,
@@ -69,6 +70,7 @@ const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player
         }
     } catch (error) {
         beatmapData = {
+            artist: row.artist || 'Artista Desconhecido',
             beatmap_id: row.map_id || 0,
             beatmapset_id: row.map_set_id || 0,
             beatmap_md5: row.map_md5,

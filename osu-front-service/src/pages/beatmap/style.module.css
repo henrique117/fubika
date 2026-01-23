@@ -128,7 +128,8 @@
 .mapStatus h2 {
     padding: 8.5px 10px;
     text-align: center;
-    background-color: rgba(25, 23, 21, 0.85); /* Figma */
+    background-color: rgba(25, 23, 21, 0.85);
+    /* Figma */
     font-size: 14px;
     font-weight: bold;
     border-radius: 10px;
@@ -142,7 +143,8 @@
 .mapGraphs,
 .mapSucess {
     width: 100%;
-    background-color: rgba(25, 23, 21, 0.85); /* Figma */
+    background-color: rgba(25, 23, 21, 0.85);
+    /* Figma */
     border-radius: 10px;
     margin-bottom: 3px;
 }
@@ -177,7 +179,6 @@
     flex-direction: column;
     gap: 4px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    /* Para ler bem sobre a cover */
 }
 
 .mapTitle {
@@ -505,26 +506,34 @@
 @media (max-width: 768px) {
     .pageWrapper {
         padding-top: 80px;
-        /* Reduz o topo no mobile */
     }
 
     .card {
         width: 95%;
-        /* Ocupa quase toda a largura */
     }
 
-    /* Aumentamos a altura para não esmagar os elementos absolutos */
     .cardBody {
         height: 580px;
     }
 
-    /* Estatísticas (Barras e Números) */
+    .mapHeaderInfo {
+        position: absolute;
+        z-index: 2;
+        margin-top: 250px;
+        margin-bottom: 0px;
+        margin-left: 10px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        gap: 4px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
     .mapStats {
         width: 90%;
         max-width: none;
         right: 5%;
         top: 80px;
-        /* Move para baixo da seleção de diffs */
         height: auto;
         gap: 10px;
     }
@@ -540,26 +549,50 @@
         margin-bottom: 7px;
     }
 
-    /* Nome da Música e Artista */
     .mapHeaderInfo {
         margin-top: 0;
-        /* Reseta a margem do desktop */
         bottom: 90px;
-        /* Posiciona acima dos botões */
         left: 15px;
         width: 90%;
     }
 
     .mapTitle {
         font-size: 20px;
-        /* Diminui o título para não quebrar */
     }
 
     .mapArtist {
         font-size: 14px;
     }
 
-    /* Botões de Ação */
+    .mapNumbers {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .mapNumbers div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-evenly;
+        /* width: 17%; */
+    }
+
+    .mapNumbers div img {
+        background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
+        padding: 1px;
+        border-radius: 50%;
+    }
+
+    .mapNumbers div span {
+        font-size: 17px;
+        padding-left: 8px;
+        font-weight: bold;
+        color: #FFBB00;
+    }
+
     .buttons {
         width: 92%;
         left: 4%;
@@ -585,17 +618,12 @@
 
     .btnText {
         display: none;
-        /* Esconde o texto "Download" para caber os ícones em telas pequenas */
     }
 
     .btnWide {
         justify-content: center;
-        /* Centraliza o ícone já que não tem texto */
     }
 
-    /* --- Ajustes da Leaderboard --- */
-
-    /* Esconde colunas de hits (300, 100, 50, X) que não cabem no mobile */
     .col300,
     .col100,
     .col50,
@@ -605,19 +633,16 @@
 
     .playerRow {
         gap: 8px;
-        /* Diminui o espaçamento entre colunas */
         padding-inline: 0px !important;
     }
 
     .tableHeader {
         gap: 8px;
-        /* Diminui o espaçamento entre colunas */
-        padding-inline: 8px !important;
+        padding-inline: 20px !important;
     }
 
     .colPlayer {
         min-width: 80px;
-        /* Garante espaço para o nome */
     }
 
     .username {
@@ -633,7 +658,6 @@
         text-align: left;
     }
 
-    /* Ajuste dos Gatos decorativos para não cobrirem o texto */
     .catBody {
         max-height: 180px;
         left: 2%;

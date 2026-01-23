@@ -30,6 +30,8 @@ interface BeatmapProps {
     max_combo: number;
     status: string;
     scores: any[];
+    playcount: number;
+    passcount: number;
     total_length: number;
     count_sliders: number;
     count_circles: number;
@@ -88,16 +90,16 @@ const Beatmap: React.FC = () => {
         if (id) loadAllData();
     }, [id]);
 
-    // O retorno de carregamento agora só acontece no acesso inicial
     if (isInitialLoading && !currentBeatmap) {
         return <WrapperComponent><div>Carregando informações...</div></WrapperComponent>;
     }
 
-    // Fallback de segurança caso algo falhe, mas não bloqueia a troca de diffs
     if (!currentBeatmap) return null;
 
     const durationMinutes = Math.floor(currentBeatmap.total_length / 60);
     const durationSeconds = (currentBeatmap.total_length % 60).toString().padStart(2, '0');
+
+    const SuccessRateValue = currentBeatmap.playcount > 0 ? (currentBeatmap.passcount / currentBeatmap.playcount) * 100 : 0;
 
     return (
         <WrapperComponent>
@@ -180,7 +182,7 @@ const Beatmap: React.FC = () => {
                                 ))}
                             </div>
                             <div className={style.mapSucess}>
-                                <SuccessRate rate={10.8} />
+                                <SuccessRate rate={SuccessRateValue} />
                             </div>
                         </div>
                         <div className={style.buttons}>

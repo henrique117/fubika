@@ -7,8 +7,6 @@ const userRoutes = async (server: FastifyInstance) => {
     server.post('/register', handleUserRegister);
     server.post('/login', handleUserLogin);
 
-    server.get('/userscount', handleGetUsersCount);
-
     server.get('/me', {
         preHandler: [authenticate]
     }, handleGetMe);
@@ -24,6 +22,8 @@ const userRoutes = async (server: FastifyInstance) => {
     server.get<{ Params: GetUserMapInput, Querystring: ScoreQueryModeInput }>('/:id/map/:map', {
         preHandler: [authenticate]
     }, handleUserBestOnMapReq);
+
+    server.get('/count', handleGetUsersCount);
 }
 
 export default userRoutes;

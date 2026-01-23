@@ -5,6 +5,16 @@ import z from "zod";
 
 const toSafeName = (name: string) => name.trim().toLowerCase().replace(/ /g, '_');
 
+export const handleGetUsersCount = async (req: FastifyRequest, res: FastifyReply) => {
+    try {
+        const userCount = await getUsersCount();
+
+        return res.send(userCount);
+    } catch (err) {
+        return res.status(401).send({ error: "Erro ao buscar a contagem de jogadores." });
+    }
+}
+
 export const handleUserLogin = async (req: FastifyRequest<{ Body: LoginUserInput }>, res: FastifyReply) => {
     try {
         const body = req.body;
@@ -165,15 +175,5 @@ export const handleGetMe = async (req: FastifyRequest, res: FastifyReply) => {
 
     } catch (err) {
         return res.status(500).send({ error: "Erro ao buscar perfil." });
-    }
-}
-
-export const handleGetUsersCount = async (req: FastifyRequest, res: FastifyReply) => {
-    try {
-        const userCount = await getUsersCount();
-
-        return res.send(userCount);
-    } catch (err) {
-        return res.status(401).send({ error: "Erro ao buscar a contagem de jogadores." });
     }
 }

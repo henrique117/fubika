@@ -86,7 +86,7 @@ export default {
 
             // Lógica para dar cargo verificado e notificar #verificados
             const member = interaction.member as GuildMember
-            const channel = interaction.guild?.channels.cache.get(GUILD_CONFIG.channels.verificados) as TextChannel
+            const channel = interaction.guild?.channels.cache.get(GUILD_CONFIG.channels.fubas_logs) as TextChannel
 
             try {
                 if (member)

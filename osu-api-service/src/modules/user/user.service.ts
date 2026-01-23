@@ -53,7 +53,11 @@ const mapOsuApiDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
         ar: data.ar,
         cs: data.cs,
         hp: data.drain,
-        max_combo: data.max_combo
+        max_combo: data.max_combo,
+        count_circles: data.count_circles,
+        count_sliders: data.count_sliders,
+        passcount: data.passcount,
+        playcount: data.playcount
     };
 };
 
@@ -90,7 +94,11 @@ const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player
             ar: 0,
             cs: 0,
             hp: 0,
-            max_combo: 0
+            max_combo: 0,
+            count_circles: 0,
+            count_sliders: 0,
+            passcount: 0,
+            playcount: 0
         };
     }
 

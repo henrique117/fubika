@@ -19,10 +19,8 @@
 
 **Fubika** é uma implementação customizada de servidor de osu!, baseada no projeto `bancho.py`. Este servidor foi desenvolvido com o objetivo de oferecer uma experiência estável, performática e com padrões de código modernos para a nossa comunidade privada.
 
-### ⚠️ Fase Beta & Reset Geral
+### ⚠️ Fase Beta
 Atualmente, o servidor encontra-se em **Fase Beta**. O foco está na estabilização das funcionalidades core (login, scores, performance). 
-
-> **Aviso Importante:** Ao final desta fase, haverá um **RESET TOTAL** de todos os dados (contas, ranks e scores) para o lançamento oficial.
 
 ### 🎮 Como Conectar
 Para jogar no Fubika, utilize o cliente oficial do osu! com a seguinte flag no atalho:
@@ -36,10 +34,8 @@ Para jogar no Fubika, utilize o cliente oficial do osu! com a seguinte flag no a
 
 **Fubika** is a customized osu! server implementation based on the `bancho.py` project. This server was developed to provide a stable, high-performance experience with modern coding standards for our private community.
 
-### ⚠️ Beta Phase & General Reset
+### ⚠️ Beta Phase
 The server is currently in **Beta Phase**. Our focus is on stabilizing core functionalities (login, scores, performance).
-
-> **Important Notice:** At the end of this phase, a **FULL RESET** of all data (accounts, ranks, and scores) will occur for the official launch.
 
 ### 🎮 How to Connect
 To play on Fubika, use the official osu! client with the following flag in your shortcut:

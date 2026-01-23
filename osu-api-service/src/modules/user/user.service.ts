@@ -403,3 +403,28 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
         }
     };
 }
+
+export const getUsersCount = async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const fiveMinutesAgo = now - 300;
+
+    const usersCount = await prisma.users.count({
+        where: { 
+            priv: { gt: 0 }
+        }
+    });
+
+    const onlineCount = await prisma.users.count({
+        where: {
+            priv: { gt: 0 },
+            latest_activity: {
+                gte: fiveMinutesAgo
+            }
+        }
+    });
+
+    return {
+        total_users: usersCount,
+        online_users: onlineCount
+    };
+}

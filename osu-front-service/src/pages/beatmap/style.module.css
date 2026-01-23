@@ -73,14 +73,14 @@
 }
 
 .mapdiffs {
-    width: auto;
+    width: fit-content;
     height: 40px;
     border-radius: 10px;
     background-color: rgba(19, 17, 15, 0.5);
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-evenly;
+    /* justify-content: space-evenly; */
     margin-bottom: 5px;
 }
 
@@ -501,6 +501,52 @@
     color: var(--color-branco);
     font-size: 16px;
     font-weight: bold;
+}
+
+.tooltipContainer {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    cursor: help;
+}
+
+.tooltipText {
+    visibility: hidden;
+    background-color: #191715;
+    color: #FFFFFF;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 10;
+    bottom: 140%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Caviar Dreams', sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.tooltipText::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #191715 transparent transparent transparent;
+}
+
+.tooltipContainer:hover .tooltipText {
+    visibility: visible;
+    opacity: 1;
 }
 
 @media (max-width: 768px) {

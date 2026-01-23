@@ -143,21 +143,25 @@ const Beatmap: React.FC = () => {
                             </div>
 
                             <div className={style.mapNumbers}>
-                                <div>
+                                <div className={style.tooltipContainer}>
                                     <img src={clock} alt="" />
                                     <span>{durationMinutes}:{durationSeconds}</span>
+                                    <span className={style.tooltipText}>Duração</span>
                                 </div>
-                                <div>
+                                <div className={style.tooltipContainer}>
                                     <img src={note} alt="" />
                                     <span>{currentBeatmap.bpm}</span>
+                                    <span className={style.tooltipText}>BPM</span>
                                 </div>
-                                <div>
+                                <div className={style.tooltipContainer}>
                                     <img src={sliders} alt="" />
                                     <span>{currentBeatmap.count_sliders || '0'}</span>
+                                    <span className={style.tooltipText}>Sliders</span>
                                 </div>
-                                <div>
+                                <div className={style.tooltipContainer}>
                                     <img src={circles} alt="" />
                                     <span>{currentBeatmap.count_circles || '0'}</span>
+                                    <span className={style.tooltipText}>Notas</span>
                                 </div>
                             </div>
 

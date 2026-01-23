@@ -73,14 +73,14 @@
 }
 
 .mapdiffs {
-    width: auto;
+    width: fit-content;
     height: 40px;
     border-radius: 10px;
     background-color: rgba(19, 17, 15, 0.5);
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-evenly;
+    /* justify-content: space-evenly; */
     margin-bottom: 5px;
 }
 

@@ -29,6 +29,10 @@ const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
         cs: data.cs,
         hp: data.drain,
         max_combo: data.max_combo,
+        count_circles: data.count_circles,
+        count_sliders: data.count_sliders,
+        passcount: data.passcount,
+        playcount: data.playcount,
         scores: []
     };
 };
@@ -175,6 +179,21 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<
     return mapLBRaw.map((row) => mapDatabaseToScoreWithoutMap(row));
 }
 
+const getBeatmapPlaycount = async (md5: string): Promise<number> => {
+    return await prisma.scores.count({
+        where: { map_md5: md5 }
+    });
+};
+
+const getBeatmapPasscount = async (md5: string): Promise<number> => {
+    return await prisma.scores.count({
+        where: { 
+            map_md5: md5,
+            grade: { not: 'F' }
+        }
+    });
+};
+
 export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
     try {
         const response = await osuApiClient.get(`/beatmaps/${input.id}`);
@@ -185,10 +204,16 @@ export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
 
         const bmap = mapOsuBeatmapToDomain(response.data);
         
-        const map_lb = await getBeatmapLB(input.id, bmap.beatmap_md5);
+        const [map_lb, localPlaycount, localPasscount] = await Promise.all([
+            getBeatmapLB(input.id, bmap.beatmap_md5),
+            getBeatmapPlaycount(bmap.beatmap_md5),
+            getBeatmapPasscount(bmap.beatmap_md5)
+        ]);
 
         return { 
             ...bmap,
+            playcount: localPlaycount,
+            passcount: localPasscount,
             scores: map_lb 
         };
         

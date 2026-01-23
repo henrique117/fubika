@@ -12,7 +12,6 @@ export default {
             .setRequired(false)
         ),
 
-
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
         

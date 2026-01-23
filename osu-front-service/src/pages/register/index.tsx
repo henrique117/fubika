@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, Navigate } from 'react-router-dom'
 import style from './style.module.css'
 import { WrapperComponent, ButtonGradientComponent } from '../../components/components.export'
 import { api } from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface FormErrors {
     name?: string
@@ -14,6 +15,15 @@ interface FormErrors {
 
 const Register: React.FC = () => {
     const navigate = useNavigate()
+    const { signIn, signed, loading } = useAuth()
+    
+    if (loading) {
+        return null
+    }
+    
+    if (signed) {
+        return <Navigate to="/" replace />
+    }
 
     const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
@@ -23,7 +33,7 @@ const Register: React.FC = () => {
 
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [isloading, setLoading] = useState(false)
     
     const [errors, setErrors] = useState<FormErrors>({})
 
@@ -210,8 +220,8 @@ const Register: React.FC = () => {
                         Já tem uma conta? Entre agora
                     </Link>
 
-                    <div className={style.entrarButton} onClick={!loading ? handleRegister : undefined}>
-                        <ButtonGradientComponent text={loading ? 'Carregando...' : 'Registrar'} />
+                    <div className={style.entrarButton} onClick={!isloading ? handleRegister : undefined}>
+                        <ButtonGradientComponent text={isloading ? 'Carregando...' : 'Registrar'} />
                     </div>
                     
                 </div>

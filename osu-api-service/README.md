@@ -262,6 +262,10 @@ Busca informações de uma dificuldade específica de um mapa.
 	"cs": 5,
 	"hp": 6,
 	"max_combo": 784,
+	"count_circles": 123,
+	"count_sliders": 123,
+	"playcount": 1,
+	"passcount": 1,
 	"scores": [
 		{
 			"id": 2,

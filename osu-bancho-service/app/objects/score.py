@@ -365,11 +365,11 @@ class Score:
         return pp, stars
 
     async def calculate_status(self) -> None:
-        """Calculate the submission status of a submitted score."""
+        """Calculate the submission status of a submitted score with V1/V2 separation."""
         assert self.player is not None
         assert self.bmap is not None
 
-        if self.bmap.status <= 0:
+        if self.bmap.status < 0:
             self.status = SubmissionStatus.SUBMITTED
             return
 
@@ -391,63 +391,53 @@ class Score:
             status=SubmissionStatus.BEST_V2,
         )
         current_best_v2 = recs_best_v2[0] if recs_best_v2 else None
-        
-        is_better_than_global = False
-        
-        if self.bmap.status == 2:
-            is_better_than_global = not current_best or self.pp > current_best["pp"]
-        else:
-            is_better_than_global = not current_best or self.score > current_best["score"]
 
-        if is_better_than_global:
+        metric = "pp" if self.bmap.status in (2, 3) and self.mode < 4 else "score"
+        
+        new_val = getattr(self, metric)
+        best_val = current_best[metric] if current_best else 0
+        alt_val = current_best_v2[metric] if current_best_v2 else 0
+
+        if new_val > best_val:
             self.status = SubmissionStatus.BEST
             
             if current_best:
-                prev = await Score.from_sql(current_best["id"])
-                self.prev_best = prev 
+                prev_best_obj = await Score.from_sql(current_best["id"])
+                self.prev_best = prev_best_obj 
                 
-                is_prev_v2 = (prev.mods & SCORE_V2_BIT) != 0
+                is_prev_v2 = (prev_best_obj.mods & SCORE_V2_BIT) != 0
                 
-                if is_prev_v2:
-                    if not current_best_v2 or prev.score > current_best_v2["score"]:
-                        prev.status = SubmissionStatus.BEST_V2
-                        
-                        if current_best_v2:
-                            prev_v2_old = await Score.from_sql(current_best_v2["id"])
-                            prev_v2_old.status = SubmissionStatus.SUBMITTED
-                            
-                            await app.state.services.database.execute(
-                                "UPDATE scores SET status = :status WHERE id = :id",
-                                {"status": prev_v2_old.status.value, "id": prev_v2_old.id}
-                            )
-                    else:
-                        prev.status = SubmissionStatus.SUBMITTED
+                if is_prev_v2 != is_current_v2:
+                    prev_best_obj.status = SubmissionStatus.BEST_V2
+                    
+                    if current_best_v2:
+                        await app.state.services.database.execute(
+                            "UPDATE scores SET status = :status WHERE id = :id",
+                            {"status": SubmissionStatus.SUBMITTED.value, "id": current_best_v2["id"]}
+                        )
                 else:
-                    prev.status = SubmissionStatus.SUBMITTED
+                    prev_best_obj.status = SubmissionStatus.SUBMITTED
                 
                 await app.state.services.database.execute(
                     "UPDATE scores SET status = :status WHERE id = :id",
-                    {"status": prev.status.value, "id": prev.id}
+                    {"status": prev_best_obj.status.value, "id": prev_best_obj.id}
                 )
+        else:
+            best_is_v2 = (current_best["mods"] & SCORE_V2_BIT) != 0 if current_best else not is_current_v2
 
-        elif is_current_v2:
-            if not current_best_v2 or self.score > current_best_v2["score"]:
-                self.status = SubmissionStatus.BEST_V2
-                
-                if current_best_v2:
-                    prev_v2 = await Score.from_sql(current_best_v2["id"])
-                    prev_v2.status = SubmissionStatus.SUBMITTED
-                    self.prev_best = prev_v2
+            if is_current_v2 != best_is_v2:
+                if new_val > alt_val:
+                    self.status = SubmissionStatus.BEST_V2
                     
-                    await app.state.services.database.execute(
-                        "UPDATE scores SET status = :status WHERE id = :id",
-                        {"status": prev_v2.status.value, "id": prev_v2.id}
-                    )
+                    if current_best_v2:
+                        await app.state.services.database.execute(
+                            "UPDATE scores SET status = :status WHERE id = :id",
+                            {"status": SubmissionStatus.SUBMITTED.value, "id": current_best_v2["id"]}
+                        )
+                else:
+                    self.status = SubmissionStatus.SUBMITTED
             else:
                 self.status = SubmissionStatus.SUBMITTED
-
-        else:
-            self.status = SubmissionStatus.SUBMITTED
             
 
     def calculate_accuracy(self) -> float:

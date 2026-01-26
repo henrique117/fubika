@@ -1,11 +1,15 @@
 import { FastifyInstance } from "fastify";
-import { handleGetMe, handleGetUsersCount, handleUserBestOnMapReq, handleUserLogin, handleUserRecentReq, handleUserRegister, handleUserReq } from "./user.controller";
+import { handleGetMe, handleGetUsersCount, handlePostPfp, handleUserBestOnMapReq, handleUserLogin, handleUserRecentReq, handleUserRegister, handleUserReq } from "./user.controller";
 import { authenticate } from "../../middlewares/auth.middleware";
-import { GetUserInput, GetUserMapInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
+import { GetUserInput, GetUserMapInput, ScoreQueryInput, ScoreQueryModeInput, PostPfpInput } from "./user.schema";
 
 const userRoutes = async (server: FastifyInstance) => {
     server.post('/register', handleUserRegister);
     server.post('/login', handleUserLogin);
+
+    server.post<{ Body: PostPfpInput }>('/avatar', {
+        preHandler: [authenticate]
+    }, handlePostPfp);
 
     server.get('/me', {
         preHandler: [authenticate]

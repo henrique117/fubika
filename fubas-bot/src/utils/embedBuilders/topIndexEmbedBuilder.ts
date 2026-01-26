@@ -20,7 +20,7 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
     const displayMods = score.mods === '' ? '' : `+${score.mods}`
 
     const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
-    const hidden_link = `[\u200B](https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}#osu/${beatmap.beatmap_id})`
+    const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()
         .setAuthor({ 
@@ -32,11 +32,11 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
         .setURL(mapUrl)
         .setColor(COLORS.blue)
         .setThumbnail(beatmap.thumbnail)
-        .setDescription(`${hidden_link}
+        .setDescription(`
 ### __Personal Best #${index}__
 ${scoreGradeToEmoji(score.grade)} **${displayMods}${tab}${score.score.toLocaleString('en-US')}${tab}${score.acc.toLocaleString('en-US', options)}%**${tab}${time(new Date(score.play_time), TimestampStyles.RelativeTime)}
 **${score.pp.toLocaleString('en-US', options)}PP** • **${score.max_combo}x**/${beatmap.max_combo}x • ${score.nmiss}${EMOJIS.miss}
-\`${formatTime(length)}\` • \`${bpm}\` BPM • \`CS: ${beatmap.cs} AR: ${beatmap.ar} OD: ${beatmap.od} HP: ${beatmap.hp}\`
+\`${formatTime(length)}\` • \`${bpm}\` BPM • \`CS: ${beatmap.cs} AR: ${beatmap.ar} OD: ${beatmap.od} HP: ${beatmap.hp}\`${hidden_link}
         `) // Mudar o campo do PP para **${score.pp.toLocaleString('en-US', options)}**/${score.maxPP.toLocaleString('en-US', options)}PP quando tiver maxPP no objeto score
         .setFooter({ 
             text: `Mapset by ${beatmap.author_name} • ${capitalizeFirstLetter(beatmap.status)}`,

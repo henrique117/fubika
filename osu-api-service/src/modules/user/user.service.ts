@@ -6,10 +6,13 @@ import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
-import { CreateUserInput, LoginUserInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
+import { CreateUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
 import { calculateLevel } from "../../utils/level";
+import path from "path";
+import { pipeline } from "stream/promises";
+import fs from "fs";
 
 const toSafeName = (name: string): string => {
     return name.trim().toLowerCase().replace(/ /g, '_');
@@ -435,4 +438,42 @@ export const getUsersCount = async () => {
         total_users: usersCount,
         online_users: onlineCount
     };
+}
+
+export const setUserPfp = async (data: PostPfpInput) => {
+    const user = await prisma.users.findFirst({
+        where: {
+            discord_id: data.discord_id 
+        }
+    });
+
+    if (!user) {
+        throw new Error("Usuário não encontrado ou não vinculado.");
+    }
+
+    const avatarDir = path.join(process.cwd(), '.data/avatars');
+    
+    if (!fs.existsSync(avatarDir)) {
+        fs.mkdirSync(avatarDir, { recursive: true });
+    }
+
+    const fileName = `${user.id}.png`;
+    const avatarPath = path.join(avatarDir, fileName);
+
+    try {
+        await pipeline(
+            data.avatar.file,
+            fs.createWriteStream(avatarPath)
+        );
+
+        return {
+            id: user.id,
+            name: user.name,
+            avatar_url: `https://a.${process.env.DOMAIN || 'bpy.local'}/${user.id}`
+        };
+
+    } catch (err) {
+        console.error("Erro no processamento do avatar:", err);
+        throw new Error("Falha ao gravar o ficheiro no servidor.");
+    }
 }

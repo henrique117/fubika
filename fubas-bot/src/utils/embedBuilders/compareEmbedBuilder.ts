@@ -23,20 +23,21 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
     })
 
     const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const hidden_link = `[\u200B](https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}#osu/${beatmap.beatmap_id})`
 
     // Caso não haja scores do player no mapa
     if (!score)        
         return new EmbedBuilder()
             .setAuthor({ 
-            name: `${player.name}: ${player.pp.toLocaleString('en-US')}pp (#${player.rank})`, 
-            iconURL: URLS.fubikaIcon,
-            url: player.url
+                name: `${player.name}: ${player.pp.toLocaleString('en-US')}pp (#${player.rank})`, 
+                iconURL: URLS.fubikaIcon,
+                url: player.url
             })
             .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
             .setURL(mapUrl)
             .setColor(COLORS.blue)
             .setThumbnail(beatmap.thumbnail)
-            .setDescription('Este player ainda não possui scores no mapa!')
+            .setDescription(`${hidden_link}Este player ainda não possui scores no mapa!`)
             .setFooter({ 
                 text: `Mapset by ${beatmap.author_name} • ${capitalizeFirstLetter(beatmap.status)}`,
             })

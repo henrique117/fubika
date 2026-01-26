@@ -12,6 +12,9 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
     const embeds: EmbedBuilder[] = []
     const scoresPerPage = 10
 
+    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const hidden_link = `[\u200B](https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}#osu/${beatmap.beatmap_id})`
+
     if (!beatmap.scores) { // Caso não haja o array de scores
         throw new Error("Scores data are missing")
 
@@ -21,11 +24,11 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
         .setAuthor({ 
             name: `${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`,
             iconURL: URLS.fubikaIcon,
-            url: beatmap.url
+            url: mapUrl
         })
         .setColor(COLORS.blue)
         .setThumbnail(beatmap.thumbnail)
-        .setDescription('Ainda não há scores nesse beatmap!')
+        .setDescription(`${hidden_link}Ainda não há scores nesse beatmap!`)
         .setFooter({ 
             text: 'Mode: osu!',
             iconURL: URLS.std
@@ -61,7 +64,7 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
         .setAuthor({ 
             name: `${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`,
             iconURL: URLS.fubikaIcon,
-            url: beatmap.url
+            url: mapUrl
         })
         .setColor(COLORS.blue)
         .setThumbnail(beatmap.thumbnail)

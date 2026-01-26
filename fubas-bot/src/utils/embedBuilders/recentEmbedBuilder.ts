@@ -14,6 +14,7 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
 
     const beatmap = score.beatmap
     const { bpm, length } = applyModsToStats(beatmap.bpm, beatmap.total_length, score.mods)
+    
     // DEFINIR DEPOIS COMO VÃO SER CALCULADOS CS, AR, OD, HP DO SCORE
     const scoreRankPosition = player.top_200
         ? player.top_200.filter(s => Number(s.pp) > Number(score.pp)).length + 1
@@ -28,6 +29,7 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
         : `${score.pp.toLocaleString('en-US', options)}PP`
 
     const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const hidden_link = `[\u200B](https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}#osu/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()
         .setAuthor({
@@ -39,7 +41,7 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
         .setURL(mapUrl)
         .setColor(COLORS.blue)
         .setThumbnail(beatmap.thumbnail)
-        .setDescription(`
+        .setDescription(`${hidden_link}
 ${displayPersonalBest}
 ${scoreGradeToEmoji(score.grade)} **${displayMods}${tab}${score.score.toLocaleString('en-US')}${tab}${score.acc.toLocaleString('en-US', options)}%**${tab}${time(new Date(score.play_time), TimestampStyles.RelativeTime)}
 **${displayPP}** • **${score.max_combo}x**/${beatmap.max_combo}x • ${score.nmiss}${EMOJIS.miss}

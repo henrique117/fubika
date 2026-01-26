@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { createUser, getUserBestOnMap, getUserRecent, getUsersCount, getUserStats, loginUser, setUserPfp } from "./user.service";
-import { CreateUserInput, GetUserInput, GetUserMapInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput, scoreQueryModeSchema, scoreQuerySchema } from "./user.schema";
+import { CreateUserInput, GetUserInput, GetUserMapInput, LoginUserInput, PostPfpInput, postPfpSchema, ScoreQueryInput, ScoreQueryModeInput, scoreQueryModeSchema, scoreQuerySchema } from "./user.schema";
 import z from "zod";
 
 const toSafeName = (name: string) => name.trim().toLowerCase().replace(/ /g, '_');
@@ -179,11 +179,30 @@ export const handleGetMe = async (req: FastifyRequest, res: FastifyReply) => {
 }
 
 export const handlePostPfp = async (req: FastifyRequest<{ Body: PostPfpInput }>, res: FastifyReply) => {
-    try {
-        const userPfp = await setUserPfp(req.body);
+    const data = await req.file();
+    
+    if (!data) {
+        return res.status(400).send({ error: "Nenhum arquivo enviado." });
+    }
 
-        return res.status(501).send(userPfp);
-    } catch (err) {
+    try {
+        const payload = {
+            discord_id: (data.fields.discord_id as any)?.value,
+            avatar: data
+        };
+
+        const validatedData = postPfpSchema.parse(payload);
+
+        const userPfp = await setUserPfp(validatedData);
+
+        return res.status(200).send(userPfp);
+
+    } catch (err: any) {
+        if (err instanceof z.ZodError) {
+            return res.status(400).send({ error: err.issues[0].message });
+        }
+
+        console.error(err);
         return res.status(500).send({ error: "Erro ao salvar imagem." });
     }
 }

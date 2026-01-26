@@ -20,13 +20,19 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.DirectMessageReactions
+        GatewayIntentBits.DirectMessageReactions,
+        GatewayIntentBits.GuildMembers
     ]
 })
 
 client.commands = new Collection()
 
 const foldersPath = path.join(__dirname, 'commands')
+if (!fs.existsSync(foldersPath)) {
+    console.error(`[ERRO CRÍTICO] A pasta 'commands' não foi encontrada em: ${foldersPath}`)
+    process.exit(1)
+}
+
 const allItems = fs.readdirSync(foldersPath)
 
 const commandFolders = allItems.filter(item => {
@@ -40,13 +46,25 @@ for (const folder of commandFolders) {
     
     for (const file of commandFiles) {
         const filePath = path.join(commandsPath, file)
-        const command = require(filePath).default
+        
+        const importedFile = require(filePath)
 
+        // 2. Tentamos pegar a propriedade .default (padrão TS/ESM) OU o próprio objeto (CommonJS)
+        const command = importedFile.default || importedFile
+
+        // 3. Verificação de Segurança: Se command for null/undefined, pulamos para o próximo
+        if (!command) {
+            console.warn(`[SKIP] O arquivo ${file} foi ignorado pois não exportou nada válido.`)
+            continue 
+        }
+
+        // 4. Agora é seguro usar o operador 'in'
         if ('data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command)
         } else {
-            console.warn(`[AVISO] O comando em ${filePath} não tem "data" ou "execute".`)
+            console.warn(`[AVISO] O comando em ${filePath} está faltando a propriedade "data" ou "execute".`)
         }
+        // --- FIM DA CORREÇÃO ---
     }
 }
 

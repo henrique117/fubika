@@ -1,4 +1,4 @@
-import { EmbedBuilder, AttachmentBuilder } from "discord.js"
+import { EmbedBuilder, AttachmentBuilder, Attachment } from "discord.js"
 import { IPlayer } from "../../interfaces/interfaces.export"
 import { URLS, COLORS } from "../../constants"
 
@@ -45,4 +45,17 @@ export async function noIndexScoresEmbedBuilder(player: IPlayer): Promise<{ embe
         .setDescription('Este player ainda não possui scores no index!')
 
     return { embed, attachment: avatarAttachment }
+}
+
+export async function changeAvatarEmbedBuilder(attachment: Attachment) {
+    
+    return new EmbedBuilder()
+        .setAuthor({
+            name: 'osu! Fubika Server',
+            iconURL: URLS.fubikaIcon
+        })
+        .setColor(COLORS.blue)
+        .setThumbnail(attachment.url)
+        .setDescription('A sua foto de perfil foi alterada com sucesso.')
+        .setFooter({ text: 'Reinicie o jogo para visualizar a alteração!'})
 }

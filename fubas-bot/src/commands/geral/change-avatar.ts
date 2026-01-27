@@ -17,11 +17,18 @@ export default {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] })
 
         const attachment = interaction.options.getAttachment('imagem') as Attachment
+        const MAX_SIZE = 2 * 1024 * 1024;
 
         if (!attachment.contentType?.startsWith('image/')) {
-
             const embed = await defaultEmbedBuilder('O arquivo enviado não é uma imagem válida!')
             await interaction.editReply({ embeds: [embed] })
+            return
+        }
+
+        if (attachment.size > MAX_SIZE) {
+            const embed = await defaultEmbedBuilder(`A imagem é muito grande! O limite é de **2MB**. (A sua tem ${(attachment.size / (1024 * 1024)).toFixed(2)}MB)`)
+            await interaction.editReply({ embeds: [embed] })
+            return
         }
 
         try {

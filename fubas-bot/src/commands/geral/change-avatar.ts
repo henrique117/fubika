@@ -1,5 +1,5 @@
 import { postChangeAvatar } from "../../services/apiCalls"
-import { SlashCommandBuilder, ChatInputCommandInteraction, Attachment, EmbedBuilder, MessageFlags, Utils } from "discord.js"
+import { SlashCommandBuilder, ChatInputCommandInteraction, Attachment, MessageFlags } from "discord.js"
 import axios from "axios"
 import { defaultEmbedBuilder, changeAvatarEmbedBuilder } from "../../utils/utils.export"
 
@@ -13,7 +13,7 @@ export default {
                 .setRequired(true)
         ),
 
-    async execute(interaction: ChatInputCommandInteraction) {
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] })
 
         const attachment = interaction.options.getAttachment('imagem') as Attachment
@@ -21,7 +21,7 @@ export default {
         if (!attachment.contentType?.startsWith('image/')) {
 
             const embed = await defaultEmbedBuilder('O arquivo enviado não é uma imagem válida!')
-            return interaction.editReply({ embeds: [embed] })
+            await interaction.editReply({ embeds: [embed] })
         }
 
         try {

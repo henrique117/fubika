@@ -7,6 +7,7 @@ import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./module
 import prisma from "./utils/prisma";
 import fastifyJwt from "@fastify/jwt";
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
 import rankingRoutes from "./modules/ranking/ranking.route";
 import apikeyRoutes from "./modules/apikey/apikey.route";
 
@@ -27,6 +28,16 @@ server.get('/ping', async () => {
 });
 
 async function main() {
+    await server.register(multipart, {
+        limits: {
+            fieldNameSize: 100,
+            fieldSize: 100,
+            fields: 10,
+            fileSize: 2000000,
+            files: 1,
+        },
+    });
+
     await server.register(fastifyJwt, {
         secret: process.env.JWT_SECRET || 'aaabbbccc'
     });

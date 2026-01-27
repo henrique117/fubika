@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import asyncio
 import functools
 import hashlib
 from datetime import datetime
 from enum import IntEnum
 from enum import unique
+from logging import log
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -17,6 +19,7 @@ from app.constants.mods import Mods
 from app.objects.beatmap import Beatmap
 from app.repositories import scores as scores_repo
 from app.usecases.performance import ScoreParams
+from app.utils import Ansi
 from app.utils import escape_enum
 from app.utils import pymysql_encode
 
@@ -293,50 +296,106 @@ class Score:
     """Methods to calculate internal data for a score."""
 
     async def calculate_placement(self) -> int:
-        assert self.bmap is not None
+        """Calcula a posição no ranking e dispara o trigger de Snipe/Top1."""
+        if not self.bmap:
+            return 0
 
-        SCORE_V2_BIT = 536870912
-        
-        am_i_v2 = (self.mods & SCORE_V2_BIT) != 0
+        try:
+            # Bitwise do ScoreV2
+            SCORE_V2_BIT = 536870912
+            am_i_v2 = (self.mods & SCORE_V2_BIT) != 0
 
-        if self.mode >= GameMode.RELAX_OSU and self.bmap.status != 2:
-            scoring_metric = "pp"
-            score = self.pp
-        else:
-            scoring_metric = "score" 
-            score = self.score
+            # Define a métrica (PP para Ranked Relax/Autopilot, Score para o resto)
+            if self.mode >= GameMode.RELAX_OSU and self.bmap.status == 2:
+                scoring_metric = "pp"
+                score_val = float(self.pp)
+            else:
+                scoring_metric = "score" 
+                score_val = int(self.score)
 
-        query = [
-            f"SELECT COUNT(*) AS c FROM scores s ",
-            "INNER JOIN users u ON u.id = s.userid ",
-            "WHERE s.map_md5 = :map_md5 AND s.mode = :mode ",
-            "AND u.priv & 1 ",
-            f"AND s.{scoring_metric} > :score "
-        ]
-        
-        params = {
-            "map_md5": self.bmap.md5,
-            "mode": self.mode,
-            "score": score,
-        }
+            # Query base para contar quem está acima
+            query = (
+                f"SELECT COUNT(*) FROM scores s "
+                "INNER JOIN users u ON u.id = s.userid "
+                "WHERE s.map_md5 = :map_md5 AND s.mode = :mode "
+                "AND u.priv & 1 AND s.status IN (2, 3) "
+                f"AND s.{scoring_metric} > :score "
+            )
+            
+            params = {
+                "map_md5": self.bmap.md5,
+                "mode": int(self.mode),
+                "score": score_val,
+                "v2_mod": SCORE_V2_BIT
+            }
 
-        if am_i_v2:
-            query.append("AND s.status IN (2, 3)") 
-            query.append("AND (s.mods & :v2_mod) != 0") 
-            params["v2_mod"] = SCORE_V2_BIT
-        else:
-            query.append("AND s.status = 2")
+            # Filtro de Leaderboard (V1 ou V2)
+            if am_i_v2:
+                query += " AND (s.mods & :v2_mod) != 0"
+            else:
+                query += " AND (s.mods & :v2_mod) = 0"
 
-        full_query = "".join(query)
+            # Executa a contagem
+            res = await app.state.services.database.fetch_val(query, params)
+            num_better_scores = int(res) if res is not None else 0
+            
+            placement = num_better_scores + 1
+            
+            # Log de Debug para o console
+            log(f"[Rank] {self.player.name} pegou #{placement} no mapa {self.bmap.id}", Ansi.LBLUE)
 
-        num_better_scores: int | None = await app.state.services.database.fetch_val(
-            full_query,
-            params,
-            column=0,
-        )
-        
-        assert num_better_scores is not None
-        return num_better_scores + 1
+            # --- GATILHO DE SNIPE / TOP 1 ---
+            if placement < 2:
+                # Criamos a task para não travar o fim da música do jogador
+                asyncio.create_task(self.process_snipe_announcement(am_i_v2, scoring_metric, SCORE_V2_BIT))
+
+            return placement
+
+        except Exception as e:
+            log(f"Erro crítico no calculate_placement: {str(e)}", Ansi.LRED)
+            return 0 # Se tudo falhar, retorna 0 (rank não definido)
+
+    async def process_snipe_announcement(self, am_i_v2: bool, metric: str, v2_bit: int):
+        """Busca a vítima e dispara o evento para o Redis."""
+        try:
+            v2_op = "!=" if am_i_v2 else "="
+            
+            # Buscamos os dados da vítima (o antigo #1)
+            victim_query = f"""
+                SELECT s.userid, u.name, u.discord_id, s.pp, s.score, s.acc, s.mods
+                FROM scores s
+                JOIN users u ON u.id = s.userid
+                WHERE s.map_md5 = :map_md5 AND s.mode = :mode
+                AND s.status IN (2, 3)
+                AND (s.mods & :v2_mod) {v2_op} 0
+                AND s.userid != :current_user
+                ORDER BY s.{metric} DESC LIMIT 1
+            """
+            
+            victim = await app.state.services.database.fetch_one(
+                victim_query,
+                {
+                    "map_md5": self.bmap.md5,
+                    "mode": int(self.mode),
+                    "v2_mod": v2_bit,
+                    "current_user": self.player.id
+                }
+            )
+
+            # Envia para a função central do Redis em services.py
+            await app.state.services.trigger_top_score_event(
+                score=self,
+                previous_top_1_id=victim["userid"] if victim else None,
+                victim_name=victim["name"] if victim else None,
+                victim_discord_id=victim["discord_id"] if victim else None,
+                victim_score=victim["score"] if victim else 0,
+                victim_pp=float(victim["pp"]) if victim else 0.0,
+                victim_acc=float(victim["acc"]) if victim else 0.0,
+                victim_mods=int(victim["mods"]) if victim else 0
+            )
+
+        except Exception as e:
+            log(f"Falha ao anunciar top score: {e}", Ansi.LRED)
 
     def calculate_performance(self, beatmap_id: int) -> tuple[float, float]:
         """Calculate PP and star rating for our score."""

@@ -5,6 +5,7 @@ export const GUILD_CONFIG = {
     channels: {
         verificados: "1460449847898538005",
         fubas_logs: "1450644955830943877",
+        top_scores: "876101363443073037"
     }
 } as const
 

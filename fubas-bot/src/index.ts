@@ -4,6 +4,7 @@ import { Client, Collection, GatewayIntentBits } from 'discord.js'
 import * as dotenv from 'dotenv'
 import path from 'path'
 import fs from 'fs'
+import { startRedisListener } from './services/redisClient'
 
 dotenv.config()
 
@@ -101,8 +102,14 @@ client.on('interactionCreate', async interaction => {
     }
 })
 
-client.once('clientReady', () => {
+client.once('clientReady', async () => {
     console.log(`Bot online como ${client.user?.tag}`)
+
+    try {
+        await startRedisListener(client)
+    } catch (err) {
+        console.error("❌ Falha ao iniciar o Redis Listener:", err)
+    }
 })
 
 client.login(process.env.TOKEN)

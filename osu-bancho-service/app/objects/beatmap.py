@@ -8,6 +8,7 @@ from datetime import datetime
 from datetime import timedelta
 from enum import IntEnum
 from enum import unique
+import json
 from pathlib import Path
 from typing import Any
 from typing import TypedDict
@@ -42,28 +43,69 @@ class BeatmapApiResponse(TypedDict):
 
 @retry(reraise=True, stop=stop_after_attempt(3))
 async def api_get_beatmaps(**params: Any) -> BeatmapApiResponse:
-    """\
-    Fetch data from the osu!api with a beatmap's md5.
-
-    Optionally use osu.direct's API if the user has not provided an osu! api key.
     """
-    if app.settings.DEBUG:
-        log(f"Doing api (getbeatmaps) request {params}", Ansi.LMAGENTA)
-
+    Busca dados do beatmap na osu!api oficial ou em um mirror.
+    Adicionado logs de debug para identificar falhas de conexão ou credenciais.
+    """
     if app.settings.OSU_API_KEY:
-        # https://github.com/ppy/osu-api/wiki#apiget_beatmaps
-        url = "https://old.ppy.sh/api/get_beatmaps"
-        params["k"] = str(app.settings.OSU_API_KEY)
+        # Uso da API Oficial
+        params["k"] = app.settings.OSU_API_KEY
+        url = "https://osu.ppy.sh/api/get_beatmaps"
+        source = "osu!api oficial"
     else:
-        # https://osu.direct/doc
-        url = "https://osu.direct/api/get_beatmaps"
+        # Uso do Mirror (Ex: Chimu, Sayobot)
+        url = app.settings.MIRROR_SEARCH_ENDPOINT
+        source = f"Mirror ({url})"
 
-    response = await app.state.services.http_client.get(url, params=params)
-    response_data = response.json()
-    if response.status_code == 200 and response_data:  # (data may be [])
-        return {"data": response_data, "status_code": response.status_code}
+    if app.settings.DEBUG:
+        log(f"Solicitando dados de mapa ao {source}: {params}", Ansi.LMAGENTA)
 
-    return {"data": None, "status_code": response.status_code}
+    async with httpx.AsyncClient() as client:
+        try:
+            # Timeout de 10 segundos para não travar o Bancho
+            response = await client.get(url, params=params, timeout=10.0)
+            
+            # --- DIAGNÓSTICO DE RESPOSTA ---
+            if response.status_code != 200:
+                log(f"[API Error] {source} retornou status {response.status_code}", Ansi.LRED)
+                if response.status_code == 401:
+                    log("Causa Provável: Sua OSU_API_KEY é inválida ou expirou.", Ansi.LYELLOW)
+                return {"data": None, "status_code": response.status_code}
+
+            if not response.content:
+                log(f"[API Warning] {source} retornou um corpo vazio.", Ansi.LYELLOW)
+                return {"data": None, "status_code": 204}
+
+            try:
+                response_data = response.json()
+            except json.JSONDecodeError:
+                log(f"[API Error] {source} enviou dados que não são JSON. Verifique a URL do Mirror.", Ansi.LRED)
+                return {"data": None, "status_code": 502} 
+            
+            # Se a resposta for uma lista vazia, o mapa não existe na base da osu!
+            if not response_data:
+                log(f"[API info] Mapa não encontrado no {source} (Query: {params})", Ansi.LCYAN)
+                return {"data": None, "status_code": 404}
+
+            # Normalização dos dados (osu!api retorna lista, alguns mirrors retornam dict)
+            if isinstance(response_data, list):
+                return {"data": response_data, "status_code": 200}
+            
+            if isinstance(response_data, dict):
+                # Se for o formato do Chimu/Sayobot que encapsula em 'data' ou 'results'
+                inner_data = response_data.get("data") or response_data.get("results")
+                if inner_data:
+                    return {"data": inner_data if isinstance(inner_data, list) else [inner_data], "status_code": 200}
+                return {"data": [response_data], "status_code": 200}
+
+        except httpx.ConnectError:
+            log(f"[API Error] Não foi possível conectar ao {source}. Verifique sua internet ou firewall.", Ansi.LRED)
+            return {"data": None, "status_code": 503}
+        except Exception as e:
+            log(f"[API Error] Falha inesperada: {str(e)}", Ansi.LRED)
+            return {"data": None, "status_code": 500}
+
+    return {"data": None, "status_code": 500}
 
 
 @retry(reraise=True, stop=stop_after_attempt(3))

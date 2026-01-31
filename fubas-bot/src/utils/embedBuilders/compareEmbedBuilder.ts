@@ -50,8 +50,13 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
     // DEFINIR DEPOIS COMO VÃO SER CALCULADOS CS, AR, OD, HP DO SCORE
     // + OTHERS SCORES ON THE BEATMAP POSTERIORMENTE
 
-    const scoreTopPlayRanking = (player.top_200?.findIndex(s => s.id === score.id) ?? -1) + 1
-    const displayPersonalBest = scoreTopPlayRanking <= 200 && score.grade != 'F' ? `### __Personal Best #${scoreTopPlayRanking}__` : ''
+    const scoreRankPosition = player.top_200
+        ? player.top_200.filter(s => Number(s.pp) > Number(score.pp)).length + 1
+        : 0
+    const displayIfRanked = beatmap.status !== 'ranked' ? ' (if ranked)' : ''
+    const displayPersonalBest = scoreRankPosition <= 100 && score.grade !== 'F'
+        ? `### __Personal Best #${scoreRankPosition}${displayIfRanked}__`
+        : ''
     const displayMods = score.mods === '' ? '' : `+${score.mods}`
 
     return new EmbedBuilder()
@@ -61,7 +66,7 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
             url: player.url
         }) //                                       Mudar --->  score.star_rating.toLocaleString('en-US', options)}
         .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
-        .setURL(beatmap.url)
+        .setURL(mapUrl)
         .setColor(COLORS.blue)
         .setThumbnail(beatmap.thumbnail)
         .setDescription(`

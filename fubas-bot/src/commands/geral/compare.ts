@@ -32,12 +32,12 @@ export default {
             let beatmap
             if (insertedBeatmap === null) {
                 
-                const beatmapId = await fetchLastBeatmapId(interaction.channel)
+                const channelBeatmapId = await fetchLastBeatmapId(interaction.channel)
 
-                if (beatmapId === null)
-                    throw new Error("Mapa não encontrado no canal")
+                if (channelBeatmapId === null)
+                    throw new Error('Mapa não encontrado no canal')
 
-                beatmap = await getBeatmap(beatmapId)
+                beatmap = await getBeatmap(channelBeatmapId)
 
             } else {
 
@@ -57,7 +57,7 @@ export default {
             else if (String(error).includes('Not Found')) // Beatmap não encontrado
                 message = 'Beatmap não encontrado!'
             else if (String(error).includes('Mapa não encontrado no canal'))
-                message = 'Não foi encontrado nenhum mapa recente no canal!\nForneça um link ou apenas o id do mapa.'
+                message = 'Não foi encontrado nenhum mapa recente no canal!\nForneça o link ou apenas o id do mapa.'
             else
                 message = String(error) // Outro erro
 

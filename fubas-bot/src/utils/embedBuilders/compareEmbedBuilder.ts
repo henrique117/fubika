@@ -54,7 +54,7 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
         ? player.top_200.filter(s => Number(s.pp) > Number(score.pp)).length + 1
         : 0
     const displayIfRanked = beatmap.status !== 'ranked' ? ' (if ranked)' : ''
-    const displayPersonalBest = scoreRankPosition <= 100 && score.grade !== 'F'
+    const displayPersonalBest = scoreRankPosition <= 50 && score.grade !== 'F'
         ? `### __Personal Best #${scoreRankPosition}${displayIfRanked}__`
         : ''
     const displayMods = score.mods === '' ? '' : `+${score.mods}`

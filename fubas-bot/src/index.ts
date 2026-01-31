@@ -49,60 +49,33 @@ for (const folder of commandFolders) {
         
         const importedFile = require(filePath)
 
-        // 2. Tentamos pegar a propriedade .default (padrão TS/ESM) OU o próprio objeto (CommonJS)
         const command = importedFile.default || importedFile
 
-        // 3. Verificação de Segurança: Se command for null/undefined, pulamos para o próximo
         if (!command) {
             console.warn(`[SKIP] O arquivo ${file} foi ignorado pois não exportou nada válido.`)
             continue 
         }
 
-        // 4. Agora é seguro usar o operador 'in'
         if ('data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command)
         } else {
             console.warn(`[AVISO] O comando em ${filePath} está faltando a propriedade "data" ou "execute".`)
         }
-        // --- FIM DA CORREÇÃO ---
     }
 }
 
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isChatInputCommand()) return
+const eventsPath = path.join(__dirname, 'events')
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'))
 
-    const command = client.commands.get(interaction.commandName)
+for (const file of eventFiles) {
+    const filePath = path.join(eventsPath, file)
+    const event = require(filePath).default || require(filePath)
 
-    if (!command) {
-        console.error(`Nenhum comando correspondente a ${interaction.commandName} foi encontrado.`)
-        return
+    if (event.once) {
+        client.once(event.name, (...args) => event.execute(...args))
+    } else {
+        client.on(event.name, (...args) => event.execute(...args))
     }
-
-    try {
-        await command.execute(interaction)
-    } catch (error) {
-        console.error(`Erro ao executar comando ${interaction.commandName}:`, error)
-        
-        const errorPayload = { content: 'Houve um erro ao executar esse comando!', ephemeral: true }
-
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp(errorPayload).catch(e => console.error("Erro no followUp:", e))
-        } else {
-            try {
-                await interaction.reply(errorPayload)
-            } catch (err: any) {
-                if (err.code === 40060) {
-                    await interaction.followUp(errorPayload).catch(e => console.error("Erro no followUp de recuperação:", e))
-                } else {
-                    console.error("Erro no reply:", err)
-                }
-            }
-        }
-    }
-})
-
-client.once('clientReady', () => {
-    console.log(`Bot online como ${client.user?.tag}`)
-})
+}
 
 client.login(process.env.TOKEN)

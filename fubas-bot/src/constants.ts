@@ -33,7 +33,7 @@ export const EMOJIS = {
 
     // Others
     miss: "<:miss:1451028123553497281>",
-    bpm: "BPM"
+    bpm: "<:bpm:1454506365614555240>"
 } as const
 
 export const COLORS = { // Cores utilizadas no fubika

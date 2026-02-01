@@ -304,18 +304,21 @@ class Score:
             SCORE_V2_BIT = 536870912
             am_i_v2 = (self.mods & SCORE_V2_BIT) != 0
 
-            if self.mode >= GameMode.RELAX_OSU and self.bmap.status == 2:
+            # Para mapas Unranked (status < 2), PP geralmente é 0. 
+            # Forçamos a métrica 'score' para mapas que não dão PP.
+            if self.mode >= GameMode.RELAX_OSU and self.bmap.status >= 2:
                 scoring_metric = "pp"
                 score_val = float(self.pp)
             else:
                 scoring_metric = "score" 
                 score_val = int(self.score)
 
+            # REMOVIDO: AND s.status IN (2, 3) para aceitar qualquer mapa
             query = [
                 f"SELECT COUNT(*) FROM scores s ",
                 "INNER JOIN users u ON u.id = s.userid ",
                 "WHERE s.map_md5 = :map_md5 AND s.mode = :mode ",
-                "AND u.priv & 1 AND s.status IN (2, 3) ",
+                "AND u.priv & 1 ", # Mantemos apenas para não contar players banidos
                 f"AND s.{scoring_metric} > :score "
             ]
             
@@ -341,6 +344,7 @@ class Score:
             log(f"[Rank] {self.player.name} pegou #{placement} no mapa {self.bmap.id}", Ansi.LBLUE)
 
             if placement == 1:
+                # Dispara a lógica de Snipe para QUALQUER mapa agora
                 asyncio.create_task(self.process_top_score_logic(am_i_v2, scoring_metric, SCORE_V2_BIT))
 
             return placement
@@ -354,12 +358,12 @@ class Score:
         try:
             v2_op = "!=" if am_i_v2 else "="
             
+            # REMOVIDO: AND s.status IN (2, 3)
             victim_query = f"""
                 SELECT s.userid, u.name, u.discord_id, s.pp, s.score, s.acc, s.mods
                 FROM scores s
                 JOIN users u ON u.id = s.userid
                 WHERE s.map_md5 = :map_md5 AND s.mode = :mode
-                AND s.status IN (2, 3)
                 AND (s.mods & :v2_mod) {v2_op} 0
                 AND s.userid != :current_user
                 ORDER BY s.{metric} DESC LIMIT 1
@@ -375,8 +379,18 @@ class Score:
                 }
             )
 
+            # Garantimos que passamos o discord_id do player atual (atacante)
+            # Se o objeto player não tiver discord_id carregado, tentamos buscar no banco ou enviamos None
+            player_discord_id = getattr(self.player, 'discord_id', None)
+            if not player_discord_id:
+                # Busca rápida no banco caso o objeto em memória esteja incompleto
+                player_discord_id = await app.state.services.database.fetch_val(
+                    "SELECT discord_id FROM users WHERE id = :id", {"id": self.player.id}
+                )
+
             await app.state.services.trigger_top_score_event(
                 score=self,
+                player_discord_id=player_discord_id,
                 previous_top_1_id=victim["userid"] if victim else None,
                 victim_name=victim["name"] if victim else None,
                 victim_discord_id=victim["discord_id"] if victim else None,

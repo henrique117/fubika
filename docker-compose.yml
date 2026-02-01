@@ -138,6 +138,9 @@ services:
       - TOKEN=${TOKEN}
       - CLIENT_ID=${CLIENT_ID}
       - API_KEY=${API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASS=${REDIS_PASS}
 
 volumes:
   data:

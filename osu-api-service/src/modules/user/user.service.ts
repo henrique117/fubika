@@ -451,7 +451,7 @@ export const setUserPfp = async (data: PostPfpInput) => {
         throw new Error("Usuário não encontrado ou não vinculado.");
     }
 
-    const avatarDir = path.join(process.cwd(), '.data/avatars');
+    const avatarDir = path.join(process.cwd(), '.data', 'avatars');
     
     if (!fs.existsSync(avatarDir)) {
         fs.mkdirSync(avatarDir, { recursive: true });
@@ -466,10 +466,13 @@ export const setUserPfp = async (data: PostPfpInput) => {
             fs.createWriteStream(avatarPath)
         );
 
+        const now = new Date();
+        fs.utimesSync(avatarPath, now, now);
+
         return {
             id: user.id,
             name: user.name,
-            avatar_url: `https://a.${process.env.DOMAIN || 'bpy.local'}/${user.id}`
+            avatar_url: `https://a.${process.env.DOMAIN || 'bpy.local'}/${user.id}?v=${Date.now()}`
         };
 
     } catch (err) {

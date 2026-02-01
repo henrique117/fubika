@@ -1,6 +1,6 @@
 import { getBeatmap, getPlayer } from "../../services/apiCalls"
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js"
-import { compareEmbedBuilder, defaultEmbedBuilder, extractBeatmapId } from "../../utils/utils.export"
+import { compareEmbedBuilder, defaultEmbedBuilder, extractBeatmapId, fetchLastBeatmapId } from "../../utils/utils.export"
 
 export default {
     data: new SlashCommandBuilder()
@@ -9,7 +9,7 @@ export default {
         .addStringOption(option => 
             option.setName('beatmap')
             .setDescription('Link ou ID do beatmap')
-            .setRequired(true)
+            .setRequired(false)
         )
         .addStringOption(option => 
             option.setName('player')
@@ -27,11 +27,25 @@ export default {
                 ? await getPlayer(interaction.user.id) // Player não foi fornecido
                 : await getPlayer(insertedPlayer.replace(" ", "_").toLowerCase()) // Player fornecido
 
-            const insertedBeatmap = interaction.options.getString('beatmap', true) // Pega o link ou id do beatmap fornecido no comando
-            const beatmap = (insertedBeatmap.includes('/'))
-                ? await getBeatmap(await extractBeatmapId(insertedBeatmap)) // Extrai ID caso seja link
-                : await getBeatmap(insertedBeatmap) // Já é o ID
+            const insertedBeatmap = interaction.options.getString('beatmap') // Pega o link ou id do beatmap fornecido (ou não) no comando
+            
+            let beatmap
+            if (insertedBeatmap === null) {
+                
+                const channelBeatmapId = await fetchLastBeatmapId(interaction.channel)
 
+                if (channelBeatmapId === null)
+                    throw new Error('Mapa não encontrado no canal')
+
+                beatmap = await getBeatmap(channelBeatmapId)
+
+            } else {
+
+                beatmap = (insertedBeatmap.includes('/'))
+                    ? await getBeatmap(await extractBeatmapId(insertedBeatmap)) // Extrai ID caso seja link
+                    : await getBeatmap(insertedBeatmap) // Já é o ID
+            }
+            
             const embed = await compareEmbedBuilder(beatmap, player)
 
             await interaction.editReply({ embeds: [embed] })
@@ -42,6 +56,8 @@ export default {
                 message = `Player \`${interaction.options.getString('player')}\` não encontrado!`
             else if (String(error).includes('Not Found')) // Beatmap não encontrado
                 message = 'Beatmap não encontrado!'
+            else if (String(error).includes('Mapa não encontrado no canal'))
+                message = 'Não foi encontrado nenhum mapa recente no canal!\nForneça o link ou apenas o id do mapa.'
             else
                 message = String(error) // Outro erro
 

@@ -9,7 +9,7 @@ from collections.abc import AsyncGenerator
 from collections.abc import Mapping
 from collections.abc import MutableMapping
 from pathlib import Path
-from typing import TypedDict
+from typing import Any, TypedDict
 
 import asyncio
 import json
@@ -505,6 +505,62 @@ async def send_ingame_message(user_id: int, message: str) -> None:
     await redis.publish("api:notification", payload)
     log(f"Enviado pedido de notificação para ID {user_id}", Ansi.LCYAN)
 
+async def trigger_top_score_event(
+    score: Any, 
+    player_discord_id: str | None = None,
+    previous_top_1_id: int | None = None, 
+    victim_name: str | None = None, 
+    victim_discord_id: str | None = None,
+    victim_score: int = 0,
+    victim_pp: float = 0.0,
+    victim_acc: float = 0.0,
+    victim_mods: int = 0
+) -> None:
+    """
+    Publica no Redis os dados para o Snipe Embed (Atacante vs Vítima).
+    Sincronizado com a lógica de calculate_placement do score.py.
+    """
+    try:
+        redis = app.state.services.redis
+        
+        is_snipe = previous_top_1_id is not None and previous_top_1_id != score.player.id
+        event_type = "SNIPE" if is_snipe else "TOP_1"
+
+        payload = {
+            "type": event_type,
+            "data": {
+                "beatmap_id": score.bmap.id,
+                "beatmap_title": score.bmap.title,
+                "beatmap_diff": score.bmap.version,
+                "star_rating": float(score.sr) if hasattr(score, 'sr') else float(score.bmap.diff),
+                "thumbnail": f"https://b.ppy.sh/thumb/{score.bmap.set_id}l.jpg",
+                
+                "player_id": score.player.id,
+                "player_name": score.player.name,
+                "player_discord_id": player_discord_id,
+                "new_score": score.score,
+                "new_pp": float(score.pp),
+                "new_acc": float(score.acc),
+                "new_mods": int(score.mods),
+
+                "victim_id": previous_top_1_id if is_snipe else None,
+                "victim_name": victim_name if is_snipe else None,
+                "victim_discord_id": victim_discord_id if is_snipe else None,
+                "victim_score": victim_score if is_snipe else 0,
+                "victim_pp": victim_pp if is_snipe else 0.0,
+                "victim_acc": victim_acc if is_snipe else 0.0,
+                "victim_mods": victim_mods if is_snipe else 0,
+
+                "mode": int(score.mode)
+            }
+        }
+
+        await redis.publish("fubika:notifications", json.dumps(payload))
+        
+        log(f"[Redis] Evento {event_type} enviado com sucesso: {score.player.name}", Ansi.LBLUE)
+
+    except Exception as e:
+        log(f"[Redis Error] Falha crítica ao publicar top score: {e}", Ansi.LRED)
 
 async def run_redis_listener() -> None:
     """

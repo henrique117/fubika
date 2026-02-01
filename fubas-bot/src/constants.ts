@@ -5,6 +5,7 @@ export const GUILD_CONFIG = {
     channels: {
         verificados: "1460449847898538005",
         fubas_logs: "1450644955830943877",
+        top_scores: "1463956240978673979"
     }
 } as const
 
@@ -32,7 +33,7 @@ export const EMOJIS = {
 
     // Others
     miss: "<:miss:1451028123553497281>",
-    bpm: "BPM"
+    bpm: "<:bpm:1454506365614555240>"
 } as const
 
 export const COLORS = { // Cores utilizadas no fubika

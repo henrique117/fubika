@@ -52,7 +52,7 @@ const getUserMapSchema = z.object({
 
 export type GetUserMapInput = z.infer<typeof getUserMapSchema>;
 
-const postPfpSchema = z.object({
+export const postPfpSchema = z.object({
     discord_id: z.string().regex(/^\d+$/, "Discord ID inválido"),
     avatar: z.any()
         .refine((file) => !!file, "Arquivo é obrigatório")

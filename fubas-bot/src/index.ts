@@ -1,6 +1,6 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-import { Client, Collection, GatewayIntentBits, Interaction, MessageFlags } from 'discord.js'
+import { Client, Collection, GatewayIntentBits, Interaction } from 'discord.js'
 import * as dotenv from 'dotenv'
 import path from 'path'
 import fs from 'fs'
@@ -85,7 +85,7 @@ client.on('interactionCreate', async (interaction: Interaction) => {
     } catch (error) {
         console.error(`Erro ao executar comando ${interaction.commandName}:`, error)
         
-        const errorPayload = { content: 'Houve um erro ao executar esse comando!', flags: [MessageFlags.Ephemeral] }
+        const errorPayload = { content: 'Houve um erro ao executar esse comando!', ephemeral: true }
 
         if (interaction.replied || interaction.deferred) {
             await interaction.followUp(errorPayload).catch(e => console.error("Erro no followUp:", e))

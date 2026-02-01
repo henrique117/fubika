@@ -937,8 +937,6 @@ async def osuSubmitModularSelector(
                 break
     
     if not stats:
-        # Se ainda assim não encontrar, logamos o erro e impedimos o crash
-        from app.logging import log, Ansi
         log(f"⚠️ Erro crítico: Stats não encontrados para {score.player.name} no modo {score.mode!r}", Ansi.LRED)
         return Response(b"error: stats")
     

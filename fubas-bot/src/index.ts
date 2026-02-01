@@ -99,7 +99,7 @@ for (const file of eventFiles) {
             }
         }
     }
-})
+}
 
 client.once('clientReady', async () => {
     console.log(`Bot online como ${client.user?.tag}`)

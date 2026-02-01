@@ -1,6 +1,6 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-import { Client, Collection, GatewayIntentBits } from 'discord.js'
+import { Client, Collection, GatewayIntentBits, Interaction, MessageFlags } from 'discord.js'
 import * as dotenv from 'dotenv'
 import path from 'path'
 import fs from 'fs'
@@ -34,9 +34,7 @@ if (!fs.existsSync(foldersPath)) {
     process.exit(1)
 }
 
-const allItems = fs.readdirSync(foldersPath)
-
-const commandFolders = allItems.filter(item => {
+const commandFolders = fs.readdirSync(foldersPath).filter(item => {
     const itemPath = path.join(foldersPath, item)
     return fs.statSync(itemPath).isDirectory()
 })
@@ -47,43 +45,47 @@ for (const folder of commandFolders) {
     
     for (const file of commandFiles) {
         const filePath = path.join(commandsPath, file)
-        
         const importedFile = require(filePath)
-
         const command = importedFile.default || importedFile
 
-        if (!command) {
-            console.warn(`[SKIP] O arquivo ${file} foi ignorado pois não exportou nada válido.`)
-            continue 
-        }
-
-        if ('data' in command && 'execute' in command) {
+        if (command && 'data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command)
         } else {
-            console.warn(`[AVISO] O comando em ${filePath} está faltando a propriedade "data" ou "execute".`)
+            console.warn(`[AVISO] O comando em ${filePath} está incompleto.`)
         }
     }
 }
 
 const eventsPath = path.join(__dirname, 'events')
-const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'))
+if (fs.existsSync(eventsPath)) {
+    const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'))
 
-for (const file of eventFiles) {
-    const filePath = path.join(eventsPath, file)
-    const event = require(filePath).default || require(filePath)
+    for (const file of eventFiles) {
+        const filePath = path.join(eventsPath, file)
+        const event = require(filePath).default || require(filePath)
 
-    if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args))
-    } else {
-        client.on(event.name, (...args) => event.execute(...args))
+        if (event.name) {
+            if (event.once) {
+                client.once(event.name, (...args) => event.execute(...args))
+            } else {
+                client.on(event.name, (...args) => event.execute(...args))
+            }
+        }
     }
+}
+
+client.on('interactionCreate', async (interaction: Interaction) => {
+    if (!interaction.isChatInputCommand()) return
+
+    const command = client.commands.get(interaction.commandName)
+    if (!command) return
 
     try {
         await command.execute(interaction)
     } catch (error) {
         console.error(`Erro ao executar comando ${interaction.commandName}:`, error)
         
-        const errorPayload = { content: 'Houve um erro ao executar esse comando!', ephemeral: true }
+        const errorPayload = { content: 'Houve um erro ao executar esse comando!', flags: [MessageFlags.Ephemeral] }
 
         if (interaction.replied || interaction.deferred) {
             await interaction.followUp(errorPayload).catch(e => console.error("Erro no followUp:", e))
@@ -99,10 +101,10 @@ for (const file of eventFiles) {
             }
         }
     }
-}
+})
 
-client.once('clientReady', async () => {
-    console.log(`Bot online como ${client.user?.tag}`)
+client.once('ready', async () => {
+    console.log(`✅ Bot online como ${client.user?.tag}`)
 
     try {
         await startRedisListener(client)

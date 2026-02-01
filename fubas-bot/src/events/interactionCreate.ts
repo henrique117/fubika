@@ -2,6 +2,7 @@ import { Events, ChatInputCommandInteraction } from 'discord.js'
 
 export default {
     name: Events.InteractionCreate,
+    once: false,
     async execute(interaction: ChatInputCommandInteraction) {
         
         if (!interaction.isChatInputCommand()) return

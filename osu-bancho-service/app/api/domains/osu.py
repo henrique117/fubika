@@ -926,6 +926,22 @@ async def osuSubmitModularSelector(
     # get the current stats, and take a
     # shallow copy for the response charts.
     stats = score.player.stats[score.mode]
+
+    if not stats:
+        # Fallback 1: Tentar encontrar pelo valor inteiro do modo
+        # Isso resolve problemas de Enums importados de caminhos diferentes
+        mode_int = int(score.mode)
+        for m, s in score.player.stats.items():
+            if int(m) == mode_int:
+                stats = s
+                break
+    
+    if not stats:
+        # Se ainda assim não encontrar, logamos o erro e impedimos o crash
+        from app.logging import log, Ansi
+        log(f"⚠️ Erro crítico: Stats não encontrados para {score.player.name} no modo {score.mode!r}", Ansi.LRED)
+        return Response(b"error: stats")
+    
     prev_stats = copy.copy(stats)
 
     # stuff update for all submitted scores

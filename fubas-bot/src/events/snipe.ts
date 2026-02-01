@@ -2,19 +2,11 @@ import { Client, EmbedBuilder, TextChannel } from 'discord.js'
 import { COLORS, GUILD_CONFIG, URLS } from '../constants'
 import { getBeatmap } from '../services/apiCalls'
 
-/**
- * Formata números com segurança para evitar o erro "toLocaleString" em valores nulos ou indefinidos.
- * Garante que o bot não crasha se a API ou o Redis enviarem dados incompletos.
- */
 const formatNum = (val: any, options?: Intl.NumberFormatOptions) => {
     if (val === undefined || val === null || isNaN(Number(val))) return "0"
     return Number(val).toLocaleString('en-US', options)
 }
 
-/**
- * Resolve o problema do @null ou menções inválidas.
- * Se o ID do Discord não for válido ou for uma string de erro, mostra apenas o Nome em negrito.
- */
 const getMention = (id: string | null, fallbackName: string) => {
     if (!id || id === 'null' || id === 'undefined' || id.length < 5) {
         return `**${fallbackName}**`
@@ -32,24 +24,16 @@ export async function sendSnipeEmbed(discordClient: Client, data: any) {
     }
 
     try {
-        // Busca os detalhes técnicos do mapa (estrelas, diff, etc) na API do Fubika
         const beatmap = await getBeatmap(data.beatmap_id)
 
         const options = { maximumFractionDigits: 2 }
         const mapUrl = `https://fubika.com.br/beatmap/${data.beatmap_id}`
         const weapon = "︻╦デ╤━╼"
-        
-        /**
-         * TÉCNICA DE HIDDEN URL:
-         * Inserimos um caractere invisível (\u2800) que serve de âncora para o link oficial do osu!.
-         * Isto permite que bots de terceiros (como o Bathbot) identifiquem o mapa,
-         * enquanto o utilizador vê apenas o design limpo do Fubika.
-         */
         const hiddenUrl = `[\u2800](https://osu.ppy.sh/b/${data.beatmap_id})`
 
         const embed = new EmbedBuilder()
             .setAuthor({ 
-                name: `novo #1! SNIPED ${hiddenUrl}`, 
+                name: `novo #1! SNIPED`, 
                 iconURL: URLS.fubikaIcon 
             })
             .setTitle(`${beatmap.title} [${beatmap.diff}] [${formatNum(beatmap.star_rating, options)}★]`)
@@ -85,7 +69,7 @@ export async function sendSnipeEmbed(discordClient: Client, data: any) {
             .setTimestamp()
 
         await channel.send({ 
-            content: `🎯 **SNIPE!** ${getMention(data.player_discord_id, data.player_name)} derrubou o topo!`, 
+            content: `🎯 **SNIPE!** ${getMention(data.player_discord_id, data.player_name)} derrubou o topo!${hiddenUrl}`, 
             embeds: [embed] 
         })
 
@@ -108,7 +92,7 @@ export async function sendTop1Embed(discordClient: Client, data: any) {
 
         const embed = new EmbedBuilder()
             .setAuthor({ 
-                name: `novo #1! ${hiddenUrl}`, 
+                name: `novo #1!`, 
                 iconURL: URLS.fubikaIcon 
             })
             .setTitle(`${beatmap.title} [${beatmap.diff}] [${formatNum(beatmap.star_rating, options)}★]`)
@@ -125,7 +109,7 @@ export async function sendTop1Embed(discordClient: Client, data: any) {
             .setTimestamp()
 
         await channel.send({ 
-            content: `👑 **Novo Recorde!** ${getMention(data.player_discord_id, data.player_name)} é o novo #1!`, 
+            content: `👑 **Novo Recorde!** ${getMention(data.player_discord_id, data.player_name)} é o novo #1!${hiddenUrl}`, 
             embeds: [embed] 
         })
 

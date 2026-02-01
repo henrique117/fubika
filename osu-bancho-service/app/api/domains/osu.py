@@ -712,7 +712,6 @@ async def osuSubmitModularSelector(
             "SELECT 1 FROM scores WHERE online_checksum = :checksum",
             {"checksum": score.client_checksum},
         ):
-            # Usando o log global sem re-importar
             log(f"{score.player} submeteu uma pontuação duplicada.", Ansi.LYELLOW)
             return Response(b"error: no")
 
@@ -837,11 +836,9 @@ async def osuSubmitModularSelector(
                 if score.player.is_online:
                     score.player.logout()
 
-    # --- LÓGICA DE STATS CORRIGIDA (SEM KEYERROR E SEM UNBOUNDLOCALERROR) ---
     stats = score.player.stats.get(score.mode)
 
     if stats is None:
-        # Fallback pelo valor inteiro para evitar problemas de Enum
         mode_int = int(score.mode)
         for m, s in score.player.stats.items():
             if int(m) == mode_int:
@@ -853,7 +850,6 @@ async def osuSubmitModularSelector(
         return Response(b"error: stats")
     
     prev_stats = copy.copy(stats)
-    # -----------------------------------------------------------------------
 
     stats.playtime += score.time_elapsed // 1000
     stats.plays += 1

@@ -1,4 +1,12 @@
-import { TextBasedChannel } from "discord.js"
+import { ChatInputCommandInteraction, Message, TextBasedChannel } from "discord.js"
+
+export async function reply(source: ChatInputCommandInteraction | Message, content: any) {
+
+    if (source instanceof ChatInputCommandInteraction)
+        return await source.editReply(content);
+    else 
+        return await source.reply(content)
+}
 
 export async function extractBeatmapId(beatmapLink: string): Promise<string> {
     

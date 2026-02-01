@@ -507,6 +507,7 @@ async def send_ingame_message(user_id: int, message: str) -> None:
 
 async def trigger_top_score_event(
     score: Any, 
+    player_discord_id: str | None = None, # ADICIONADO: Agora a função aceita o parâmetro
     previous_top_1_id: int | None = None, 
     victim_name: str | None = None, 
     victim_discord_id: str | None = None,
@@ -516,30 +517,37 @@ async def trigger_top_score_event(
     victim_mods: int = 0
 ) -> None:
     """
-    Identifica se a nova pontuação é um SNIPE ou um NOVO TOP 1 e publica no Redis.
-    Contém os dados completos de ambos os jogadores para comparação.
+    Publica no Redis os dados para o Snipe Embed (Atacante vs Vítima).
+    Sincronizado com a lógica de calculate_placement do score.py.
     """
     try:
+        redis = app.state.services.redis
+        
+        # Se havia alguém e não era o mesmo player, é SNIPE. 
+        # Se não havia ninguém ou era o próprio player melhorando o score, é TOP_1.
         is_snipe = previous_top_1_id is not None and previous_top_1_id != score.player.id
         event_type = "SNIPE" if is_snipe else "TOP_1"
 
         payload = {
             "type": event_type,
             "data": {
+                # --- INFORMAÇÕES DO MAPA ---
                 "beatmap_id": score.bmap.id,
                 "beatmap_title": score.bmap.title,
                 "beatmap_diff": score.bmap.version,
-                "star_rating": float(score.bmap.diff),
+                "star_rating": float(score.sr) if hasattr(score, 'sr') else float(score.bmap.diff),
                 "thumbnail": f"https://b.ppy.sh/thumb/{score.bmap.set_id}l.jpg",
                 
+                # --- COLUNA 1: ATACANTE (Novo #1) ---
                 "player_id": score.player.id,
                 "player_name": score.player.name,
-                "player_discord_id": getattr(score.player, 'discord_id', None),
+                "player_discord_id": player_discord_id, # Usa o valor enviado pelo score.py
                 "new_score": score.score,
                 "new_pp": float(score.pp),
                 "new_acc": float(score.acc),
                 "new_mods": int(score.mods),
 
+                # --- COLUNA 2: VÍTIMA (Antigo #1) ---
                 "victim_id": previous_top_1_id if is_snipe else None,
                 "victim_name": victim_name if is_snipe else None,
                 "victim_discord_id": victim_discord_id if is_snipe else None,
@@ -552,11 +560,13 @@ async def trigger_top_score_event(
             }
         }
 
+        # Publica no canal que o bot está a ouvir
         await redis.publish("fubika:notifications", json.dumps(payload))
-        log(f"[Redis] Evento {event_type} publicado: {score.player.name}", Ansi.LBLUE)
+        
+        log(f"[Redis] Evento {event_type} enviado com sucesso: {score.player.name}", Ansi.LBLUE)
 
     except Exception as e:
-        log(f"[Redis Error] Falha ao publicar evento de Top Score: {e}", Ansi.LRED)
+        log(f"[Redis Error] Falha crítica ao publicar top score: {e}", Ansi.LRED)
 
 async def run_redis_listener() -> None:
     """

@@ -77,7 +77,7 @@ export async function parseCompareArguments(rawContent: string) {
     return { beatmapId, username }
 }
 
-export async function parseRecentArguments(rawContent: string) {
+export async function parseOnlyUsername(rawContent: string) {
 
     const allTokens = tokenize(rawContent)
 

@@ -1,6 +1,6 @@
 import { getPlayer, getRecentScore } from "../../services/apiCalls"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
-import { reply, recentEmbedBuilder, noRecentScoresEmbedBuilder, defaultEmbedBuilder, parseRecentArguments } from "../../utils/utils.export"
+import { reply, recentEmbedBuilder, noRecentScoresEmbedBuilder, defaultEmbedBuilder, parseOnlyUsername } from "../../utils/utils.export"
 
 export default {
     data: new SlashCommandBuilder()
@@ -24,7 +24,7 @@ export default {
 
     async executePrefix(message: Message) {
 
-        const { username } = await parseRecentArguments(message.content)
+        const { username } = await parseOnlyUsername(message.content)
 
         await this.handleRecentCommand(message, username)
     },

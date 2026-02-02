@@ -7,7 +7,7 @@ export default interface ICommand {
     
     execute(interaction: ChatInputCommandInteraction): Promise<void> // Execução do Slash Command
     
-    executePrefix?(message: Message, args: string[]): Promise<void>
+    executePrefix?(message: Message, args?: string[]): Promise<void>
     
     autocomplete?(interaction: AutocompleteInteraction): Promise<void>
 }

@@ -8,4 +8,5 @@ export {default as top200EmbedsBuilder} from './embedBuilders/top200EmbedsBuilde
 export {default as topIndexEmbedBuilder} from './embedBuilders/topIndexEmbedBuilder'
 export {default as userEmbedBuilder} from './embedBuilders/userEmbedBuilder'
 export * from './embedBuilders/embedsDescriptionFormatting'
+export * from './argumentsParsers'
 export * from './auxiliarFunctions'

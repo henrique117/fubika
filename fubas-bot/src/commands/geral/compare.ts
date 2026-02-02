@@ -1,6 +1,6 @@
 import { getBeatmap, getPlayer } from "../../services/apiCalls"
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js"
-import { compareEmbedBuilder, defaultEmbedBuilder, extractBeatmapId, fetchLastBeatmapId } from "../../utils/utils.export"
+import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
+import { reply, compareEmbedBuilder,defaultEmbedBuilder, extractBeatmapId, parseCompareArguments, getBeatmapIdFromMessage, fetchLastBeatmapId } from "../../utils/utils.export"
 
 export default {
     data: new SlashCommandBuilder()
@@ -16,44 +16,81 @@ export default {
                 .setDescription('Nick do player')
                 .setRequired(false)
         ),
+    
+    aliases: ['c', 'compare'],
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
+
+        const username = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
+        
+        const insertedBeatmap = interaction.options.getString('beatmap') // Pega o link ou id do beatmap fornecido (ou não) no comando
+        
+        const beatmapId = (insertedBeatmap?.includes('/'))
+            ? await extractBeatmapId(insertedBeatmap)
+            : insertedBeatmap
+
+        await this.handleCompareCommand(interaction, beatmapId, username)
+    },
+    
+    async executePrefix(message: Message){
+
+        const { beatmapId, username } = await parseCompareArguments(message.content)
+
+        let inputBeatmapId = beatmapId // Tenta pegar beatmap inserido
+
+        // Se não foi inserido nada && houver uma mensagem respondida, tenta pegar dela
+        if (!inputBeatmapId && message.reference?.messageId) {
+            try {
+                const repliedMessage = await message.channel.messages.fetch(message.reference.messageId)
+                
+                const replyId = await getBeatmapIdFromMessage(repliedMessage)
+                
+                if (replyId)
+                    inputBeatmapId = replyId
+
+            } catch (error) {
+                console.warn("Erro na leitura da messagem replied:", error)
+            }
+        }
+
+        await this.handleCompareCommand(message, inputBeatmapId, username)
+    },
+
+    async handleCompareCommand(source: ChatInputCommandInteraction | Message, beatmapId: string | null, username: string | null){
         
         try{
-            
-            const insertedPlayer = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
-            const player = (insertedPlayer === null)
-                ? await getPlayer(interaction.user.id) // Player não foi fornecido
-                : await getPlayer(insertedPlayer.replace(" ", "_").toLowerCase()) // Player fornecido
+        
+            const user = (source instanceof ChatInputCommandInteraction)
+                ? source.user
+                : source.author
 
-            const insertedBeatmap = interaction.options.getString('beatmap') // Pega o link ou id do beatmap fornecido (ou não) no comando
-            
-            let beatmap
-            if (insertedBeatmap === null) {
+            const finalUser = username || user.id // Player fornecido || Player não foi fornecido
+
+            const player = await getPlayer(finalUser.replace(" ", "_").toLowerCase())
+
+            let finalBeatmapId = beatmapId
+
+            if(finalBeatmapId === null) {
                 
-                const channelBeatmapId = await fetchLastBeatmapId(interaction.channel)
+                const channelBeatmapId = await fetchLastBeatmapId(source.channel)
 
                 if (channelBeatmapId === null)
                     throw new Error('Mapa não encontrado no canal')
 
-                beatmap = await getBeatmap(channelBeatmapId)
-
-            } else {
-
-                beatmap = (insertedBeatmap.includes('/'))
-                    ? await getBeatmap(await extractBeatmapId(insertedBeatmap)) // Extrai ID caso seja link
-                    : await getBeatmap(insertedBeatmap) // Já é o ID
+                finalBeatmapId = channelBeatmapId
             }
-            
+
+            const beatmap = await getBeatmap(finalBeatmapId)
+
             const embed = await compareEmbedBuilder(beatmap, player)
 
-            await interaction.editReply({ embeds: [embed] })
-    
-        }catch(error){
+            await reply(source, { embeds: [embed] })
+
+        } catch (error) {
             let message
             if (String(error).includes('Usuário não encontrado')) // Player não encontrado
-                message = `Player \`${interaction.options.getString('player')}\` não encontrado!`
+                message = `Player \`${username}\` não encontrado!`
             else if (String(error).includes('Not Found')) // Beatmap não encontrado
                 message = 'Beatmap não encontrado!'
             else if (String(error).includes('Mapa não encontrado no canal'))
@@ -63,7 +100,7 @@ export default {
 
             const embed = await defaultEmbedBuilder(message)
 
-            await interaction.editReply({ embeds: [embed] })
+            await reply(source, { embeds: [embed] })
         }
     }
 }

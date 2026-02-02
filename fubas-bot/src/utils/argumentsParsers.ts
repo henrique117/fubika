@@ -19,7 +19,7 @@ function tokenize(content: string): Token[] {
         // match[1] = em aspas duplas
         // match[2] = aspas simples
         // match[3] = sem aspas
-        
+
         const value = match[1] || match[2] || match[3]
         const isQuoted = match[1] !== undefined || match[2] !== undefined
 
@@ -75,4 +75,23 @@ export async function parseCompareArguments(rawContent: string) {
     }
 
     return { beatmapId, username }
+}
+
+export async function parseRecentArguments(rawContent: string) {
+
+    const allTokens = tokenize(rawContent)
+
+    const args = allTokens.slice(1) // Remove o token do comando
+
+    let username: string | null = null
+
+    const quotedToken = args.find(t => t.isQuoted)
+
+    if (quotedToken) {
+        username = quotedToken.value
+    } else {
+        username = allTokens[0]?.value ?? null
+    }
+
+    return { username }
 }

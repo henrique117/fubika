@@ -1,12 +1,12 @@
 import { getPlayer, getRecentScore } from "../../services/apiCalls"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
-import { reply, recentEmbedBuilder, noRecentScoresEmbedBuilder, defaultEmbedBuilder } from "../../utils/utils.export"
+import { reply, recentEmbedBuilder, noRecentScoresEmbedBuilder, defaultEmbedBuilder, parseRecentArguments } from "../../utils/utils.export"
 
 export default {
     data: new SlashCommandBuilder()
         .setName('recent')
         .setDescription('Exibe o score mais recente de um player')
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName('player')
                 .setDescription('Nick do player')
                 .setRequired(false)
@@ -14,7 +14,7 @@ export default {
 
     aliases: ['r', 'rs', 'recent'],
 
-    async execute(interaction: ChatInputCommandInteraction){
+    async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
 
         const username = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
@@ -22,48 +22,46 @@ export default {
         await this.handleRecentCommand(interaction, username)
     },
 
-    async executePrefix(message: Message, args: string[]){
+    async executePrefix(message: Message) {
 
-        const username = (args.length > 0)
-            ? args.join(' ')
-            : null
+        const { username } = await parseRecentArguments(message.content)
 
         await this.handleRecentCommand(message, username)
     },
 
     async handleRecentCommand(source: ChatInputCommandInteraction | Message, username: string | null) {
-        
-        try{
-            
+
+        try {
+
             const user = (source instanceof ChatInputCommandInteraction)
                 ? source.user
                 : source.author
 
             const finalUser = username || user.id // Player fornecido || Player não foi fornecido
 
-            const player =  await getPlayer(finalUser.replace(" ", "_").toLowerCase())
+            const player = await getPlayer(finalUser.replace(" ", "_").toLowerCase())
 
-            const [ score ] = await getRecentScore(finalUser.replace(" ", "_").toLowerCase())
+            const [score] = await getRecentScore(finalUser.replace(" ", "_").toLowerCase())
 
             // Caso o player ainda não possua scores
-            if (!score) { 
+            if (!score) {
 
-                const { embed, attachment } = await noRecentScoresEmbedBuilder(player)        
+                const { embed, attachment } = await noRecentScoresEmbedBuilder(player)
 
                 reply(source, {
                     embeds: [embed],
                     files: [attachment]
-                    }
-                )  
+                }
+                )
 
                 return
             }
-            
+
             const embed = await recentEmbedBuilder(player, score)
 
-            reply(source, {embeds: [embed]})
+            reply(source, { embeds: [embed] })
 
-        }catch(error){
+        } catch (error) {
             let message
             if (String(error).includes('Usuário não encontrado')) // Player não encontrado
                 message = `Player \`${username}\` não encontrado!`
@@ -72,7 +70,7 @@ export default {
 
             const embed = await defaultEmbedBuilder(message)
 
-            reply(source, {embeds: [embed]})
+            reply(source, { embeds: [embed] })
         }
     }
 }

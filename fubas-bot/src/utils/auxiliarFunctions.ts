@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction, Message, TextBasedChannel } from "discord.js"
+import { REGEX } from "../constants"
 
 export async function reply(source: ChatInputCommandInteraction | Message, content: any) {
 
@@ -14,10 +15,6 @@ export async function extractBeatmapId(beatmapLink: string): Promise<string> {
     return String(parts[parts.length - 1])
 }
 
-const OSU_URL_REGEX = /(?:https?:\/\/)?osu\.ppy\.sh\/(?:b\/|beatmaps\/|beatmapsets\/\d+#(?:osu|taiko|fruits|mania)\/)(\d+)/
-const FUBIKA_URL_REGEX = /(?:https?:\/\/)?fubika\.com\.br\/beatmap\/(\d+)/
-const RAW_ID_REGEX = /^\s*(\d+)\s*$/
-
 export async function fetchLastBeatmapId(channel: TextBasedChannel | null): Promise<string | null> {
 
     if (!channel)
@@ -31,11 +28,11 @@ export async function fetchLastBeatmapId(channel: TextBasedChannel | null): Prom
             const content = msg.content
 
             // 1. Verifica links na mensagem
-            const osuMatch = content.match(OSU_URL_REGEX)
+            const osuMatch = content.match(REGEX.osuUrl)
             if (osuMatch)
                 return osuMatch[1] ?? null
 
-            const fubikaMatch = content.match(FUBIKA_URL_REGEX)
+            const fubikaMatch = content.match(REGEX.fubikaUrl)
             if (fubikaMatch)
                 return fubikaMatch[1] ?? null
 
@@ -45,18 +42,18 @@ export async function fetchLastBeatmapId(channel: TextBasedChannel | null): Prom
 
                     const contentToCheck = [embed.url, embed.author?.url, embed.description].join(' ')
 
-                    const embedOsu = contentToCheck.match(OSU_URL_REGEX)
+                    const embedOsu = contentToCheck.match(REGEX.osuUrl)
                     if (embedOsu)
                         return embedOsu[1] ?? null
 
-                    const embedFubika = contentToCheck.match(FUBIKA_URL_REGEX)
+                    const embedFubika = contentToCheck.match(REGEX.fubikaUrl)
                     if (embedFubika)
                         return embedFubika[1] ?? null
                 }
             }
 
             // 3. Verifica id puro com pelo menos 5 dígitos
-            const rawIdMatch = content.match(RAW_ID_REGEX)
+            const rawIdMatch = content.match(REGEX.rawId)
             if (rawIdMatch && rawIdMatch[1]) {
 
                 const potentialId = rawIdMatch[1]

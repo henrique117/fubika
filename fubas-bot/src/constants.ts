@@ -9,6 +9,12 @@ export const GUILD_CONFIG = {
     }
 } as const
 
+export const REGEX = {
+    osuUrl: /(?:https?:\/\/)?osu\.ppy\.sh\/(?:b\/|beatmaps\/|beatmapsets\/\d+#(?:osu|taiko|fruits|mania)\/)(\d+)/,
+    fubikaUrl: /(?:https?:\/\/)?fubika\.com\.br\/beatmap\/(\d+)/,
+    rawId: /^\d+$/
+}
+
 export const URLS = {
     fubikaIcon: "https://i.imgur.com/F7FEYaG.png",
     std: "https://i.imgur.com/jhR2Swe.png",

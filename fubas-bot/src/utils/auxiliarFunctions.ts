@@ -1,12 +1,12 @@
-import { ChatInputCommandInteraction, Message, TextBasedChannel } from "discord.js"
+import { ChatInputCommandInteraction, Message, PartialGroupDMChannel, TextBasedChannel } from "discord.js"
 import { REGEX } from "../constants"
 
 export async function reply(source: ChatInputCommandInteraction | Message, content: any) {
 
     if (source instanceof ChatInputCommandInteraction)
-        return await source.editReply(content);
-    else 
-        return await source.reply(content)
+        return await source.editReply(content)
+    else if (!(source.channel instanceof PartialGroupDMChannel))
+        return await source.channel.send(content)
 }
 
 export async function extractBeatmapId(beatmapLink: string): Promise<string> {

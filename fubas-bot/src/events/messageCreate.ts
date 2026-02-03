@@ -1,7 +1,7 @@
 import { Events, Message } from 'discord.js'
 import { ICommand } from '../interfaces/interfaces.export' 
 
-const COMMAND_REGEX = /^([a-zA-Z]{1,12})(1000|\d{1,3})?$/
+const COMMAND_REGEX = /^([a-zA-Z]{1,16})(1000|\d{1,3})?$/
 
 export default {
     name: Events.MessageCreate,

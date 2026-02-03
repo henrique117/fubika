@@ -1,6 +1,8 @@
 import { Events, Message } from 'discord.js'
 import { ICommand } from '../interfaces/interfaces.export' 
 
+const COMMAND_REGEX = /^([a-zA-Z]{1,12})(1000|\d{1,3})?$/
+
 export default {
     name: Events.MessageCreate,
     once: false,
@@ -8,8 +10,19 @@ export default {
 
         if (message.author.bot || !message.content.startsWith('!')) return
 
+        
         const args = message.content.slice(1).trim().split(/ +/)
-        const commandName = args.shift()?.toLowerCase()
+        const rawCommand = args.shift()?.toLowerCase()
+
+        const match = rawCommand?.match(COMMAND_REGEX)
+
+        let commandName
+        let index
+        if (match) {
+
+            commandName = match[1] ?? null
+            index = Number(match[2]) ?? null
+        }
 
         if (!commandName) return
 
@@ -24,7 +37,7 @@ export default {
         if (!command || !command.executePrefix) return
 
         try {
-            await command.executePrefix(message, args)
+            await command.executePrefix(message, index, args)
         } catch (error) {
             console.error(error)
             await message.reply('Houve um erro ao executar esse comando.')

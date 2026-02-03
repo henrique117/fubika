@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, ComponentType, EmbedBuilder, Message, AttachmentBuilder } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, ComponentType, EmbedBuilder, Message, AttachmentBuilder, PartialGroupDMChannel } from 'discord.js'
 
 export default async function embedPagination(interaction: CommandInteraction | Message, pages: EmbedBuilder[], string: string = "", disapear: boolean = false, time: number = 40000, attachment?: AttachmentBuilder): Promise<void> {
     
@@ -16,8 +16,8 @@ export default async function embedPagination(interaction: CommandInteraction | 
                     throw err
                 }
             }
-        } else {
-            return await interaction.reply(payload)
+        } else if (!(interaction.channel instanceof PartialGroupDMChannel)){
+            return await interaction.channel.send(payload)
         }
     }
 

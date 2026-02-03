@@ -90,7 +90,7 @@ export async function parseOnlyUsername(rawContent: string) {
     if (quotedToken) {
         username = quotedToken.value
     } else {
-        username = allTokens[0]?.value ?? null
+        username = args[0]?.value ?? null
     }
 
     return { username }

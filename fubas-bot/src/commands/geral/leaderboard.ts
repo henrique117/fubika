@@ -1,46 +1,78 @@
 import { getBeatmap } from "../../services/apiCalls"
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js"
-import { leaderboardEmbedsBuilder, embedPagination, defaultEmbedBuilder, extractBeatmapId, fetchLastBeatmapId } from "../../utils/utils.export"
+import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
+import { reply, leaderboardEmbedsBuilder, embedPagination, defaultEmbedBuilder, extractBeatmapId, parseOnlyBeatmapId, getBeatmapIdFromMessage, fetchLastBeatmapId } from "../../utils/utils.export"
 
 export default {
     data: new SlashCommandBuilder()
         .setName('leaderboard')
         .setDescription('Exibe a leaderboard de um beatmap')
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName('beatmap')
                 .setDescription('Link ou ID do beatmap')
                 .setRequired(false)
         ),
 
+    aliases: ['lb'],
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
-        
-        try{
-        
-            const insertedBeatmap = interaction.options.getString('beatmap') // Pega o link ou id do beatmap fornecido (ou não) no comando
-            
-            let beatmap
-            if (insertedBeatmap === null) {
 
-                const channelBeatmapId = await fetchLastBeatmapId(interaction.channel)
+        const insertedBeatmap = interaction.options.getString('beatmap') // Pega o link ou id do beatmap fornecido (ou não) no comando
+
+        const beatmapId = (insertedBeatmap?.includes('/'))
+            ? await extractBeatmapId(insertedBeatmap)
+            : insertedBeatmap
+
+        await this.handleLeaderboardCommand(interaction, beatmapId)
+    },
+
+    async executePrefix(message: Message) {
+
+        const { beatmapId } = await parseOnlyBeatmapId(message.content)
+
+        let inputBeatmapId = beatmapId // Tenta pegar beatmap inserido
+
+        // Se não foi inserido nada && houver uma mensagem respondida, tenta pegar dela
+        if (!inputBeatmapId && message.reference?.messageId) {
+            try {
+                const repliedMessage = await message.channel.messages.fetch(message.reference.messageId)
+
+                const replyId = await getBeatmapIdFromMessage(repliedMessage)
+
+                if (replyId)
+                    inputBeatmapId = replyId
+
+            } catch (error) {
+                console.warn("Erro na leitura da messagem replied:", error)
+            }
+        }
+
+        await this.handleLeaderboardCommand(message, inputBeatmapId)
+    },
+
+    async handleLeaderboardCommand(source: ChatInputCommandInteraction | Message, beatmapId: string | null) {
+
+        try {
+
+            let finalBeatmapId = beatmapId
+
+            if (finalBeatmapId === null) {
+
+                const channelBeatmapId = await fetchLastBeatmapId(source.channel)
 
                 if (channelBeatmapId === null)
-                    throw new Error("Mapa não encontrado no canal")
+                    throw new Error('Mapa não encontrado no canal')
 
-                beatmap = await getBeatmap(channelBeatmapId)
-
-            } else {
-
-                beatmap = (insertedBeatmap.includes('/'))
-                    ? await getBeatmap(await extractBeatmapId(insertedBeatmap)) // Extrai ID caso seja link
-                    : await getBeatmap(insertedBeatmap) // Já é o ID
+                finalBeatmapId = channelBeatmapId
             }
+
+            const beatmap = await getBeatmap(finalBeatmapId)
 
             const embeds = await leaderboardEmbedsBuilder(beatmap)
 
-            await embedPagination(interaction, embeds, "", false, 60000)
-        
-        }catch(error){
+            await embedPagination(source, embeds, "", false, 60000)
+
+        } catch (error) {
             let message
             if (String(error).includes('Not Found'))
                 message = 'Beatmap não encontrado!'
@@ -51,7 +83,7 @@ export default {
 
             const embed = await defaultEmbedBuilder(message)
 
-            await interaction.editReply({ embeds: [embed] })
+            await reply(source, { embeds: [embed] })
         }
     }
 } 

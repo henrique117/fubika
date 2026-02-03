@@ -95,3 +95,29 @@ export async function parseOnlyUsername(rawContent: string) {
 
     return { username }
 }
+
+export async function parseOnlyBeatmapId(rawContent: string) {
+
+    const allTokens = tokenize(rawContent)
+
+    const args = allTokens.slice(1) // Remove o token do comando
+
+    let beatmapId: string | null = null
+
+    for (const token of args) {
+        const text = token.value
+
+        const isBeatmap = REGEX.osuUrl.test(text) || REGEX.fubikaUrl.test(text) || REGEX.rawId.test(text)
+
+        if (isBeatmap) {
+            if (isBeatmap)
+                beatmapId = await extractBeatmapId(text)
+            else
+                beatmapId = text
+
+            continue
+        }
+    }
+
+    return { beatmapId }
+}

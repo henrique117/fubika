@@ -33,7 +33,7 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
             .setAuthor({
                 name: `Performance Ranking for ${getModeName(mode)}`,
                 iconURL: URLS.fubikaIcon,
-                // url: 
+                url: 'https://fubika.com.br/ranking'
             })
             .setColor(COLORS.blue)
             .setDescription("Ainda não há jogadores neste ranking!")

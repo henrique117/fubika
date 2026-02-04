@@ -81,8 +81,8 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
         const embed = new EmbedBuilder()
             .setAuthor({
                 name: `Performance Ranking for ${getModeName(mode)}`,
-                iconURL: URLS.fubikaIcon,
-                // url: 
+                url: 'https://fubika.com.br/ranking',
+                iconURL: URLS.fubikaIcon
             })
             .setColor(COLORS.blue)
             .setDescription(lines.join('\n'))

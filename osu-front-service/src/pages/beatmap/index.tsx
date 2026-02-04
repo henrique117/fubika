@@ -123,7 +123,7 @@ const Beatmap: React.FC = () => {
                                     ))
                                 }
                             </div>
-                            <div className={style.diffSR}>
+                            <div className={style.diffSR}> 
                                 <h2>{currentBeatmap.diff}</h2>
                                 <span>Dificuldade {currentBeatmap.star_rating.toFixed(2)}</span>
                             </div>

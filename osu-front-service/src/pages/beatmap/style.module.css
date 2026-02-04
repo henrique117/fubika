@@ -73,15 +73,29 @@
 }
 
 .mapdiffs {
-    width: fit-content;
-    height: 40px;
-    border-radius: 10px;
+    width: 100%;
+    min-height: 40px;
+    max-width: 430px;
+    height: 100%;
+    max-height: 200px;
+    border-radius: 12px;
     background-color: rgba(19, 17, 15, 0.5);
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
-    /* justify-content: space-evenly; */
     margin-bottom: 5px;
+}
+
+.mapdiffs > * {
+    width: 37px;
+    padding: 5px;
+}
+
+.mapdiffs:has(> :nth-child(40)) > * {
+    width: 25px;   
+    padding: 2px;  
+    border-width: 1px !important; 
 }
 
 .otherMap {
@@ -172,20 +186,27 @@
 .mapHeaderInfo {
     position: absolute;
     z-index: 2;
-    margin-top: 250px;
-    margin-bottom: 20px;
-    margin-left: 20px;
+    top: 230px; 
+    left: 0; 
+    width: 100%; 
+    padding-left: 20px; 
+    padding-right: 260px; 
     display: flex;
     flex-direction: column;
     gap: 4px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    box-sizing: border-box; 
 }
 
 .mapTitle {
-    font-size: 28px;
+    font-size: 20px; 
     font-weight: bold;
     color: white;
-    margin: 0;
+    margin: 0 !important;
+    width: 100%;
+    overflow: hidden; 
+    line-height: 1.2; 
+    max-height: 2.4em; 
 }
 
 .mapArtist {

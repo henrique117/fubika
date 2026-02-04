@@ -4,6 +4,7 @@ interface DifficultyIconProps {
     color: string;
     isSelected?: boolean;
     onClick?: () => void;
+    className?: string;
 }
 
 const DiffIcon: React.FC<DifficultyIconProps> = ({ color, isSelected, onClick }) => {
@@ -14,14 +15,14 @@ const DiffIcon: React.FC<DifficultyIconProps> = ({ color, isSelected, onClick })
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '5px',
+                // padding: '5px',
                 borderRadius: '8px',
                 cursor: 'pointer',
                 border: isSelected ? '2px solid rgba(255,255,255,0.5)' : '2px solid transparent',
                 transition: 'all 0.2s ease'
             }}
         >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none">
                 <circle 
                     cx="12" 
                     cy="12" 

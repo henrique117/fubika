@@ -10,6 +10,7 @@ import { api } from '../../services/api'
 const Home: React.FC = () => {
     const [loading, setLoading] = useState(true)
     const [counts, setCounts] = useState({ total: 0, online: 0 })
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     const fetchUsersCount = async () => {
         try {
@@ -30,8 +31,17 @@ const Home: React.FC = () => {
         fetchUsersCount()
         const interval = setInterval(fetchUsersCount, 30000)
         return () => clearInterval(interval)
+
     }, []);
-    
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        }
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     return (
         <WrapperComponent>
             <div className={style.pageWrapper}>
@@ -46,25 +56,40 @@ const Home: React.FC = () => {
                                     <span className={style.statsNumber}>
                                         {loading && counts.total === 0 ? '...' : counts.total}
                                     </span>
-                                    <span>jogadores registrados</span>
-                                    
+                                    <span className={style.statsLabel}>jogadores registrados</span>
+
                                     <span className={style.statsNumber} style={{ marginLeft: '15px' }}>
                                         {loading && counts.online === 0 ? '...' : counts.online}
                                     </span>
-                                    <span>jogadores online</span>
+                                    <span className={style.statsLabel}>jogadores online</span>
                                 </div>
-                                <p className={style.description}>
-                                    Esse server nasceu com o intuito de ser uma base para que os brasileiros, principalmente 6 dígitos,
-                                </p>
+                                {isMobile ? (
+                                    <p className={style.description}>
+                                        Esse server nasceu com o intuito de ser uma base para que os brasileiros, principalmente 6 dígitos,
+                                        pudessem melhorar suas habilidades e skillcaps de uma forma que não precisassem se preocupar em ganhar rank e pp em mapas no Bancho.
+                                        <br />
+                                        Caso possuam algum tipo de dúvida, favor entrar em contato com qualquer admin do servidor no Discord do Fubika!
+                                    </p>
+
+                                ) : (
+                                    <p className={style.description}>
+                                        Esse server nasceu com o intuito de ser uma base para que os brasileiros, principalmente 6 dígitos,
+                                    </p>
+
+                                )}
                             </div>
                         </div>
-                        <div>
-                            <p className={style.description}>
-                                pudessem melhorar suas habilidades e skillcaps de uma forma que não precisassem se preocupar em ganhar rank e pp em mapas no Bancho.
-                                <br />
-                                Caso possuam algum tipo de dúvida, favor entrar em contato com qualquer admin do servidor no Discord do Fubika!
-                            </p>
-                        </div>
+
+                        {!isMobile && (
+                            <div>
+                                <p className={style.description}>
+                                    pudessem melhorar suas habilidades e skillcaps de uma forma que não precisassem se preocupar em ganhar rank e pp em mapas no Bancho.
+                                    <br />
+                                    Caso possuam algum tipo de dúvida, favor entrar em contato com qualquer admin do servidor no Discord do Fubika!
+                                </p>
+                            </div>
+                        )}
+
                     </div>
 
                     <div className={style.buttonsRow}>

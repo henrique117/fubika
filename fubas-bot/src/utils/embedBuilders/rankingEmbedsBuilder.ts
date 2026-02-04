@@ -55,8 +55,8 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
         const maxRankLength = String(pagePlayers[pagePlayers.length - 1]?.rank).length
         const maxNameLenLeft = Math.max(...leftSide.map(p => p.name.length))
         const maxNameLenRight = rightSide.length > 0 ? Math.max(...rightSide.map(p => p.name.length)) : 0
-        const maxPpLenLeft = Math.max(...leftSide.map(p => String(p.pp).length))
-        const maxPpLenRight = rightSide.length > 0 ? Math.max(...rightSide.map(p => String(p.pp).length)) : 0
+        const maxPpLenLeft = Math.max(...leftSide.map(p => p.pp.toLocaleString('en-US').length))
+        const maxPpLenRight = rightSide.length > 0 ? Math.max(...rightSide.map(p => p.pp.toLocaleString('en-US').length)) : 0
 
         const lines = leftSide.map((playerLeft, index) => {
             const playerRight = rightSide[index]

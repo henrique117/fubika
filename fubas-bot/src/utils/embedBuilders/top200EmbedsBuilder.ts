@@ -52,8 +52,8 @@ export default async function top200EmbedsBuilder(player: IPlayer): Promise<{ em
             const displayMods = score.mods === '' ? '' : `+${score.mods}`
 
             // --- Formatação da line 1 ---
-            const MAX_TOTAL = 50
-            const MAX_DIFF = 20
+            const MAX_TOTAL = 40
+            const MAX_DIFF = 18
 
             let tempTitle = score.beatmap.title
             let tempDiff = score.beatmap.diff

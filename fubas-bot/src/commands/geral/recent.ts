@@ -12,7 +12,7 @@ export default {
                 .setRequired(false)
         ),
 
-    aliases: ['r', 'rs', 'recent'],
+    aliases: ['r', 'rs'],
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()

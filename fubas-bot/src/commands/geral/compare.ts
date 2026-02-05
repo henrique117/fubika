@@ -17,7 +17,7 @@ export default {
                 .setRequired(false)
         ),
     
-    aliases: ['c', 'compare'],
+    aliases: ['c'],
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()

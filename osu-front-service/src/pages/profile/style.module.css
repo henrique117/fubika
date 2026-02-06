@@ -1,0 +1,178 @@
+.pageWrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding-top: 80px;
+    padding-bottom: 50px;
+}
+
+.rankingContainer {
+    width: 100%;
+    max-width: 1000px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.tableCard {
+    background-color: rgba(25, 23, 21, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.profileHeader {
+    display: flex;
+    background-color: rgba(25, 23, 21, 0.5);
+    border-radius: 16px;
+    height: 180px;
+    margin-bottom: 20px;
+}
+
+.profileImg {
+    height: 135px;
+    width: 135px;
+    background-color: rgba(25, 23, 21, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border-radius: 16px;
+    transform: translate(30px, 20px);
+    padding-top: 100px;
+}
+
+.profileHeaderInfo {
+    padding-left: 40px;
+    padding-top: 60px;
+    
+}
+
+.profileNickname {
+    font-size: 18px;
+    font-weight: bold;
+    padding-left: 20px;
+}
+
+.profileLevel {
+    color: #007F96;
+    font-size: 12px;
+    
+}
+
+.levelProgressBar {
+    height: 5px;
+    width: 120px;
+    border: 1px solid #D9D9D9;
+    border-radius: 10px;
+    margin: 3px 0px;
+}
+
+.rank {
+    display: flex;
+    font-size: 8px;
+    gap: 20px;
+
+}
+
+.rankNumber {
+    padding-left: 30%;
+    font-size: 15px
+
+}
+
+.rankBronze { color: #cd7f32; font-weight: bold; }
+.rankPrata { color: #c0c0c0; font-weight: bold; }
+.rankOuro { color: #ffd700; font-weight: bold; }
+.rankPlatina {
+    font-weight: bold;
+    background: linear-gradient(to right, #00c6ff, #0072ff, #00c6ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: shine 2s linear infinite;
+}
+
+.profileInfos {
+    width: 100%;
+    height: 700px;
+    display: flex;
+    gap: 20px;
+}
+
+.profileMaps {
+    width: 50%;
+    background-color: rgba(25, 23, 21, 0.5);
+    height: 600px;
+    margin-left: 3%;
+    border-radius: 16px;
+
+}
+
+.rightColumn {
+    width: 50%;
+    margin-right: 3%;
+}
+
+.profileStats {
+    background-color: rgba(25, 23, 21, 0.5);
+    height: 250px;
+    border-radius: 16px;
+    padding: 20px 30px;
+    font-size: 12px;
+    line-height: 25px;
+}
+
+.statRow {
+    display: flex;
+    justify-content: flex-start;
+    gap: 50px;
+    align-items: center;
+}
+
+.statRow span:first-child {
+    width: 130px;
+    flex-shrink: 0;
+    font-weight: bold;
+}
+
+.catImg {
+    position: absolute;
+    right: 20px;
+    top: 340px;
+}
+
+.catImg img {
+    transform: rotate(8deg);
+}
+
+.profileTop {
+    display: flex;
+    width: 100%;
+    background-color: rgba(25, 23, 21, 0.5);
+    height: 50px;
+    border-radius: 40px;
+    padding: 20px 30px;
+    font-size: 12px;
+    line-height: 25px;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.profileTopBtn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+    font-size: large;
+    font-weight: 900;
+    width: 100%;
+    border-radius: 40px;
+    height: 50px;
+}
+
+@keyframes shine {
+    to { background-position: 200% center; }
+}

@@ -70,7 +70,8 @@ export async function sendSnipeEmbed(discordClient: Client, data: any) {
 
         await channel.send({ 
             content: `🎯 **SNIPE!** ${getMention(data.player_discord_id, data.player_name)} derrubou o topo!${hiddenUrl}`, 
-            embeds: [embed] 
+            embeds: [embed],
+            allowedMentions: { parse: [] }
         })
 
     } catch (err) {
@@ -110,7 +111,8 @@ export async function sendTop1Embed(discordClient: Client, data: any) {
 
         await channel.send({ 
             content: `👑 **Novo Recorde!** ${getMention(data.player_discord_id, data.player_name)} é o novo #1!${hiddenUrl}`, 
-            embeds: [embed] 
+            embeds: [embed],
+            allowedMentions: { parse: [] }
         })
 
     } catch (err) {

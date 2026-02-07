@@ -1,57 +1,76 @@
 import { getPlayer, getRecentScore } from "../../services/apiCalls"
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js"
-import { recentEmbedBuilder, noRecentScoresEmbedBuilder, defaultEmbedBuilder } from "../../utils/utils.export";
+import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
+import { reply, recentEmbedBuilder, noRecentScoresEmbedBuilder, defaultEmbedBuilder, parseOnlyUsername } from "../../utils/utils.export"
 
 export default {
     data: new SlashCommandBuilder()
         .setName('recent')
         .setDescription('Exibe o score mais recente de um player')
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName('player')
                 .setDescription('Nick do player')
                 .setRequired(false)
         ),
 
+    aliases: ['r', 'rs', 'recent'],
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
-        
-        try{
-            
-            const insertedPlayer = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
-            const player = (insertedPlayer === null)
-                ? await getPlayer(interaction.user.id) // Player não foi fornecido
-                : await getPlayer(insertedPlayer) // Player fornecido
 
-            const [ score ] = (insertedPlayer === null)
-                ? await getRecentScore(interaction.user.id) // Player não foi fornecido
-                : await getRecentScore(insertedPlayer) // Player fornecido
+        const username = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
+
+        await this.handleRecentCommand(interaction, username)
+    },
+
+    async executePrefix(message: Message) {
+
+        const { username } = await parseOnlyUsername(message.content)
+
+        await this.handleRecentCommand(message, username)
+    },
+
+    async handleRecentCommand(source: ChatInputCommandInteraction | Message, username: string | null) {
+
+        try {
+
+            const user = (source instanceof ChatInputCommandInteraction)
+                ? source.user
+                : source.author
+
+            const finalUser = username || user.id // Player fornecido || Player não foi fornecido
+
+            const player = await getPlayer(finalUser.replace(" ", "_").toLowerCase())
+
+            const [score] = await getRecentScore(finalUser.replace(" ", "_").toLowerCase())
 
             // Caso o player ainda não possua scores
-            if (!score) { 
+            if (!score) {
 
-                const { embed, attachment } = await noRecentScoresEmbedBuilder(player);        
+                const { embed, attachment } = await noRecentScoresEmbedBuilder(player)
 
-                await interaction.editReply({
+                reply(source, {
                     embeds: [embed],
                     files: [attachment]
-                })
+                }
+                )
+
                 return
             }
-            
+
             const embed = await recentEmbedBuilder(player, score)
 
-            await interaction.editReply({ embeds: [embed] })
-    
-        }catch(error){
-            let mensagem
+            reply(source, { embeds: [embed] })
+
+        } catch (error) {
+            let message
             if (String(error).includes('Usuário não encontrado')) // Player não encontrado
-                mensagem = `Player \`${interaction.options.getString('player')}\` não encontrado!`
+                message = `Player \`${username}\` não encontrado!`
             else
-                mensagem = String(error) // Outro erro
+                message = String(error) // Outro erro
 
-            const embed = await defaultEmbedBuilder(mensagem)
+            const embed = await defaultEmbedBuilder(message)
 
-            await interaction.editReply({ embeds: [embed] })
+            reply(source, { embeds: [embed] })
         }
     }
 }

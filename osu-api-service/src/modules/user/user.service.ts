@@ -6,10 +6,13 @@ import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
-import { CreateUserInput, LoginUserInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
+import { CreateUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
 import { calculateLevel } from "../../utils/level";
+import path from "path";
+import { pipeline } from "stream/promises";
+import fs from "fs";
 
 const toSafeName = (name: string): string => {
     return name.trim().toLowerCase().replace(/ /g, '_');
@@ -33,6 +36,7 @@ export const getLastActivity = (unixTimestamp: number): string => {
 
 const mapOsuApiDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
     return {
+        artist: data.artist || data.beatmapset?.artist || 'Artista desconhecido',
         beatmap_id: data.id,
         beatmapset_id: data.beatmapset_id,
         beatmap_md5: data.checksum,
@@ -52,7 +56,11 @@ const mapOsuApiDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
         ar: data.ar,
         cs: data.cs,
         hp: data.drain,
-        max_combo: data.max_combo
+        max_combo: data.max_combo,
+        count_circles: data.count_circles,
+        count_sliders: data.count_sliders,
+        passcount: data.passcount,
+        playcount: data.playcount
     };
 };
 
@@ -69,6 +77,7 @@ const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player
         }
     } catch (error) {
         beatmapData = {
+            artist: row.artist || 'Artista Desconhecido',
             beatmap_id: row.map_id || 0,
             beatmapset_id: row.map_set_id || 0,
             beatmap_md5: row.map_md5,
@@ -88,7 +97,11 @@ const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player
             ar: 0,
             cs: 0,
             hp: 0,
-            max_combo: 0
+            max_combo: 0,
+            count_circles: 0,
+            count_sliders: 0,
+            passcount: 0,
+            playcount: 0
         };
     }
 
@@ -400,4 +413,70 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
             total_score: 0, ranked_score: 0, max_combo: 0, playtime: 0
         }
     };
+}
+
+export const getUsersCount = async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const fiveMinutesAgo = now - 300;
+
+    const usersCount = await prisma.users.count({
+        where: { 
+            priv: { gt: 0 }
+        }
+    });
+
+    const onlineCount = await prisma.users.count({
+        where: {
+            priv: { gt: 0 },
+            latest_activity: {
+                gte: fiveMinutesAgo
+            }
+        }
+    });
+
+    return {
+        total_users: usersCount,
+        online_users: onlineCount
+    };
+}
+
+export const setUserPfp = async (data: PostPfpInput) => {
+    const user = await prisma.users.findFirst({
+        where: {
+            discord_id: data.discord_id 
+        }
+    });
+
+    if (!user) {
+        throw new Error("Usuário não encontrado ou não vinculado.");
+    }
+
+    const avatarDir = path.join(process.cwd(), '.data', 'avatars');
+    
+    if (!fs.existsSync(avatarDir)) {
+        fs.mkdirSync(avatarDir, { recursive: true });
+    }
+
+    const fileName = `${user.id}.png`;
+    const avatarPath = path.join(avatarDir, fileName);
+
+    try {
+        await pipeline(
+            data.avatar.file,
+            fs.createWriteStream(avatarPath)
+        );
+
+        const now = new Date();
+        fs.utimesSync(avatarPath, now, now);
+
+        return {
+            id: user.id,
+            name: user.name,
+            avatar_url: `https://a.${process.env.DOMAIN || 'bpy.local'}/${user.id}?v=${Date.now()}`
+        };
+
+    } catch (err) {
+        console.error("Erro no processamento do avatar:", err);
+        throw new Error("Falha ao gravar o ficheiro no servidor.");
+    }
 }

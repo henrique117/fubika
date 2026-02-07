@@ -1,6 +1,8 @@
 import axios from 'axios'
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.fubika.com.br'
+//debug maldito
+console.log("API?:", apiUrl);
 
 export const api = axios.create({
     baseURL: apiUrl + '/api',

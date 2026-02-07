@@ -1,26 +1,48 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, ComponentType, EmbedBuilder, Message, AttachmentBuilder } from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, ComponentType, EmbedBuilder, Message, AttachmentBuilder, PartialGroupDMChannel } from 'discord.js'
 
 export default async function embedPagination(interaction: CommandInteraction | Message, pages: EmbedBuilder[], string: string = "", disapear: boolean = false, time: number = 40000, attachment?: AttachmentBuilder): Promise<void> {
     
-    if (!interaction || !pages || pages.length === 0) {
+    const sendResponse = async (payload: any): Promise<any> => {
         if (interaction instanceof CommandInteraction) {
-            const replyMethod = (interaction.deferred || interaction.replied) ? 'editReply' : 'reply';
-            await interaction[replyMethod]({ content: 'No pages found', ephemeral: true }).catch(() => {});
-        } else if (interaction instanceof Message) {
-            await interaction.reply('No pages found').catch(() => {});
+            if (interaction.deferred || interaction.replied) {
+                return await interaction.editReply(payload)
+            } else {
+                try {
+                    return await interaction.reply({ ...payload, fetchReply: true })
+                } catch (err: any) {
+                    if (err.code === 40060) { 
+                        return await interaction.editReply(payload)
+                    }
+                    throw err
+                }
+            }
+        } else if (!(interaction.channel instanceof PartialGroupDMChannel)){
+            return await interaction.channel.send(payload)
         }
-        return;
+    }
+
+    if (!interaction || !pages || pages.length === 0) {
+        const payload = { content: 'No pages found', ephemeral: true }
+        if (interaction instanceof CommandInteraction) {
+             if (interaction.deferred || interaction.replied) {
+                await interaction.editReply(payload).catch(() => {})
+             } else {
+                await interaction.reply(payload).catch(() => {})
+             }
+        } else {
+            await interaction.reply('No pages found').catch(() => {})
+        }
+        return
     }
 
     if (pages.length === 1) {
-        if (interaction instanceof CommandInteraction) {
-            const replyMethod = (interaction.deferred || interaction.replied) ? 'editReply' : 'reply';
-            await interaction[replyMethod]({ content: string, embeds: [pages[0]!.data], components: [], files: attachment ? [attachment] : [] });
-            return;
-        } else {
-            await interaction.reply({ content: string, embeds: [pages[0]!.data], components: [], files: attachment ? [attachment] : [] });
-            return;
-        }
+        await sendResponse({ 
+            content: string, 
+            embeds: [pages[0]!.data], 
+            components: [], 
+            files: attachment ? [attachment] : [] 
+        })
+        return
     }
 
     let index = 0
@@ -32,36 +54,18 @@ export default async function embedPagination(interaction: CommandInteraction | 
 
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(first, prev, pageCount, next, last)
     
-    let msg: Message;
+    let msg: any
 
     try {
-        if (interaction instanceof CommandInteraction) {
-            if (interaction.deferred || interaction.replied) {
-                msg = await interaction.editReply({ 
-                    content: string, 
-                    embeds: [pages[index]!.data], 
-                    components: [buttons],
-                    files: attachment ? [attachment] : []
-                });
-            } else {
-                msg = await interaction.reply({ 
-                    content: string, 
-                    embeds: [pages[index]!.data], 
-                    components: [buttons], 
-                    fetchReply: true,
-                    files: attachment ? [attachment] : []
-                });
-            }
-        } 
-        else if (interaction instanceof Message) {
-            msg = await interaction.reply({ 
-                content: string, 
-                embeds: [pages[index]!.data], 
-                components: [buttons],
-                files: attachment ? [attachment] : []
-            });
-        } else {
-            return;
+        msg = await sendResponse({ 
+            content: string, 
+            embeds: [pages[index]!.data], 
+            components: [buttons],
+            files: attachment ? [attachment] : []
+        })
+
+        if (!msg.createMessageComponentCollector && interaction instanceof CommandInteraction) {
+            msg = await interaction.fetchReply();
         }
 
         const collector = msg.createMessageComponentCollector({
@@ -70,12 +74,11 @@ export default async function embedPagination(interaction: CommandInteraction | 
         })
 
         collector.on('collect', async (i: any) => {
-            // Opcional: Travar para outros usuários
-            // if (i.user.id !== (interaction instanceof CommandInteraction ? interaction.user.id : interaction.author.id)) {
-            //    return await i.reply({ content: `You can't use this button!`, ephemeral: true });
-            // }
+            if (i.user.id !== (interaction instanceof CommandInteraction ? interaction.user.id : interaction.author.id)) {
+               return await i.reply({ content: `You can't use this button!`, ephemeral: true })
+            }
 
-            await i.deferUpdate();
+            await i.deferUpdate()
 
             if (i.customId === 'pagefirst') index = 0
             else if (i.customId === 'pageprev' && index > 0) index--
@@ -95,20 +98,19 @@ export default async function embedPagination(interaction: CommandInteraction | 
 
         collector.on("end", async () => {
             if (!disapear) {
-                await msg.edit({ embeds: [pages[index]!.data], components: [] }).catch(() => {})
+                await msg.edit({ components: [] }).catch(() => {})
             } else {
                 if (msg.deletable) await msg.delete().catch(() => {})
                 if (interaction instanceof Message && interaction.deletable) await interaction.delete().catch(() => {})
             }
         })
 
-        // return msg;
-
     } catch (e) {
-        console.error("Erro na paginação: ", e);
+        console.error("Erro na paginação: ", e)
         
         if (interaction instanceof CommandInteraction && !interaction.replied) {
-             await interaction.editReply({ content: 'Error on loading pages' }).catch(() => {});
+             const method = interaction.deferred ? 'editReply' : 'reply'
+             await interaction[method]({ content: 'Error on loading pages', ephemeral: true }).catch(() => {})
         }
     }
 }

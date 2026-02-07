@@ -43,7 +43,7 @@ const router = createBrowserRouter([
                 element: <GlobalRankingPage />
             },
             {
-                path: '/beatmap',
+                path: '/beatmap/:id',
                 element: <BeatmapPage />
             },
         ]

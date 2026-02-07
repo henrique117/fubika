@@ -7,17 +7,21 @@ import { useAuth } from '../../contexts/AuthContext'
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate()
-    const { signIn, signed } = useAuth()
+    const { signIn, signed, loading } = useAuth()
+
+    if (loading) {
+        return null
+    }
     
     if (signed) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/" replace />
     }
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     
     const [showPassword, setShowPassword] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [isloading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
     const togglePassword = () => setShowPassword(!showPassword)
@@ -122,10 +126,10 @@ const LoginPage: React.FC = () => {
 
                     <div 
                         className={style.entrarButton} 
-                        onClick={() => !loading && handleLogin()}
-                        style={{ cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.7 : 1 }}
+                        onClick={() => !isloading && handleLogin()}
+                        style={{ cursor: isloading ? 'wait' : 'pointer', opacity: isloading ? 0.7 : 1 }}
                     >
-                        <ButtonGradientComponent text={loading ? 'Carregando...' : 'Entrar'} />
+                        <ButtonGradientComponent text={isloading ? 'Carregando...' : 'Entrar'} />
                     </div>
 
                 </div>

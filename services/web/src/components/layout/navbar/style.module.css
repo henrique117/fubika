@@ -1,0 +1,263 @@
+:global(body.no-transition) * {
+    transition: none !important;
+}
+
+.header {
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(var(--color-azul-baitola) 0%, var(--color-verde-baitola) 100%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo img {
+    height: 35px;
+    width: auto;
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.navLinks a {
+    color: white;
+    text-decoration: none;
+    opacity: 0.9;
+    transition: all 0.2s;
+}
+
+.navLinks a:hover {
+    opacity: 1;
+    color: #2dd4bf;
+}
+
+.rightSection {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.searchWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchInput {
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 12px 8px 35px;
+    color: white;
+    font-size: 14px;
+    width: 150px;
+    transition: width 0.3s ease;
+}
+
+.searchInput:focus {
+    width: 200px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.searchIcon {
+    position: absolute;
+    left: 10px;
+    pointer-events: none;
+}
+
+.actionButtons {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 5px 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.iconButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.avatarTrigger {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.menuToggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.mobileOnly {
+    display: none;
+}
+
+.authLinks {
+    display: flex;
+    gap: 15px; 
+    align-items: center; 
+    margin-left: 10px;
+}
+
+.loginLink {
+    color: white;
+    text-decoration: none; 
+    font-weight: 600; 
+    font-size: 14px; 
+    opacity: 0.9;
+}
+
+.registerLink {
+    color: white;
+    background: transparent; 
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.4); 
+}
+
+@media (max-width: 768px) {
+    .mobileOnly {
+        display: block;
+        width: 100%;
+    }
+
+    .avatarTrigger {
+        display: none;
+    }
+
+    .menuToggle {
+        display: flex;
+    }
+
+    .navLinks {
+        display: flex;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: #1a1a1a;
+        flex-direction: column;
+        padding: 20px 0;
+        gap: 0;
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+
+        /* anim */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-30px); 
+        transition: transform 0.4s ease, opacity 0.4s ease, visibility 0.4s;
+        pointer-events: none; 
+        overflow: hidden;
+    }
+
+    .navActive {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0); 
+        padding: 20px 0;
+        pointer-events: auto;
+    }
+
+    .navLinks a {
+        width: 100%;
+        padding: 15px 25px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 16px;
+    }
+
+    .searchWrapperInside {
+        padding: 10px 20px;
+    }
+    
+    .searchWrapperInside .searchInput {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .profileInside {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .profileInside img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+
+    .logoutBtn {
+        width: 100%;
+        padding: 15px 25px;
+        text-align: left;
+        background: none;
+        border: none;
+        color: #ff6666;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 16px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .searchWrapper, 
+    .actionButtons .iconButton, 
+    .separator {
+        display: none !important;
+    }
+    
+}
+

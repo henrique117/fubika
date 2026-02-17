@@ -1,0 +1,26 @@
+.container {
+    width: 100%;
+    height: 100%;
+
+    background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
+    border-radius: 10px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 5px 15px;
+}
+
+.container:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    filter: grayscale(0.5)
+}
+
+.container:hover:not(:disabled) {
+    cursor: pointer;
+    border-color: transparent;
+    filter: brightness(0.85);
+    transition: 0.3s;
+}

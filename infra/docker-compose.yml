@@ -1,0 +1,115 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:9.1.0
+    container_name: fubika_mysql
+    restart: always
+    ports:
+      - "${DB_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASS}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: "${DB_PASS}"
+      DB_ROOT_PASS: "${DB_ROOT_PASS}"
+      DB_NAME: "${DB_NAME}"
+      DB_USER: "${DB_USER}"
+      DB_PASS: "${DB_PASS}"
+    volumes:
+      - ../volumes/mysql:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+      - ./mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${DB_ROOT_PASS}"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: fubika_redis
+    restart: always
+    volumes:
+      - ../volumes/redis:/data
+    command: >
+      sh -c 'if [ -n "${REDIS_PASS}" ]; then redis-server --requirepass "${REDIS_PASS}"; else redis-server; fi'
+
+  bancho:
+    container_name: fubika_bancho
+    build: ../services/bancho
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    tty: true
+    init: true
+    volumes:
+      - ../volumes/avatars:/srv/root/.data/avatars
+      - ../volumes/replays:/srv/root/.data/osr
+      - ../volumes/maps:/srv/root/.data/osu
+      - ../volumes/logs:/srv/root/.data/logs
+      - ../volumes/assets:/srv/root/.data/assets
+    env_file: .env
+
+  api:
+    container_name: fubika_api
+    build: ../services/api
+    restart: always
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file: .env
+    volumes:
+      - ../volumes/avatars:/app/.data/avatars
+
+  web:
+    container_name: fubika_web
+    build:
+      context: ../services/web
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=https://api.${DOMAIN}
+    depends_on:
+      - api
+    restart: always
+    env_file: .env
+
+  caddy:
+    image: caddy:latest
+    container_name: fubika_caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ../volumes/caddy_data:/data
+      - ../volumes/caddy_config:/config
+      - ../volumes/avatars:/srv/avatars
+      - ../volumes/assets:/srv/assets
+    env_file: .env
+    depends_on:
+      - web
+      - api
+      - bancho
+
+  bot:
+    container_name: fubika_bot
+    build: ../services/bot
+    restart: always
+    depends_on:
+      - api
+      - redis
+    env_file: .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASS=${REDIS_PASS}
+      - API_URL=http://api:${API_PORT}/api

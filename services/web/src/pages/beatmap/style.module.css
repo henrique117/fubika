@@ -1,0 +1,716 @@
+.pageWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 100px;
+}
+
+.card {
+    width: 90%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    align-items: center;
+    background-color: var(--color-background-dark);
+    border-radius: 15px;
+}
+
+.cardHeader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-verde-baitola);
+    width: 100%;
+    border-radius: 15px 15px 0px 0px;
+    height: 70px;
+    padding-inline: 20px;
+    gap: 20px;
+}
+
+.headerImg {
+    max-height: 40px;
+    width: auto;
+    opacity: 0.5;
+}
+
+.headerTitle {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.cardBody {
+    width: 100%;
+    height: 380px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.cardBody::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(19, 17, 15, 0.65);
+    z-index: 1;
+}
+
+.collection,
+.mapStats,
+.buttons {
+    position: absolute;
+    z-index: 2;
+}
+
+.collection {
+    left: 20px;
+    top: 20px;
+}
+
+.mapdiffs {
+    width: fit-content;
+    height: 40px;
+    border-radius: 10px;
+    background-color: rgba(19, 17, 15, 0.5);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /* justify-content: space-evenly; */
+    margin-bottom: 5px;
+}
+
+.otherMap {
+    width: 23px;
+    height: 23px;
+
+}
+
+.diffSR {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.diffSR h2 {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.diffSR span {
+    font-size: 10px;
+    color: #FFF600;
+}
+
+.mapStats {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    right: 20px;
+    top: 20px;
+    max-width: 231px;
+    width: 40%;
+    height: 280px;
+}
+
+.mapStatus {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+}
+
+.mapStatus h2 {
+    padding: 8.5px 10px;
+    text-align: center;
+    background-color: rgba(25, 23, 21, 0.85);
+    /* Figma */
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 10px;
+    letter-spacing: 1px;
+    text-transform: capitalize;
+    margin-bottom: 10px;
+}
+
+.mapPreview,
+.mapNumbers,
+.mapGraphs,
+.mapSucess {
+    width: 100%;
+    background-color: rgba(25, 23, 21, 0.85);
+    /* Figma */
+    border-radius: 10px;
+    margin-bottom: 3px;
+}
+
+.mapPreview,
+.mapNumbers {
+    height: 50px;
+}
+
+.mapNumbers img {
+    width: 18px;
+    height: 18px;
+}
+
+.mapGraphs {
+    height: 120px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 20px;
+    box-sizing: border-box;
+}
+
+.mapHeaderInfo {
+    position: absolute;
+    z-index: 2;
+    margin-top: 250px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.mapTitle {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+}
+
+.mapArtist {
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+.statRow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+    color: var(--color-branco);
+}
+
+.statLabel {
+    width: 50%;
+    white-space: nowrap;
+    font-family: 'Caviar Dreams', sans-serif;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+.progressBarBase {
+    flex: 1;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progressBarFill {
+    height: 100%;
+    background-color: #dddddd;
+    border-radius: 10px;
+    transition: width 0.5s ease-out;
+}
+
+.statValue {
+    width: 8px;
+    text-align: right;
+    font-size: 10px !important;
+    font-weight: bold;
+}
+
+.mapSucess {
+    height: 49px;
+    margin-bottom: 0 !important;
+}
+
+.mapPreview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.mapNumbers {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.mapNumbers div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    /* width: 17%; */
+}
+
+.mapNumbers div img {
+    background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
+    ;
+    padding: 2px;
+    border-radius: 50%;
+}
+
+.mapNumbers div span {
+    font-size: 10px;
+    padding-left: 5px;
+    font-weight: bold;
+    color: #FFBB00;
+}
+
+.buttons {
+    left: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 45%;
+    margin-top: 15px;
+}
+
+.btn {
+    height: 45px;
+    background-color: #3685CF;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    background-color: #4da0e9;
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btnSquare {
+    width: 45px;
+    flex-shrink: 0;
+}
+
+.btnWide {
+    flex: 1;
+    padding: 0 15px;
+    justify-content: space-between;
+}
+
+.btnText {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.cardFooter {
+    width: 100%;
+    height: 40px;
+    background-color: var(--color-verde-baitola);
+    border-radius: 0px 0px 15px 15px;
+    opacity: 0.65;
+}
+
+.cardLB {
+    width: 100%;
+}
+
+.lbHeader {
+    width: 100%;
+    height: 290px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 7px;
+}
+
+.lbTitle {
+    background-color: #39AD9B;
+    padding: 10px 20px;
+    border-radius: 6px;
+}
+
+.lbTitle h2 {
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+}
+
+.catBody,
+.catHead {
+    position: absolute;
+    opacity: 0.5;
+    width: auto;
+}
+
+.catBody {
+    max-height: 291px;
+    left: 5%;
+    bottom: -2%;
+    transform: scaleX(-1);
+}
+
+.catHead {
+    max-height: 140px;
+    right: 5%;
+    bottom: 20%;
+    transform: rotate(12deg);
+}
+
+.leaderboardContainer {
+    width: 100%;
+}
+
+.tableHeader {
+    display: flex;
+    padding: 5px 0px;
+    background-color: inherit;
+    color: var(--color-branco);
+    font-size: 8px;
+    font-weight: bold;
+    align-items: center;
+    gap: 15px;
+    padding-inline: 20px;
+}
+
+.colRank {
+    width: 15px;
+    text-align: center;
+}
+
+.colPlayer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 100px;
+    padding-left: 10px;
+    overflow: hidden;
+}
+
+.colPP {
+    width: 80px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.colAcc {
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.colMods {
+    width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.colMaxCombo {
+    width: 59px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.col300,
+.col100,
+.col50,
+.colX {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.rowsContainer {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    padding-inline: 20px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.playerRow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 30px;
+    background-color: var(--color-background);
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 10px;
+    border-radius: 15px;
+    gap: 15px;
+}
+
+.ppValue,
+.statValue {
+    font-size: 12px;
+    color: var(--color-branco);
+}
+
+.nameInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.username {
+    font-size: 15px;
+}
+
+.grade {
+    max-width: 15px;
+    height: auto;
+    width: 100%;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.emptyState {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+    color: var(--color-branco);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.tooltipContainer {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    cursor: help;
+}
+
+.tooltipText {
+    visibility: hidden;
+    background-color: #191715;
+    color: #FFFFFF;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 10;
+    bottom: 140%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Caviar Dreams', sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.tooltipText::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #191715 transparent transparent transparent;
+}
+
+.tooltipContainer:hover .tooltipText {
+    visibility: visible;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .pageWrapper {
+        padding-top: 80px;
+    }
+
+    .card {
+        width: 95%;
+    }
+
+    .cardBody {
+        height: 580px;
+    }
+
+    .mapHeaderInfo {
+        position: absolute;
+        z-index: 2;
+        margin-top: 250px;
+        margin-bottom: 0px;
+        margin-left: 10px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        gap: 4px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .mapStats {
+        width: 90%;
+        max-width: none;
+        right: 5%;
+        top: 80px;
+        height: auto;
+        gap: 10px;
+    }
+
+    .lbHeader {
+        width: 100%;
+        height: 200px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        margin-bottom: 7px;
+    }
+
+    .mapHeaderInfo {
+        margin-top: 0;
+        bottom: 90px;
+        left: 15px;
+        width: 90%;
+    }
+
+    .mapTitle {
+        font-size: 20px;
+    }
+
+    .mapArtist {
+        font-size: 14px;
+    }
+
+    .mapNumbers {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .mapNumbers div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-evenly;
+        /* width: 17%; */
+    }
+
+    .mapNumbers div img {
+        background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
+        padding: 1px;
+        border-radius: 50%;
+    }
+
+    .mapNumbers div span {
+        font-size: 17px;
+        padding-left: 8px;
+        font-weight: bold;
+        color: #FFBB00;
+    }
+
+    .buttons {
+        width: 92%;
+        left: 4%;
+        bottom: 15px;
+        gap: 5px;
+    }
+
+    .statLabel {
+        font-family: 'Caviar Dreams', sans-serif;
+        width: 50%;
+        white-space: nowrap;
+        font-weight: normal;
+        font-size: 16px;
+    }
+
+    .progressBarBase {
+        flex: 1;
+        height: 6px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .btnText {
+        display: none;
+    }
+
+    .btnWide {
+        justify-content: center;
+    }
+
+    .col300,
+    .col100,
+    .col50,
+    .colX {
+        display: none;
+    }
+
+    .playerRow {
+        gap: 8px;
+        padding-inline: 0px !important;
+    }
+
+    .tableHeader {
+        gap: 8px;
+        padding-inline: 20px !important;
+    }
+
+    .colPlayer {
+        min-width: 80px;
+    }
+
+    .username {
+        font-size: 12px;
+    }
+
+    .colPP {
+        width: 60px;
+    }
+
+    .colMaxCombo {
+        width: 50px;
+        text-align: left;
+    }
+
+    .catBody {
+        max-height: 180px;
+        left: 2%;
+    }
+
+    .catHead {
+        max-height: 80px;
+        right: 2%;
+    }
+}

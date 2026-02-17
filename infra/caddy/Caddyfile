@@ -1,0 +1,45 @@
+{
+    email hassis.moreira117@gmail.com
+}
+
+# --- 1. O SITE PRINCIPAL (React) ---
+{$DOMAIN}, www.{$DOMAIN} {
+    {$TLS_OPTS}
+    encode gzip
+    reverse_proxy web:80
+}
+
+# --- 2. A API (Fastify) ---
+api.{$DOMAIN} {
+    {$TLS_OPTS}
+    encode gzip
+    reverse_proxy api:{$API_PORT}
+}
+
+# --- 3. BANCHO (Game Client) ---
+c.{$DOMAIN}, ce.{$DOMAIN}, c4.{$DOMAIN}, osu.{$DOMAIN}, b.{$DOMAIN} {
+    {$TLS_OPTS}
+    reverse_proxy bancho:{$APP_PORT} {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+    }
+}
+
+# --- 4. AVATARES (Serviço de Imagens) ---
+a.{$DOMAIN} {
+    {$TLS_OPTS}
+    encode gzip
+    root * /srv/avatars
+    
+    try_files {path} {path}.png {path}.jpg {path}.jpeg {path}.gif /default.jpg /default.png
+    
+    file_server
+}
+
+# --- 5. ASSETS (Medalhas, Banners, etc) ---
+assets.{$DOMAIN} {
+    {$TLS_OPTS}
+    encode gzip
+    root * /srv/assets
+    file_server browse
+}

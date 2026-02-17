@@ -1,0 +1,48 @@
+.data
+.env
+__pycache__
+.venv
+.git
+
+---
+
+### 3. Bot (`fubika-bot/Dockerfile`)
+Simples e eficiente. Só vou adicionar a limpeza do cache do npm para deixar a imagem menor.
+
+
+http://googleusercontent.com/immersive_entry_chip/1
+
+**Cria o arquivo `.dockerignore` na raiz do `fubika-bot`:**
+```text
+node_modules
+dist
+.env
+.git
+
+---
+
+### 4. Web (`fubika-web/Dockerfile`) e o `nginx.conf`
+O Dockerfile está correto, **MAS** você precisa criar o arquivo `nginx.conf` na raiz do `fubika-web`, senão o React vai quebrar (erro 404) quando você tentar acessar `/login` ou `/rankings` diretamente pela URL (problema de SPA).
+
+**O Dockerfile (Pequeno ajuste no comando final):**
+
+http://googleusercontent.com/immersive_entry_chip/2
+
+**Arquivo OBRIGATÓRIO: `fubika-web/nginx.conf`**
+Sem isso, o site carrega a Home, mas se der F5 numa rota interna, quebra.
+
+http://googleusercontent.com/immersive_entry_chip/3
+
+**Cria o arquivo `.dockerignore` na raiz do `fubika-web`:**
+```text
+node_modules
+dist
+.env
+.git
+
+### Resumo das Alterações
+1.  **Bancho:** Adicionado `RUN chmod +x` para evitar erro de permissão.
+2.  **Web:** Criado o arquivo `nginx.conf` para suportar rotas do React (Login, Ranking, etc).
+3.  **Geral:** Adicionados arquivos `.dockerignore` para evitar copiar `node_modules` do Windows para o Linux (o que causa erros estranhos de binários).
+
+Com esses ajustes, o deploy deve ser tranquilo!

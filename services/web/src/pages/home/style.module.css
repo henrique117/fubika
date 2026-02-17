@@ -1,0 +1,98 @@
+.pageWrapper {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.centerContent {
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.infoCard {
+    background-color: var(--color-background-dark);
+    border-radius: 20px;
+    padding-inline: 20px;
+    padding-bottom: 15px;
+    width: 100%;
+    margin-top: 71px;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch; 
+}
+
+.cardUpperText {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logoSvg {
+    padding-top: 5px;
+    width: 40%;
+    display: flex;
+    align-items: flex-start;
+}
+
+.stats {
+    font-size: 10px;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    margin-top: 20px;
+    padding-left: 30px;
+    font-weight: bold;
+}
+
+.statsNumber {
+    font-size: 20px;
+    font-weight: bold;
+
+    background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    
+    display: inline-block; 
+}
+
+.description {
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    font-size: 17.5px;
+    line-height: 1.6;
+    padding-left: 30px;
+    font-weight: bold;
+    text-align: justify;
+}
+
+.buttonsRow {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.btnWrapper {
+    flex: 1;
+    max-width: 300px;
+    height: 50px;
+    position: relative;
+}

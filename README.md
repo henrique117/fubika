@@ -9,7 +9,7 @@
     <br>
     <img src="https://img.shields.io/badge/License-All_Rights_Reserved-red?style=flat-square" alt="License">
     <a href="https://discord.gg/rUCxPEBjB8">
-        <img src="https://img.shields.io/discord/748687781605408908?color=7289DA&label=Discord&logo=discord&logoColor=white&style=flat-square" alt="Discord">
+        <img src="https://img.shields.io/discord/1450592028147712173?color=7289DA&label=Discord&logo=discord&logoColor=white&style=flat-square" alt="Discord">
     </a>
 </div>
 

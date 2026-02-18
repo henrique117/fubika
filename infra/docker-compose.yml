@@ -37,6 +37,8 @@ services:
       - ../volumes/redis:/data
     command: >
       sh -c 'if [ -n "${REDIS_PASS}" ]; then redis-server --requirepass "${REDIS_PASS}"; else redis-server; fi'
+    networks:
+      - public_proxy
 
   bancho:
     container_name: fubika_bancho
@@ -123,6 +125,8 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASS=${REDIS_PASS}
       - API_URL=http://api:${API_PORT}/api
+    networks:
+      - public_proxy
 
 networks:
   public_proxy:

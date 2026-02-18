@@ -46,5 +46,5 @@ assets.{$DOMAIN} {
 
 tickets.fubika.com.br {
     {$TLS_OPTS}
-    reverse_proxy tickets_bot:8169
+    reverse_proxy tickets_app:8169
 }

@@ -43,3 +43,8 @@ assets.{$DOMAIN} {
     root * /srv/assets
     file_server browse
 }
+
+tickets.fubika.com.br {
+    {$TLS_OPTS}
+    reverse_proxy tickets-bot:8169
+}

@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "discord.js"
 import { URLS, COLORS } from "../../constants"
 
-export default async function defaultHelpEmbed() {
+export default function defaultHelpEmbed() {
 
     // Usuários
     const fubasId = '1450602338925543537'

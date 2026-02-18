@@ -139,7 +139,7 @@ export async function postChangeAvatar(id: string, buffer: Buffer) {
 export async function postGenerateApiKey(id: string, application_name: string) {
 
     try {
-        const response = await osuApiClient.post(`api/key`, {
+        const response = await osuApiClient.post(`key`, {
             id: id,
             id_target: id,
             name: application_name

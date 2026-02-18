@@ -1,0 +1,208 @@
+.pageWrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding-top: 80px;
+    padding-bottom: 50px;
+}
+
+.rankingContainer {
+    width: 100%;
+    max-width: 1000px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+}
+
+.tableCard {
+    background-color: rgba(25, 23, 21, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: center;
+    background-color: rgba(25, 23, 21, 0.75);
+    border-radius: 16px;
+    height: 180px;
+    padding: 20px 30px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.profileImg {
+    width: 140px;
+    height: 140px;
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.profileHeaderInfo {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    margin-left: 7px;
+    align-items: center;
+    gap: 0px !important;
+}
+
+.profileNickname {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.profileLevel {
+    font-size: 10px;
+    color: #88C0E8;
+    font-weight: 100;
+    text-align: center;
+    padding-bottom: 2px;
+}
+
+.progressBarLevel {
+    height: 7px;
+    width: 140px;
+    border: 1px solid #D9D9D9;
+    align-self: center;
+    border-radius: 15px;
+    margin-bottom: 0;
+    line-height: 0.7;
+}
+
+.rankArea {
+    display: flex;
+    gap: 12px;
+    margin: 0;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+.rankNumber {
+    font-size: 12px;
+    font-weight: 800;
+    padding-left: 10px;
+}
+
+.rankBronze {
+    color: #cd7f32;
+}
+
+.rankPrata {
+    color: #c0c0c0;
+}
+
+.rankOuro {
+    color: #ffd700;
+}
+
+.rankPlatina {
+    background: linear-gradient(to right, #00c6ff, #0072ff, #00c6ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: shine 2s linear infinite;
+}
+
+@keyframes shine {
+    to {
+        background-position: 200% center;
+    }
+}
+
+.profileButtons button{
+    margin-top: 5px;
+    height: 20px;
+    width: 35px;
+    border: none;
+    border-radius: 10px;
+    background-color: #c0c0c0;
+}
+
+.friendBtn{
+    margin-left: 20px;
+}
+
+.notificationBtn {
+    margin-left: 10px;
+}
+
+.rankRow {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    align-items: center;
+    font-size: 10px;
+}
+
+.profileInfos {
+    width: 100%;
+    height: 700px;
+    display: flex;
+    gap: 20px;
+}
+
+.profileMaps {
+    width: 50%;
+    background-color: rgba(25, 23, 21, 0.5);
+    height: 600px;
+    margin-left: 3%;
+    border-radius: 16px;
+}
+
+.rightColumn {
+    width: 50%;
+    margin-right: 3%;
+}
+
+.profileStats {
+    background-color: rgba(25, 23, 21, 0.5);
+    height: 250px;
+    border-radius: 16px;
+    padding: 20px 30px;
+    font-size: 12px;
+    line-height: 25px;
+}
+
+.statRow {
+    display: flex;
+    justify-content: flex-start;
+    gap: 50px;
+    align-items: center;
+
+}
+
+.statRow span:first-child {
+    width: 130px;
+    flex-shrink: 0;
+    font-weight: bold;
+}
+
+.catImg {
+    position: absolute;
+    right: 20px;
+    top: 340px;
+}
+
+.catImg img {
+    transform: rotate(8deg);
+}
+
+.profileTop {
+    margin-top: 10px;
+    min-height: 100px;
+    background-color: rgba(25, 23, 21, 0.5);
+    height: 100px;
+    border-radius: 16px;
+    padding: 20px 30px;
+    font-size: 12px;
+    line-height: 25px;
+    flex-grow: 1;
+}

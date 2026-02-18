@@ -21,7 +21,9 @@ export default {
         if (match) {
 
             commandName = match[1] ?? null
-            index = Number(match[2]) ?? null
+            index = (match[2] !== undefined) 
+                ? Number(match[2])
+                : null
         }
 
         if (!commandName) return

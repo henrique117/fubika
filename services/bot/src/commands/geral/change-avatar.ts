@@ -7,7 +7,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName('change-avatar')
         .setDescription('Atualiza a sua foto de perfil no servidor de osu!')
-        .addAttachmentOption(option => 
+        .addAttachmentOption(option =>
             option.setName('imagem')
                 .setDescription('A nova imagem para o seu perfil (PNG/JPG)')
                 .setRequired(true)
@@ -41,7 +41,7 @@ export default {
 
             await interaction.editReply({ embeds: [successEmbed] })
 
-        } catch (error: any) {            
+        } catch (error: any) {
             const errorMsg = error.response?.data?.message || 'Erro interno ao processar o upload.'
 
             const embed = await defaultEmbedBuilder(`Falha ao atualizar avatar: **${errorMsg}**`)

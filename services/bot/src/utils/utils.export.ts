@@ -1,3 +1,4 @@
+// Embed Builders
 export * from './embedBuilders/auxiliarEmbeds'
 export {default as compareEmbedBuilder} from './embedBuilders/compareEmbedBuilder'
 export {default as embedPagination} from './embedBuilders/embedPagination'
@@ -8,5 +9,17 @@ export {default as top200EmbedsBuilder} from './embedBuilders/top200EmbedsBuilde
 export {default as topIndexEmbedBuilder} from './embedBuilders/topIndexEmbedBuilder'
 export {default as userEmbedBuilder} from './embedBuilders/userEmbedBuilder'
 export * from './embedBuilders/embedsDescriptionFormatting'
+
+// Help Command Embeds
+export {default as defaultHelpEmbed} from './helpCommandEmbeds/defaultHelpEmbed'
+export {default as helpCompareEmbed} from './helpCommandEmbeds/helpCompareEmbed'
+export {default as helpHelpEmbed} from './helpCommandEmbeds/helpHelpEmbed'
+export {default as helpLeaderboardEmbed} from './helpCommandEmbeds/helpLeaderboardEmbed'
+export {default as helpRankingEmbed} from './helpCommandEmbeds/helpRankingEmbed'
+export {default as helpRecentEmbed} from './helpCommandEmbeds/helpRecentEmbed'
+export {default as helpRecentListEmbed} from './helpCommandEmbeds/helpRecentListEmbed'
+export {default as helpTopEmbed} from './helpCommandEmbeds/helpTopEmbed'
+export {default as helpUserEmbed} from './helpCommandEmbeds/helpUserEmbed'
+
 export * from './argumentsParsers'
 export * from './auxiliarFunctions'

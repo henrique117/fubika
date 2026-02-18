@@ -3,7 +3,6 @@ export const GUILD_CONFIG = {
         verificado: "1450593806079623168"
     },
     channels: {
-        verificados: "1460449847898538005",
         fubas_logs: "1450644955830943877",
         top_scores: "1463956240978673979"
     }

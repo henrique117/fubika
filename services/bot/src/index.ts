@@ -4,7 +4,6 @@ import { Client, Collection, GatewayIntentBits, Interaction } from 'discord.js'
 import * as dotenv from 'dotenv'
 import path from 'path'
 import fs from 'fs'
-import { startRedisListener } from './services/redisClient'
 
 dotenv.config()
 
@@ -73,44 +72,5 @@ if (fs.existsSync(eventsPath)) {
         }
     }
 }
-
-client.on('interactionCreate', async (interaction: Interaction) => {
-    if (!interaction.isChatInputCommand()) return
-
-    const command = client.commands.get(interaction.commandName)
-    if (!command) return
-
-    try {
-        await command.execute(interaction)
-    } catch (error) {
-        console.error(`Erro ao executar comando ${interaction.commandName}:`, error)
-        
-        const errorPayload = { content: 'Houve um erro ao executar esse comando!', ephemeral: true }
-
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp(errorPayload).catch(e => console.error("Erro no followUp:", e))
-        } else {
-            try {
-                await interaction.reply(errorPayload)
-            } catch (err: any) {
-                if (err.code === 40060) {
-                    await interaction.followUp(errorPayload).catch(e => console.error("Erro no followUp de recuperação:", e))
-                } else {
-                    console.error("Erro no reply:", err)
-                }
-            }
-        }
-    }
-})
-
-client.once('ready', async () => {
-    console.log(`✅ Bot online como ${client.user?.tag}`)
-
-    try {
-        await startRedisListener(client)
-    } catch (err) {
-        console.error("❌ Falha ao iniciar o Redis Listener:", err)
-    }
-})
 
 client.login(process.env.TOKEN)

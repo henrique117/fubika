@@ -18,7 +18,7 @@ export async function getPlayer(id: string): Promise<IPlayer> {
     }
 }
 
-export async function getRecentScore(id: string): Promise<Array<IScore>> {
+export async function getRecentScores(id: string): Promise<Array<IScore>> {
 
     try {
         const response = await osuApiClient.get(`user/${id}/recent`)

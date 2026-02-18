@@ -12,7 +12,7 @@ export default {
                 .setRequired(false)
         ),
 
-    aliases: ['std', 'osu', 'u', 'user'],
+    aliases: ['std', 'osu', 'u'],
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()

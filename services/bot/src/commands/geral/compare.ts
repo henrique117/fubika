@@ -1,39 +1,39 @@
 import { getBeatmap, getPlayer } from "../../services/apiCalls"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
-import { reply, compareEmbedBuilder,defaultEmbedBuilder, extractBeatmapId, parseCompareArguments, getBeatmapIdFromMessage, fetchLastBeatmapId } from "../../utils/utils.export"
+import { reply, compareEmbedBuilder, defaultEmbedBuilder, extractBeatmapId, parseCompareArguments, getBeatmapIdFromMessage, fetchLastBeatmapId } from "../../utils/utils.export"
 
 export default {
     data: new SlashCommandBuilder()
         .setName('compare')
         .setDescription('Compara o score de um player em um beatmap')
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName('beatmap')
-            .setDescription('Link ou ID do beatmap')
-            .setRequired(false)
+                .setDescription('Link ou ID do beatmap')
+                .setRequired(false)
         )
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName('player')
                 .setDescription('Nick do player')
                 .setRequired(false)
         ),
-    
-    aliases: ['c', 'compare'],
+
+    aliases: ['c', 'gap'],
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
 
         const username = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
-        
+
         const insertedBeatmap = interaction.options.getString('beatmap') // Pega o link ou id do beatmap fornecido (ou não) no comando
-        
+
         const beatmapId = (insertedBeatmap?.includes('/'))
             ? await extractBeatmapId(insertedBeatmap)
             : insertedBeatmap
 
         await this.handleCompareCommand(interaction, beatmapId, username)
     },
-    
-    async executePrefix(message: Message){
+
+    async executePrefix(message: Message) {
 
         const { beatmapId, username } = await parseCompareArguments(message.content)
 
@@ -43,9 +43,9 @@ export default {
         if (!inputBeatmapId && message.reference?.messageId) {
             try {
                 const repliedMessage = await message.channel.messages.fetch(message.reference.messageId)
-                
+
                 const replyId = await getBeatmapIdFromMessage(repliedMessage)
-                
+
                 if (replyId)
                     inputBeatmapId = replyId
 
@@ -57,10 +57,10 @@ export default {
         await this.handleCompareCommand(message, inputBeatmapId, username)
     },
 
-    async handleCompareCommand(source: ChatInputCommandInteraction | Message, beatmapId: string | null, username: string | null){
-        
-        try{
-        
+    async handleCompareCommand(source: ChatInputCommandInteraction | Message, beatmapId: string | null, username: string | null) {
+
+        try {
+
             const user = (source instanceof ChatInputCommandInteraction)
                 ? source.user
                 : source.author
@@ -71,8 +71,8 @@ export default {
 
             let finalBeatmapId = beatmapId
 
-            if(finalBeatmapId === null) {
-                
+            if (finalBeatmapId === null) {
+
                 const channelBeatmapId = await fetchLastBeatmapId(source.channel)
 
                 if (channelBeatmapId === null)

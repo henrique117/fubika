@@ -55,6 +55,8 @@ services:
       - ../volumes/logs:/srv/root/.data/logs
       - ../volumes/assets:/srv/root/.data/assets
     env_file: .env
+    networks:
+      - public_proxy
 
   api:
     container_name: fubika_api
@@ -68,6 +70,8 @@ services:
     env_file: .env
     volumes:
       - ../volumes/avatars:/app/.data/avatars
+    networks:
+      - public_proxy
 
   web:
     container_name: fubika_web
@@ -80,6 +84,8 @@ services:
       - api
     restart: always
     env_file: .env
+    networks:
+      - public_proxy
 
   caddy:
     image: caddy:latest

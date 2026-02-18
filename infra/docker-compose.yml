@@ -99,6 +99,8 @@ services:
       - web
       - api
       - bancho
+    networks:
+      - public_proxy
 
   bot:
     container_name: fubika_bot
@@ -113,3 +115,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASS=${REDIS_PASS}
       - API_URL=http://api:${API_PORT}/api
+
+networks:
+  public_proxy:
+    external: true

@@ -7,6 +7,7 @@ export async function reply(source: ChatInputCommandInteraction | Message, conte
         return await source.editReply(content)
     else if (!(source.channel instanceof PartialGroupDMChannel))
         return await source.channel.send(content)
+    return
 }
 
 export async function extractBeatmapId(beatmapLink: string): Promise<string> {

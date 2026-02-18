@@ -82,14 +82,14 @@ export default {
             } else {
 
                 switch (selectedCommand) {
-                    case 'compare': embed = helpCompareEmbed(); break
-                    case 'help': embed = helpHelpEmbed(); break
+                    case 'compare':     embed = helpCompareEmbed();     break
+                    case 'help':        embed = helpHelpEmbed();        break
                     case 'leaderboard': embed = helpLeaderboardEmbed(); break
-                    case 'ranking': embed = helpRankingEmbed(); break
-                    case 'recent': embed = helpRecentEmbed(); break
-                    case 'recentlist': embed = helpRecentListEmbed(); break
-                    case 'top': embed = helpTopEmbed(); break
-                    case 'user': embed = helpUserEmbed(); break
+                    case 'ranking':     embed = helpRankingEmbed();     break
+                    case 'recent':      embed = helpRecentEmbed();      break
+                    case 'recentlist':  embed = helpRecentListEmbed();  break
+                    case 'top':         embed = helpTopEmbed();         break
+                    case 'user':        embed = helpUserEmbed();        break
                 }
             }
 

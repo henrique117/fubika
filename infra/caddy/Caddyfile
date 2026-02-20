@@ -44,6 +44,7 @@ assets.{$DOMAIN} {
     file_server browse
 }
 
+# --- 6. TICKETS (Bot de tickets do Discord) ---
 tickets.fubika.com.br {
     {$TLS_OPTS}
     reverse_proxy tickets_app:8169

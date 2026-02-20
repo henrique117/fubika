@@ -306,7 +306,7 @@ class Score:
 
             # Para mapas Unranked (status < 2), PP geralmente é 0. 
             # Forçamos a métrica 'score' para mapas que não dão PP.
-            if self.mode >= GameMode.RELAX_OSU and self.bmap.status >= 2:
+            if self.mode >= GameMode.RELAX_OSU and self.bmap.status == 2:
                 scoring_metric = "pp"
                 score_val = float(self.pp)
             else:
@@ -317,8 +317,8 @@ class Score:
             query = [
                 f"SELECT COUNT(*) FROM scores s ",
                 "INNER JOIN users u ON u.id = s.userid ",
-                "WHERE s.map_md5 = :map_md5 AND s.mode = :mode ",
-                "AND u.priv & 1 ", # Mantemos apenas para não contar players banidos
+                "WHERE s.map_md5 = :map_md5 AND s.mode = :mode AND s.grade != 'F' ",
+                "AND u.priv & 1 ",
                 f"AND s.{scoring_metric} > :score "
             ]
             
@@ -343,7 +343,7 @@ class Score:
             
             log(f"[Rank] {self.player.name} pegou #{placement} no mapa {self.bmap.id}", Ansi.LBLUE)
 
-            if placement == 1:
+            if placement == 1 and self.grade != 'F':
                 # Dispara a lógica de Snipe para QUALQUER mapa agora
                 asyncio.create_task(self.process_top_score_logic(am_i_v2, scoring_metric, SCORE_V2_BIT))
 
@@ -363,7 +363,7 @@ class Score:
                 SELECT s.userid, u.name, u.discord_id, s.pp, s.score, s.acc, s.mods
                 FROM scores s
                 JOIN users u ON u.id = s.userid
-                WHERE s.map_md5 = :map_md5 AND s.mode = :mode
+                WHERE s.map_md5 = :map_md5 AND s.mode = :mode AND s.grade != 'F'
                 AND (s.mods & :v2_mod) {v2_op} 0
                 AND s.userid != :current_user
                 ORDER BY s.{metric} DESC LIMIT 1

@@ -74,6 +74,7 @@ export default {
 
                     if (tries === maxTries) {
                         await dmChannel.send('❌ **Código incorreto.** Você excedeu o número máximo de tentativas!\nUse o comando no servidor novamente.')
+                        return
                     } else if (error.message.includes('Erro interno ao processar vinculação')) {
                         await dmChannel.send(`⚠️ **Código incorreto** (Tentativa ${tries}/${maxTries})\n\nTente novamente:`)
                     } else {
@@ -85,21 +86,24 @@ export default {
             }
 
             // Lógica para dar cargo verificado e notificar #verificados
-            const member = interaction.member as GuildMember
-            const channel = interaction.guild?.channels.cache.get(GUILD_CONFIG.channels.fubas_logs) as TextChannel
+            if (sucess) {
+                const guild = await interaction.client.guilds.fetch(GUILD_CONFIG.guild_id)
+                const member = await guild.members.fetch(interaction.user.id) as GuildMember
+                const channel = await interaction.client.channels.fetch(GUILD_CONFIG.channels.fubas_logs) as TextChannel
 
-            try {
-                if (member)
-                    await member.roles.add(GUILD_CONFIG.roles.verificado)
+                try {
+                    if (member)
+                        await member.roles.add(GUILD_CONFIG.roles.verificado)
 
-                if (channel) {
-                    await channel.send({
-                        content: `${member} verificou com \`${insertedNick}\``,
-                    })
+                    if (channel) {
+                        await channel.send({
+                            content: `${member} verificou com \`${insertedNick}\``,
+                        })
+                    }
+
+                } catch (error) {
+                    console.error("[osu-link] Erro ao processar cargo/log de verificação:", error)
                 }
-
-            } catch (error) {
-                console.error("Erro ao processar cargo/aviso de verificação:", error)
             }
 
         } catch (error) {

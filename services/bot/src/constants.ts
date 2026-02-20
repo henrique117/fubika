@@ -1,4 +1,5 @@
 export const GUILD_CONFIG = {
+    guild_id: "1450592028147712173",
     roles: {
         verificado: "1450593806079623168"
     },

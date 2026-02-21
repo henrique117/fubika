@@ -286,10 +286,9 @@ class Score:
                 self.passed,
                 self.mode.as_vanilla,
                 self.client_time,
-                osu_version,  # 20210520
+                osu_version,
                 osu_client_hash,
                 storyboard_checksum,
-                # yyMMddHHmmss
             ).encode(),
         ).hexdigest()
 

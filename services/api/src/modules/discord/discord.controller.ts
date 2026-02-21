@@ -1,35 +1,39 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply, FastifyRequest } from "fastify";
 import { finishLinkProcess, startLinkProcess } from "./discord.service";
 import { CheckDiscordLink, CreateDiscordLink } from "./discord.schema";
 import z from "zod";
+
+const sendError = (res: FastifyReply, statusCode: number, message: string, technicalError?: any) => {
+    if (technicalError) {
+        console.error(`[Discord Link API Error ${statusCode}]:`, technicalError);
+    }
+    return res.code(statusCode).send({ 
+        error: statusCode >= 500 ? "Internal Server Error" : "Bad Request",
+        message 
+    });
+};
 
 export const handleCreateDiscordLink = async (
     req: FastifyRequest<{ Body: CreateDiscordLink }>,
     res: FastifyReply
 ) => {
     try {
-        const body = req.body;
-
-        const result = await startLinkProcess(body);
-
+        const result = await startLinkProcess(req.body);
         return res.send(result);
-
     } catch (err: any) {
-        
         if (err instanceof z.ZodError) {
-            return res.status(400).send({ error: "Dados inválidos", details: err.format() });
+            return sendError(res, 400, "Dados de entrada inválidos.");
         }
 
         if (err.message === "USER_NOT_FOUND") {
-            return res.status(404).send({ error: "Usuário não encontrado no servidor." });
+            return sendError(res, 404, "Usuário não encontrado no servidor.");
         }
 
         if (err.message === "ALREADY_LINKED") {
-            return res.status(409).send({ error: "Este usuário já está vinculado a um Discord." });
+            return sendError(res, 409, "Este usuário já está vinculado a uma conta Discord.");
         }
 
-        console.error(err)
-        return res.status(500).send({ error: "Erro interno ao processar vinculação." });
+        return sendError(res, 500, "Falha ao processar o início da vinculação.", err);
     }
 }
 
@@ -38,18 +42,14 @@ export const handleCheckDiscordLink = async (
     res: FastifyReply
 ) => {
     try {
-        const body = req.body;
-
-        const result = await finishLinkProcess(body);
-
+        const result = await finishLinkProcess(req.body);
         return res.send(result);
-        
     } catch (err: any) {
-
         if (err instanceof z.ZodError) {
-            return res.status(400).send({ error: "Dados inválidos", details: err.format() });
+            return sendError(res, 400, "Parâmetros de verificação inválidos.");
         }
 
-        return res.status(500).send({ error: "Erro interno ao processar vinculação." });
+        const msg = err.message === "INVALID_CODE" ? "Código de verificação inválido ou expirado." : "Erro ao finalizar vinculação.";
+        return sendError(res, 400, msg, err);
     }
 }

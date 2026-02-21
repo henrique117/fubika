@@ -2,6 +2,16 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { getGlobalRankSchema } from "./ranking.schema";
 import { getGlobalLeaderboard } from "./ranking.service";
 
+const sendError = (res: FastifyReply, statusCode: number, message: string, technicalError?: any) => {
+    if (technicalError) {
+        console.error(`[Ranking API Error ${statusCode}]:`, technicalError);
+    }
+    return res.code(statusCode).send({ 
+        error: statusCode >= 500 ? "Internal Server Error" : "Bad Request",
+        message 
+    });
+};
+
 export const handleRankingGlobalReq = async (
     req: FastifyRequest,
     res: FastifyReply
@@ -10,10 +20,7 @@ export const handleRankingGlobalReq = async (
         const result = getGlobalRankSchema.safeParse(req.query);
 
         if (!result.success) {
-            return res.code(400).send({ 
-                error: "Parâmetros inválidos", 
-                details: result.error.format() 
-            });
+            return sendError(res, 400, "Parâmetros de consulta inválidos.");
         }
 
         const leaderboard = await getGlobalLeaderboard(result.data);
@@ -21,6 +28,6 @@ export const handleRankingGlobalReq = async (
         return res.send(leaderboard);
 
     } catch (err) {
-        return res.code(500).send({ error: "Erro interno ao buscar ranking." });
+        return sendError(res, 500, "Não foi possível carregar o ranking global.", err);
     }
 }

@@ -158,6 +158,8 @@ model scores {
   user            users    @relation(fields: [userid], references: [id], onDelete: Cascade)
   performance_reports performance_reports[]
 
+  score_sr        Float    @default(0.000) @db.Float
+
   @@index([map_md5, status, mode])
   @@index([map_md5])
   @@index([mode])

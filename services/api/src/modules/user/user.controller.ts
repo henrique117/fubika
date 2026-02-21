@@ -5,60 +5,55 @@ import z from "zod";
 
 const toSafeName = (name: string) => name.trim().toLowerCase().replace(/ /g, '_');
 
-export const handleGetUsersCount = async (req: FastifyRequest, res: FastifyReply) => {
+const sendError = (res: FastifyReply, statusCode: number, message: string, technicalError?: any) => {
+    if (technicalError) {
+        console.error(`[API Error ${statusCode}]:`, technicalError);
+    }
+    return res.code(statusCode).send({ 
+        error: statusCode >= 500 ? "Internal Server Error" : "Bad Request",
+        message 
+    });
+};
+
+export const handleGetUsersCount = async (_: any, res: FastifyReply) => {
     try {
         const userCount = await getUsersCount();
-
         return res.send(userCount);
     } catch (err) {
-        return res.status(401).send({ error: "Erro ao buscar a contagem de jogadores." });
+        return sendError(res, 500, "Não foi possível carregar a contagem de jogadores.", err);
     }
 }
 
 export const handleUserLogin = async (req: FastifyRequest<{ Body: LoginUserInput }>, res: FastifyReply) => {
     try {
-        const body = req.body;
-
-        const user = await loginUser(body);
+        const user = await loginUser(req.body);
 
         const token = req.server.jwt.sign({
             id: user.id,
-            name: user.name,
-            priv: 1
+            name: user.name
         }, {
             expiresIn: '7d'
         });
 
         return res.send({ token, user });
-
     } catch (err: any) {
-        return res.code(401).send({ message: err.message });
+        return sendError(res, 401, "Credenciais inválidas. Verifique seu e-mail e senha.", err);
     }
 }
 
-export const handleUserRegister = async (
-    req: FastifyRequest<{ Body: CreateUserInput }>,
-    res: FastifyReply
-) => {
-
-    const body = req.body;
-
+export const handleUserRegister = async (req: FastifyRequest<{ Body: CreateUserInput }>, res: FastifyReply) => {
     try {
-        const user = await createUser(body);
-
+        const user = await createUser(req.body);
         return res.code(201).send(user);
-    } catch (err) {
-        return res.code(401).send(err);
+    } catch (err: any) {
+        const msg = err.message || "Erro ao realizar o cadastro.";
+        return sendError(res, 400, msg, err);
     }
 }
 
-export const handleUserReq = async (
-    req: FastifyRequest<{ Params: GetUserInput }>,
-    res: FastifyReply
-) => {
+export const handleUserReq = async (req: FastifyRequest<{ Params: GetUserInput }>, res: FastifyReply) => {
     try {
         const rawParam = req.params.id;
-
         let userResult;
 
         if (/^\d+$/.test(rawParam)) {
@@ -67,114 +62,64 @@ export const handleUserReq = async (
             } else {
                 userResult = await getUserStats({ id: Number(rawParam) });
             }
-        }
-
-        else {
-            const safeName = toSafeName(rawParam);
-            userResult = await getUserStats({ safe_name: safeName });
+        } else {
+            userResult = await getUserStats({ safe_name: toSafeName(rawParam) });
         }
 
         return res.code(200).send(userResult);
-
     } catch (err: any) {
-        console.error("Erro ao buscar usuário:", err);
-
-        if (err.message === "Usuário não encontrado" || err.message.includes("inválido")) {
-            return res.code(404).send({ error: err.message });
-        }
-
-        return res.code(500).send({ error: "Erro interno ao buscar dados do usuário." });
+        return sendError(res, 404, "Usuário não encontrado.", err);
     }
 }
 
-export const handleUserRecentReq = async (
-    req: FastifyRequest<{ Params: GetUserInput, Querystring: ScoreQueryInput }>,
-    res: FastifyReply
-) => {
+export const handleUserRecentReq = async (req: FastifyRequest<{ Params: GetUserInput, Querystring: ScoreQueryInput }>, res: FastifyReply) => {
     try {
         const rawParam = req.params.id;
         const query = scoreQuerySchema.parse(req.query); 
-
-        let userRecentScores;
         
-        if (/^\d+$/.test(rawParam)) {
-            if (rawParam.length > 15) {
-                userRecentScores = await getUserRecent({ discord_id: rawParam }, query);
-            } else {
-                userRecentScores = await getUserRecent({ id: Number(rawParam) }, query);
-            }
-        } else {
-            const safeName = toSafeName(rawParam);
-            userRecentScores = await getUserRecent({ safe_name: safeName }, query);
-        }
+        const identifier = /^\d+$/.test(rawParam) 
+            ? (rawParam.length > 15 ? { discord_id: rawParam } : { id: Number(rawParam) })
+            : { safe_name: toSafeName(rawParam) };
 
+        const userRecentScores = await getUserRecent(identifier, query);
         return res.code(200).send(userRecentScores);
-
     } catch (err: any) {
-        console.error("Erro ao buscar recent scores:", err);
-
-        if (err.message === "Usuário não encontrado" || err.message.includes("inválido")) {
-            return res.code(404).send({ error: err.message });
-        }
-
-        return res.code(500).send({ error: "Erro interno ao buscar scores recentes." });
+        return sendError(res, 404, "Não foi possível carregar as plays recentes.", err);
     }
 }
 
-export const handleUserBestOnMapReq = async (
-    req: FastifyRequest<{ Params: GetUserMapInput, Querystring: ScoreQueryModeInput }>,
-    res: FastifyReply
-) => {
+export const handleUserBestOnMapReq = async (req: FastifyRequest<{ Params: GetUserMapInput, Querystring: ScoreQueryModeInput }>, res: FastifyReply) => {
     try {
         const rawParam = req.params.id;
         const bmapId = Number(req.params.map);
-
         const query = scoreQueryModeSchema.parse(req.query);
 
-        let scoreResult;
+        const identifier = /^\d+$/.test(rawParam) 
+            ? (rawParam.length > 15 ? { discord_id: rawParam } : { id: Number(rawParam) })
+            : { safe_name: toSafeName(rawParam) };
 
-        if (/^\d+$/.test(rawParam)) {
-            if (rawParam.length > 15) {
-                scoreResult = await getUserBestOnMap({ discord_id: rawParam }, bmapId, query);
-            } else {
-                scoreResult = await getUserBestOnMap({ id: Number(rawParam) }, bmapId, query);
-            }
-        } else {
-            const safeName = toSafeName(rawParam);
-            scoreResult = await getUserBestOnMap({ safe_name: safeName }, bmapId, query);
-        }
+        const scoreResult = await getUserBestOnMap(identifier, bmapId, query);
 
-        if (scoreResult === null || scoreResult === undefined) {
-            return res.code(404).send({ message: "Nenhum score encontrado para este mapa." });
+        if (!scoreResult) {
+            return sendError(res, 404, "Nenhum score encontrado para este mapa.");
         }
 
         return res.code(200).send(scoreResult);
-
     } catch (err: any) {
-        console.error("Erro ao buscar score:", err);
-
         if (err instanceof z.ZodError) {
-            return res.code(400).send({ error: "Parâmetros inválidos", details: err.format() });
+            return sendError(res, 400, "Parâmetros de consulta inválidos.");
         }
-
-        if (err.message === "Usuário não encontrado" || err.message.includes("inválido") || err.message === "Mapa não encontrado no banco de dados.") {
-            return res.code(404).send({ error: err.message });
-        }
-
-        return res.code(500).send({ error: "Erro interno ao buscar score." });
+        return sendError(res, 404, "Dados não encontrados.", err);
     }
 }
 
 export const handleGetMe = async (req: FastifyRequest, res: FastifyReply) => {
     try {
         const userFromToken = req.user as { id: number };
-
         const userProfile = await getUserStats({ id: userFromToken.id });
-
         return res.send(userProfile);
-
     } catch (err) {
-        return res.status(500).send({ error: "Erro ao buscar perfil." });
+        return sendError(res, 500, "Falha ao carregar seu perfil.", err);
     }
 }
 
@@ -182,7 +127,7 @@ export const handlePostPfp = async (req: FastifyRequest<{ Body: PostPfpInput }>,
     const data = await req.file();
     
     if (!data) {
-        return res.status(400).send({ error: "Nenhum arquivo enviado." });
+        return sendError(res, 400, "Nenhum arquivo enviado.");
     }
 
     try {
@@ -192,17 +137,13 @@ export const handlePostPfp = async (req: FastifyRequest<{ Body: PostPfpInput }>,
         };
 
         const validatedData = postPfpSchema.parse(payload);
-
         const userPfp = await setUserPfp(validatedData);
 
         return res.status(200).send(userPfp);
-
     } catch (err: any) {
         if (err instanceof z.ZodError) {
-            return res.status(400).send({ error: err.issues[0].message });
+            return sendError(res, 400, err.issues[0].message);
         }
-
-        console.error(err);
-        return res.status(500).send({ error: "Erro ao salvar imagem." });
+        return sendError(res, 500, "Falha ao processar o upload da imagem.", err);
     }
 }

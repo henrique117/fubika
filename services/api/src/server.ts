@@ -1,33 +1,25 @@
-(BigInt.prototype as any).toJSON = function () {
-    return Number(this);
-};
-
 import Fastify from "fastify";
-import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./modules/barrel";
-import prisma from "./utils/prisma";
 import fastifyJwt from "@fastify/jwt";
 import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
+import prisma from "./utils/prisma";
+
+import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./modules/barrel";
 import rankingRoutes from "./modules/ranking/ranking.route";
 import apikeyRoutes from "./modules/apikey/apikey.route";
+import { globalErrorHandler } from "./utils/errorHandler";
+
+(BigInt.prototype as any).toJSON = function () {
+    return Number(this);
+};
 
 export const server = Fastify({ 
     logger: true
 });
 
-server.get('/ping', async () => {
-    const start = performance.now();
-    await prisma.$queryRaw`SELECT 1`;
-    const end = performance.now();
-
-    return { 
-        status: 'alive', 
-        database: 'connected', 
-        latency_db_ms: end - start
-    }
-});
-
 async function main() {
+    server.setErrorHandler(globalErrorHandler);
+
     await server.register(multipart, {
         limits: {
             fieldNameSize: 100,
@@ -48,6 +40,18 @@ async function main() {
         allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
     });
 
+    server.get('/ping', async () => {
+        const start = performance.now();
+        await prisma.$queryRaw`SELECT 1`;
+        const end = performance.now();
+
+        return { 
+            status: 'alive', 
+            database: 'connected', 
+            latency_db_ms: end - start
+        };
+    });
+
     await server.register(userRoutes, { prefix: 'api/user' });
     await server.register(inviteRoutes, { prefix: 'api/invite' });
     await server.register(discordRoutes, { prefix: 'api/discord' });
@@ -57,7 +61,7 @@ async function main() {
 
     try {
         await server.listen({ port: 3000, host: '0.0.0.0' });
-        console.log('Servidor rodando em http://0.0.0.0:3000');
+        console.log('🚀 Servidor Fubika rodando em http://0.0.0.0:3000');
     } catch (err) {
         server.log.error(err);
         process.exit(1);

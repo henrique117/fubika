@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Errors } from "./errorHandler";
 
 const client_id = Number(process.env.OSU_CLIENT_ID);
 const client_secret = process.env.OSU_CLIENT_SECRET;
@@ -44,9 +45,9 @@ export const getApiAuthToken = async (): Promise<string> => {
             tokenExpirationTime = now + (expires_in * 1000);
 
             return access_token;
-        } catch (err) {
-            console.error("❌ Falha ao obter token do osu!:", err);
-            throw err;
+        } catch (err: any) {
+            console.error("[osu! Auth Error]:", err.response?.data || err.message);
+            throw Errors.Internal("Falha na autenticação com a API oficial do osu!.");
         } finally {
             tokenRequest = null;
         }
@@ -62,5 +63,21 @@ osuApiClient.interceptors.request.use(async (config) => {
 }, (err) => {
     return Promise.reject(err);
 });
+
+osuApiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 404) {
+            throw Errors.NotFound("O recurso solicitado não existe na API do osu!.");
+        }
+        
+        if (error.response?.status === 401) {
+            cachedAccessToken = null; 
+            throw Errors.Unauthorized("Token da API do osu! expirado ou inválido.");
+        }
+
+        throw Errors.Internal("Erro na comunicação com a API do osu!.");
+    }
+);
 
 export default osuApiClient;

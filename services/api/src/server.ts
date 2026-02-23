@@ -10,6 +10,7 @@ import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import rankingRoutes from "./modules/ranking/ranking.route";
 import apikeyRoutes from "./modules/apikey/apikey.route";
+import { initCronJobs } from "./modules/cron/maintenance.service";
 
 export const server = Fastify({ 
     logger: true
@@ -54,6 +55,8 @@ async function main() {
     await server.register(beatmapRoutes, { prefix: 'api/beatmap' });
     await server.register(rankingRoutes, { prefix: 'api/ranking' });
     await server.register(apikeyRoutes, { prefix: 'api/key' });
+
+    initCronJobs();
 
     try {
         await server.listen({ port: 3000, host: '0.0.0.0' });

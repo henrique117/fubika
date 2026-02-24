@@ -8,6 +8,7 @@ import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./module
 import rankingRoutes from "./modules/ranking/ranking.route";
 import apikeyRoutes from "./modules/apikey/apikey.route";
 import { globalErrorHandler } from "./utils/errorHandler";
+import { initCronJobs } from "./modules/cron/maintenance.service";
 
 (BigInt.prototype as any).toJSON = function () {
     return Number(this);
@@ -58,6 +59,8 @@ async function main() {
     await server.register(beatmapRoutes, { prefix: 'api/beatmap' });
     await server.register(rankingRoutes, { prefix: 'api/ranking' });
     await server.register(apikeyRoutes, { prefix: 'api/key' });
+
+    initCronJobs();
 
     try {
         await server.listen({ port: 3000, host: '0.0.0.0' });

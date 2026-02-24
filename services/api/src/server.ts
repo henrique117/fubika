@@ -4,9 +4,7 @@ import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import prisma from "./utils/prisma";
 
-import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes } from "./modules/barrel";
-import rankingRoutes from "./modules/ranking/ranking.route";
-import apikeyRoutes from "./modules/apikey/apikey.route";
+import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes, rankingRoutes, apikeyRoutes } from "./modules/barrel";
 import { globalErrorHandler } from "./utils/errorHandler";
 import { initCronJobs } from "./modules/cron/maintenance.service";
 

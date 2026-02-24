@@ -153,7 +153,7 @@ export const createUser = async (input: CreateUserInput) => {
             email: email,
             pw_bcrypt: hash,
             safe_name: safeName,
-            country: 'br',
+            country: 'BR',
             priv: user_priv,
             creation_time: Math.floor(Date.now() / 1000),
             latest_activity: Math.floor(Date.now() / 1000),

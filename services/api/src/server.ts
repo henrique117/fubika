@@ -15,6 +15,7 @@ import {
 
 import { globalErrorHandler } from "./utils/errorHandler";
 import { initCronJobs } from "./modules/cron/maintenance.service";
+import { validatorCompiler, serializerCompiler } from "fastify-type-provider-zod";
 
 (BigInt.prototype as any).toJSON = function () {
     return Number(this);
@@ -23,6 +24,9 @@ import { initCronJobs } from "./modules/cron/maintenance.service";
 export const server = Fastify({ 
     logger: true
 });
+
+server.setValidatorCompiler(validatorCompiler)
+server.setSerializerCompiler(serializerCompiler)
 
 async function main() {
     server.setErrorHandler(globalErrorHandler);

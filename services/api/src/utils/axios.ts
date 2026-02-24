@@ -47,7 +47,8 @@ export const getApiAuthToken = async (): Promise<string> => {
             return access_token;
         } catch (err: any) {
             console.error("[osu! Auth Error]:", err.response?.data || err.message);
-            throw Errors.Internal("Falha na autenticação com a API oficial do osu!.");
+            
+            throw Errors.Internal("Falha crítica na conexão com a infraestrutura oficial do osu!.");
         } finally {
             tokenRequest = null;
         }
@@ -67,16 +68,18 @@ osuApiClient.interceptors.request.use(async (config) => {
 osuApiClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 404) {
-            throw Errors.NotFound("O recurso solicitado não existe na API do osu!.");
+        const status = error.response?.status;
+
+        if (status === 404) {
+            throw Errors.NotFound("O recurso solicitado não foi encontrado no osu!.");
         }
         
-        if (error.response?.status === 401) {
+        if (status === 401) {
             cachedAccessToken = null; 
-            throw Errors.Unauthorized("Token da API do osu! expirado ou inválido.");
+            throw Errors.Unauthorized("Sessão com a API oficial expirada. Tente novamente.");
         }
 
-        throw Errors.Internal("Erro na comunicação com a API do osu!.");
+        throw Errors.Internal("O servidor oficial do osu! demorou a responder ou recusou a conexão.");
     }
 );
 

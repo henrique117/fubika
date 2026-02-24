@@ -2,6 +2,7 @@ import prisma from "../../utils/prisma";
 import { sendIngameMessage } from "../../utils/redis";
 import { CheckDiscordLink, CreateDiscordLink } from "./discord.schema";
 import crypto from "crypto";
+import { Errors } from "../../utils/errorHandler"; // Importando o padrão novo
 
 export const startLinkProcess = async (input: CreateDiscordLink) => {
     const user = await prisma.users.findFirst({
@@ -9,11 +10,11 @@ export const startLinkProcess = async (input: CreateDiscordLink) => {
     });
 
     if (!user) {
-        throw new Error("USER_NOT_FOUND");
+        throw Errors.NotFound("Usuário não encontrado.");
     }
- 
+
     if (user.discord_id) {
-        throw new Error("ALREADY_LINKED");
+        throw Errors.Conflict("Esta conta já possui um Discord vinculado.");
     }
 
     const code = crypto.randomBytes(3).toString('hex').toUpperCase();
@@ -48,7 +49,7 @@ export const finishLinkProcess = async (input: CheckDiscordLink) => {
     });
 
     if (!code || code.discord_id != input.discord_id) {
-        throw new Error('INVALID_CODE');
+        throw Errors.BadRequest("O código inserido é inválido ou expirou.");
     }
 
     await prisma.$transaction([

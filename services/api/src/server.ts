@@ -4,7 +4,15 @@ import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import prisma from "./utils/prisma";
 
-import { userRoutes, inviteRoutes, discordRoutes, beatmapRoutes, rankingRoutes, apikeyRoutes } from "./modules/barrel";
+import { 
+    userRoutes, 
+    inviteRoutes, 
+    discordRoutes, 
+    beatmapRoutes, 
+    rankingRoutes, 
+    apikeyRoutes 
+} from "./modules/barrel";
+
 import { globalErrorHandler } from "./utils/errorHandler";
 import { initCronJobs } from "./modules/cron/maintenance.service";
 
@@ -30,7 +38,7 @@ async function main() {
     });
 
     await server.register(fastifyJwt, {
-        secret: process.env.JWT_SECRET || 'aaabbbccc'
+        secret: process.env.JWT_SECRET || 'fubika_secret_2026'
     });
 
     await server.register(cors, { 
@@ -47,7 +55,7 @@ async function main() {
         return { 
             status: 'alive', 
             database: 'connected', 
-            latency_db_ms: end - start
+            latency_db_ms: Math.round(end - start)
         };
     });
 
@@ -61,8 +69,14 @@ async function main() {
     initCronJobs();
 
     try {
-        await server.listen({ port: 3000, host: '0.0.0.0' });
-        console.log('🚀 Servidor Fubika rodando em http://0.0.0.0:3000');
+        const port = Number(process.env.API_PORT) || 3000;
+        await server.listen({ port: port, host: '0.0.0.0' });
+        
+        console.log(`
+        🚀 Fubika API está online!
+        📡 Porta: ${port}
+        🔗 Host: http://0.0.0.0:${port}
+        `);
     } catch (err) {
         server.log.error(err);
         process.exit(1);

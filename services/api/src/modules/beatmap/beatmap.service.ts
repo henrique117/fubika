@@ -5,6 +5,7 @@ import IScore from "../../interfaces/score.interface";
 import osuApiClient from "../../utils/axios";
 import { getModString } from "../../utils/getModString";
 import { SearchBeatmaps } from "./beatmap.schema";
+import { Errors } from "../../utils/errorHandler";
 
 const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
     return {
@@ -101,7 +102,6 @@ const mapDatabaseToScoreWithoutMap = (row: any): Omit<IScore, 'beatmap'> => {
 };
 
 const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<IScore, 'beatmap'>[]> => {
-    
     let bmap_md5 = knownMd5;
     
     if (!bmap_md5) {
@@ -147,7 +147,6 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<
                     ORDER BY s.score DESC
                 ) as rn
             FROM scores s
-            -- Filtra pelo MD5 e Status (2=Ranked, 3=BestV2) e Mod V2
             WHERE s.map_md5 = ${bmap_md5} AND (s.status = 2 OR s.status = 3) AND (s.mods & 536870912) > 0
         )
         SELECT 
@@ -195,46 +194,34 @@ const getBeatmapPasscount = async (md5: string): Promise<number> => {
 };
 
 export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
-    try {
-        const response = await osuApiClient.get(`/beatmaps/${input.id}`);
+    const response = await osuApiClient.get(`/beatmaps/${input.id}`);
 
-        if (!response.data) {
-            throw new Error('Beatmap não encontrado na API');
-        }
-
-        const bmap = mapOsuBeatmapToDomain(response.data);
-        
-        const [map_lb, localPlaycount, localPasscount] = await Promise.all([
-            getBeatmapLB(input.id, bmap.beatmap_md5),
-            getBeatmapPlaycount(bmap.beatmap_md5),
-            getBeatmapPasscount(bmap.beatmap_md5)
-        ]);
-
-        return { 
-            ...bmap,
-            playcount: localPlaycount,
-            passcount: localPasscount,
-            scores: map_lb 
-        };
-        
-    } catch (err) {
-        console.error("Erro no getBeatmap:", err);
-        throw err;
+    if (!response.data) {
+        throw Errors.NotFound('O beatmap solicitado não retornou dados.');
     }
+
+    const bmap = mapOsuBeatmapToDomain(response.data);
+    
+    const [map_lb, localPlaycount, localPasscount] = await Promise.all([
+        getBeatmapLB(input.id, bmap.beatmap_md5),
+        getBeatmapPlaycount(bmap.beatmap_md5),
+        getBeatmapPasscount(bmap.beatmap_md5)
+    ]);
+
+    return { 
+        ...bmap,
+        playcount: localPlaycount,
+        passcount: localPasscount,
+        scores: map_lb 
+    };
 }
 
 export const getBeatmapset = async (input: SearchBeatmaps): Promise<IBeatmapset> => {
-    try {
-        const response = await osuApiClient.get(`/beatmapsets/${input.id}`);
+    const response = await osuApiClient.get(`/beatmapsets/${input.id}`);
 
-        if (!response.data) {
-            throw new Error('Beatmapset não encontrado na API');
-        }
-
-        return mapOsuBeatmapsetToDomain(response.data);
-        
-    } catch (err) {
-        console.error("Erro no getBeatmapset:", err);
-        throw err;
+    if (!response.data) {
+        throw Errors.NotFound('O beatmapset solicitado não retornou dados.');
     }
+
+    return mapOsuBeatmapsetToDomain(response.data);
 }

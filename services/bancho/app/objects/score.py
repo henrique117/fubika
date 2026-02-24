@@ -303,8 +303,6 @@ class Score:
             SCORE_V2_BIT = 536870912
             am_i_v2 = (self.mods & SCORE_V2_BIT) != 0
 
-            # Para mapas Unranked (status < 2), PP geralmente é 0. 
-            # Forçamos a métrica 'score' para mapas que não dão PP.
             if self.mode >= GameMode.RELAX_OSU and self.bmap.status == 2:
                 scoring_metric = "pp"
                 score_val = float(self.pp)
@@ -312,7 +310,6 @@ class Score:
                 scoring_metric = "score" 
                 score_val = int(self.score)
 
-            # REMOVIDO: AND s.status IN (2, 3) para aceitar qualquer mapa
             query = [
                 f"SELECT COUNT(*) FROM scores s ",
                 "INNER JOIN users u ON u.id = s.userid ",
@@ -343,7 +340,6 @@ class Score:
             log(f"[Rank] {self.player.name} pegou #{placement} no mapa {self.bmap.id}", Ansi.LBLUE)
 
             if placement == 1 and self.grade != 'F':
-                # Dispara a lógica de Snipe para QUALQUER mapa agora
                 asyncio.create_task(self.process_top_score_logic(am_i_v2, scoring_metric, SCORE_V2_BIT))
 
             return placement
@@ -355,9 +351,18 @@ class Score:
     async def process_top_score_logic(self, am_i_v2: bool, metric: str, v2_bit: int):
         """Busca a vítima e envia os dados para o Bot via Redis."""
         try:
+            dedup_key = f"top1_announced:{self.player.id}:{self.bmap.id}:{int(self.pp)}"
+            
+            already_announced = not await app.state.services.redis.set(
+                dedup_key, "1", nx=True, ex=60
+            )
+            
+            if already_announced:
+                log(f"[Dedup] Top1 duplicado ignorado para {self.player.name} no mapa {self.bmap.id}", Ansi.LYELLOW)
+                return
+
             v2_op = "!=" if am_i_v2 else "="
             
-            # REMOVIDO: AND s.status IN (2, 3)
             victim_query = f"""
                 SELECT s.userid, u.name, u.discord_id, s.pp, s.score, s.acc, s.mods
                 FROM scores s
@@ -378,11 +383,8 @@ class Score:
                 }
             )
 
-            # Garantimos que passamos o discord_id do player atual (atacante)
-            # Se o objeto player não tiver discord_id carregado, tentamos buscar no banco ou enviamos None
             player_discord_id = getattr(self.player, 'discord_id', None)
             if not player_discord_id:
-                # Busca rápida no banco caso o objeto em memória esteja incompleto
                 player_discord_id = await app.state.services.database.fetch_val(
                     "SELECT discord_id FROM users WHERE id = :id", {"id": self.player.id}
                 )
@@ -395,7 +397,7 @@ class Score:
                 victim_discord_id=victim["discord_id"] if victim else None,
                 victim_score=victim["score"] if victim else 0,
                 victim_pp=float(victim["pp"]) if victim else 0.0,
-                victim_acc=float(victim["acc"]) if victim else 0.0,
+                victim_acc=float(victim["acc"] if victim else 0.0),
                 victim_mods=int(victim["mods"]) if victim else 0
             )
 

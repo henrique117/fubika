@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { handleCheckDiscordLink, handleCreateDiscordLink } from "./discord.controller";
 import { authenticate } from "../../middlewares/auth.middleware";
-import { authorizeDiscordOwnership } from "../../middlewares/ownership.middleware";
 import { checkDiscordLinkSchema, createDiscordLinkSchema, CheckDiscordLink, CreateDiscordLink } from "./discord.schema";
 
 const discordRoutes = async (server: FastifyInstance) => {
@@ -10,8 +9,7 @@ const discordRoutes = async (server: FastifyInstance) => {
             body: createDiscordLinkSchema
         },
         preHandler: [
-            authenticate,
-            authorizeDiscordOwnership
+            authenticate
         ]
     }, handleCreateDiscordLink);
 
@@ -20,8 +18,7 @@ const discordRoutes = async (server: FastifyInstance) => {
             body: checkDiscordLinkSchema
         },
         preHandler: [
-            authenticate,
-            authorizeDiscordOwnership
+            authenticate
         ]
     }, handleCheckDiscordLink);
 }

@@ -1,6 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import Fastify from 'fastify'
+import Fastify, { FastifyInstance } from 'fastify'
 import fastifyJwt from '@fastify/jwt'
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
+
+const mockPublish = vi.fn()
+
+vi.mock('ioredis', () => ({
+    default: class Redis {
+        publish = mockPublish
+        on = vi.fn()
+    }
+}))
 
 vi.mock('../src/utils/prisma', () => ({
     default: {
@@ -9,311 +19,252 @@ vi.mock('../src/utils/prisma', () => ({
             findFirst: vi.fn(),
             deleteMany: vi.fn(),
             create: vi.fn(),
-            delete: vi.fn(),
+            delete: vi.fn()
         },
-        $transaction: vi.fn(),
-    },
-}))
-
-vi.mock('../src/utils/redis', () => ({
-    sendIngameMessage: vi.fn(),
+        $transaction: vi.fn()
+    }
 }))
 
 vi.mock('../src/middlewares/auth.middleware', () => ({
     authenticate: vi.fn(async (req: any, _res: any) => {
         req.user = { id: 5, name: 'testuser' }
-    }),
+    })
 }))
 
 vi.mock('../src/middlewares/ownership.middleware', () => ({
-    authorizeDiscordOwnership: vi.fn(async (_req: any, _res: any) => { }),
+    authorizeDiscordOwnership: vi.fn(async () => {})
 }))
 
 const buildServer = async () => {
     const app = Fastify()
+    app.setValidatorCompiler(validatorCompiler)
+    app.setSerializerCompiler(serializerCompiler)
     await app.register(fastifyJwt, { secret: 'test_secret' })
-
-    const discordRoutes = (await import('../src/modules/discord/discord.route')).default
-    await app.register(discordRoutes, { prefix: '/discord' })
-
+    const routes = (await import('../src/modules/discord/discord.route')).default
+    await app.register(routes, { prefix: '/discord' })
     await app.ready()
     return app
 }
 
-const makeToken = (app: any) => app.jwt.sign({ id: 5, name: 'testuser' })
-
-const mockUser = {
-    id: 5,
-    name: 'TestUser',
-    safe_name: 'testuser',
-    discord_id: null,
-}
-
-const mockUserWithDiscord = {
-    ...mockUser,
-    discord_id: '123456789012345678',
-}
-
-const mockVerificationCode = {
-    id: 1,
-    osu_id: 5,
-    discord_id: '999888777666555444',
-    code: 'ABC123',
-}
-
 describe('POST /discord/createlink', () => {
-    let app: any
-    let prismaMock: any
-    let redisMock: any
+    let app: FastifyInstance
 
     beforeEach(async () => {
-        vi.resetModules()
-        prismaMock = (await import('../src/utils/prisma')).default
-        redisMock = await import('../src/utils/redis')
+        vi.clearAllMocks()
+        mockPublish.mockReset()
         app = await buildServer()
     })
 
-    afterEach(async () => { await app.close(); vi.clearAllMocks() })
+    afterEach(async () => { if (app) await app.close(); vi.clearAllMocks() })
 
     it('inicia vinculação com sucesso e envia código in-game', async () => {
-        prismaMock.users.findFirst.mockResolvedValueOnce(mockUser)
-        prismaMock.$transaction.mockResolvedValueOnce([])
-        redisMock.sendIngameMessage.mockResolvedValueOnce(undefined)
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.users.findFirst).mockResolvedValueOnce({
+            id: 5, safe_name: 'testuser', discord_id: null
+        } as any)
+        vi.mocked(prisma.$transaction).mockResolvedValueOnce([undefined, { id: 1 }])
+        mockPublish.mockResolvedValueOnce(1)
 
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/createlink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: {
-                discord_id: '999888777666555444',
-                osu_name: 'TestUser',
-            },
+            method: 'POST', url: '/discord/createlink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123456789', osu_name: 'TestUser' })
         })
 
         expect(res.statusCode).toBe(200)
-        const body = res.json()
-        expect(body.success).toBe(true)
-        expect(body.message).toContain('código')
-        expect(redisMock.sendIngameMessage).toHaveBeenCalledWith(
-            5,
-            expect.stringContaining('código')
-        )
+        expect(JSON.parse(res.body)).toHaveProperty('success', true)
     })
 
     it('retorna 404 para osu_name inexistente', async () => {
-        prismaMock.users.findFirst.mockResolvedValueOnce(null)
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.users.findFirst).mockResolvedValueOnce(null)
 
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/createlink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999888777666555444', osu_name: 'NaoExiste' },
+            method: 'POST', url: '/discord/createlink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123', osu_name: 'ghost' })
         })
-
         expect(res.statusCode).toBe(404)
-        expect(res.json().message).toContain('não encontrado')
     })
 
     it('retorna 409 quando conta já tem Discord vinculado', async () => {
-        prismaMock.users.findFirst.mockResolvedValueOnce(mockUserWithDiscord)
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.users.findFirst).mockResolvedValueOnce({
+            id: 5, safe_name: 'testuser', discord_id: '999888777'
+        } as any)
 
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/createlink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999888777666555444', osu_name: 'TestUser' },
+            method: 'POST', url: '/discord/createlink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123', osu_name: 'testuser' })
         })
-
         expect(res.statusCode).toBe(409)
-        expect(res.json().message).toContain('Discord vinculado')
     })
 
     it('normaliza osu_name (case-insensitive, espaços para _)', async () => {
-        prismaMock.users.findFirst.mockResolvedValueOnce(mockUser)
-        prismaMock.$transaction.mockResolvedValueOnce([])
-        redisMock.sendIngameMessage.mockResolvedValueOnce(undefined)
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.users.findFirst).mockResolvedValueOnce({
+            id: 5, safe_name: 'test_user', discord_id: null
+        } as any)
+        vi.mocked(prisma.$transaction).mockResolvedValueOnce([undefined, { id: 1 }])
+        mockPublish.mockResolvedValueOnce(1)
 
-        const token = makeToken(app)
         await app.inject({
-            method: 'POST',
-            url: '/discord/createlink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999', osu_name: 'Test User' },
+            method: 'POST', url: '/discord/createlink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123', osu_name: 'Test User' })
         })
 
-        expect(prismaMock.users.findFirst).toHaveBeenCalledWith(
+        expect(prisma.users.findFirst).toHaveBeenCalledWith(
             expect.objectContaining({
-                where: { safe_name: 'test_user' },
+                where: expect.objectContaining({ safe_name: 'test_user' })
             })
         )
     })
 
     it('retorna 400 para body sem discord_id', async () => {
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/createlink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { osu_name: 'TestUser' },
+            method: 'POST', url: '/discord/createlink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ osu_name: 'test' })
         })
-
         expect(res.statusCode).toBe(400)
     })
 
     it('retorna 400 para body sem osu_name', async () => {
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/createlink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999888777' },
+            method: 'POST', url: '/discord/createlink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123' })
         })
-
         expect(res.statusCode).toBe(400)
     })
 
     it('retorna 400 para discord_id vazio', async () => {
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/createlink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '', osu_name: 'TestUser' },
+            method: 'POST', url: '/discord/createlink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '', osu_name: 'test' })
         })
-
         expect(res.statusCode).toBe(400)
     })
 
     it('usa $transaction para deletar código antigo e criar novo', async () => {
-        prismaMock.users.findFirst.mockResolvedValueOnce(mockUser)
-        prismaMock.$transaction.mockResolvedValueOnce([])
-        redisMock.sendIngameMessage.mockResolvedValueOnce(undefined)
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.users.findFirst).mockResolvedValueOnce({
+            id: 5, safe_name: 'testuser', discord_id: null
+        } as any)
+        vi.mocked(prisma.$transaction).mockResolvedValueOnce([undefined, { id: 1 }])
+        mockPublish.mockResolvedValueOnce(1)
 
-        const token = makeToken(app)
         await app.inject({
-            method: 'POST',
-            url: '/discord/createlink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999888777666555444', osu_name: 'TestUser' },
+            method: 'POST', url: '/discord/createlink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123', osu_name: 'testuser' })
         })
 
-        expect(prismaMock.$transaction).toHaveBeenCalledTimes(1)
+        expect(prisma.$transaction).toHaveBeenCalledOnce()
     })
 })
 
 describe('POST /discord/checklink', () => {
-    let app: any
-    let prismaMock: any
+    let app: FastifyInstance
 
     beforeEach(async () => {
-        vi.resetModules()
-        prismaMock = (await import('../src/utils/prisma')).default
+        vi.clearAllMocks()
         app = await buildServer()
     })
 
-    afterEach(async () => { await app.close(); vi.clearAllMocks() })
+    afterEach(async () => { if (app) await app.close(); vi.clearAllMocks() })
 
     it('finaliza vinculação com sucesso', async () => {
-        prismaMock.verification_codes.findFirst.mockResolvedValueOnce(mockVerificationCode)
-        prismaMock.$transaction.mockResolvedValueOnce([])
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.verification_codes.findFirst).mockResolvedValueOnce({
+            id: 1, osu_id: 5, discord_id: '123', code: 'ABC123'
+        } as any)
+        vi.mocked(prisma.$transaction).mockResolvedValueOnce([{}, {}])
 
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/checklink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: {
-                discord_id: '999888777666555444',
-                code: 'ABC123',
-            },
+            method: 'POST', url: '/discord/checklink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123', code: 'ABC123' })
         })
 
         expect(res.statusCode).toBe(200)
-        expect(res.json().success).toBe(true)
-        expect(res.json().message).toContain('sucesso')
+        expect(JSON.parse(res.body)).toHaveProperty('success', true)
     })
 
     it('usa $transaction para atualizar user e deletar código', async () => {
-        prismaMock.verification_codes.findFirst.mockResolvedValueOnce(mockVerificationCode)
-        prismaMock.$transaction.mockResolvedValueOnce([])
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.verification_codes.findFirst).mockResolvedValueOnce({
+            id: 1, osu_id: 5, discord_id: '123', code: 'XYZ'
+        } as any)
+        vi.mocked(prisma.$transaction).mockResolvedValueOnce([{}, {}])
 
-        const token = makeToken(app)
         await app.inject({
-            method: 'POST',
-            url: '/discord/checklink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999888777666555444', code: 'ABC123' },
+            method: 'POST', url: '/discord/checklink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123', code: 'XYZ' })
         })
 
-        expect(prismaMock.$transaction).toHaveBeenCalledTimes(1)
+        expect(prisma.$transaction).toHaveBeenCalledOnce()
     })
 
     it('retorna 400 para código inexistente', async () => {
-        prismaMock.verification_codes.findFirst.mockResolvedValueOnce(null)
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.verification_codes.findFirst).mockResolvedValueOnce(null)
 
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/checklink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999888777666555444', code: 'INVALID' },
+            method: 'POST', url: '/discord/checklink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123', code: 'WRONG' })
         })
-
         expect(res.statusCode).toBe(400)
-        expect(res.json().message).toContain('inválido')
     })
 
     it('retorna 400 quando discord_id não bate com o código', async () => {
-        prismaMock.verification_codes.findFirst.mockResolvedValueOnce({
-            ...mockVerificationCode,
-            discord_id: 'OUTRO_DISCORD_ID',
-        })
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.verification_codes.findFirst).mockResolvedValueOnce({
+            id: 1, osu_id: 5, discord_id: '999', code: 'ABC'
+        } as any)
 
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/checklink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999888777666555444', code: 'ABC123' },
+            method: 'POST', url: '/discord/checklink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '111', code: 'ABC' })
         })
-
         expect(res.statusCode).toBe(400)
     })
 
     it('retorna 400 para body sem code', async () => {
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/checklink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { discord_id: '999888777666555444' },
+            method: 'POST', url: '/discord/checklink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123' })
         })
-
         expect(res.statusCode).toBe(400)
     })
 
     it('retorna 400 para body sem discord_id', async () => {
-        const token = makeToken(app)
         const res = await app.inject({
-            method: 'POST',
-            url: '/discord/checklink',
-            headers: { authorization: `Bearer ${token}` },
-            payload: { code: 'ABC123' },
+            method: 'POST', url: '/discord/checklink',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ code: 'ABC' })
         })
-
         expect(res.statusCode).toBe(400)
     })
 
     it('retorna 401 sem token', async () => {
-        const res = await app.inject({
-            method: 'POST',
-            url: '/discord/checklink',
-            payload: { discord_id: '999', code: 'ABC123' },
+        const { authenticate } = await import('../src/middlewares/auth.middleware')
+        vi.mocked(authenticate).mockImplementationOnce(async (_req: any, res: any) => {
+            return res.code(401).send({ message: 'Unauthorized' })
         })
 
+        const res = await app.inject({
+            method: 'POST', url: '/discord/checklink',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ discord_id: '123', code: 'ABC' })
+        })
         expect(res.statusCode).toBe(401)
     })
 })

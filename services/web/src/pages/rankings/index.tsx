@@ -65,6 +65,8 @@ const GlobalRanking: React.FC = () => {
     useEffect(() => {
         fetchRanking(activeMode, page)
     }, [activeMode, page])
+    // Nova função que impede o jogador de continuar passando as páginas infinitamente caso o número de jogadores exibidos na pág seja menor que 50.
+    const isLastPage = players.length < 50;
 
     return (
         <WrapperComponent>
@@ -109,8 +111,14 @@ const GlobalRanking: React.FC = () => {
                                     src="arrow_pagination.svg" 
                                     alt="Próximo" 
                                     className={style.arrow} 
-                                    style={{ transform: 'rotate(180deg)', cursor: 'pointer' }} 
-                                    onClick={() => setPage(p => p + 1)}
+                                    style={{ 
+                                        transform: 'rotate(180deg)', 
+                                        cursor: isLastPage ? 'default' : 'pointer', 
+                                        opacity: isLastPage ? 0.5 : 1 
+                                    }} 
+                                    onClick={() => {
+                                        if (!isLastPage) setPage(p => p + 1)
+                                    }}
                                 />
                             </div>  
                         </div>
@@ -172,12 +180,19 @@ const GlobalRanking: React.FC = () => {
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     style={{ cursor: 'pointer', opacity: page === 1 ? 0.5 : 1 }}
                                 />
+                                
                                 <img 
                                     src="arrow_pagination.svg" 
                                     alt="Próximo" 
                                     className={style.arrow} 
-                                    style={{ transform: 'rotate(180deg)', cursor: 'pointer' }} 
-                                    onClick={() => setPage(p => p + 1)}
+                                    style={{ 
+                                        transform: 'rotate(180deg)', 
+                                        cursor: isLastPage ? 'default' : 'pointer', 
+                                        opacity: isLastPage ? 0.5 : 1 
+                                    }} 
+                                    onClick={() => {
+                                        if (!isLastPage) setPage(p => p + 1)
+                                    }}
                                 />
                                 <img src="cat_head.png" alt="" className={style.cat} />
                             </div>  

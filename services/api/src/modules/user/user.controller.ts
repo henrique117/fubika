@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUser, getUserBestOnMap, getUserRecent, getUsersCount, getUserStats, loginUser, setUserPfp } from "./user.service";
-import { CreateUserInput, GetUserInput, GetUserMapInput, LoginUserInput, PostPfpInput, postPfpSchema, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
+import { createUser, getUserBestOnMap, getUserRecent, getUsersCount, getUserStats, loginUser, setUserPfp, getUserRankHistory } from "./user.service";
+import { CreateUserInput, GetUserInput, GetUserMapInput, LoginUserInput, PostPfpInput, postPfpSchema, ScoreQueryInput, ScoreQueryModeInput, GetRankHistoryInput } from "./user.schema";
 import { Errors } from "../../utils/errorHandler";
 
 const toSafeName = (name: string) => name.trim().toLowerCase().replace(/ /g, '_');
@@ -54,6 +54,18 @@ export const handleUserRecentReq = async (req: FastifyRequest<{ Params: GetUserI
 
     const userRecentScores = await getUserRecent(identifier, req.query);
     return res.code(200).send(userRecentScores);
+}
+
+export const handleGetUserRankHistoryReq = async (req: FastifyRequest<{ Params: GetUserInput, Querystring: GetRankHistoryInput }>, res: FastifyReply) => {
+    const rawParam = req.params.id;
+    const { mode, days } = req.query;
+    
+    const identifier = /^\d+$/.test(rawParam) 
+        ? (rawParam.length > 15 ? { discord_id: rawParam } : { id: Number(rawParam) })
+        : { safe_name: toSafeName(rawParam) };
+
+    const history = await getUserRankHistory(identifier, mode, days);
+    return res.code(200).send(history);
 }
 
 export const handleUserBestOnMapReq = async (req: FastifyRequest<{ Params: GetUserMapInput, Querystring: ScoreQueryModeInput }>, res: FastifyReply) => {

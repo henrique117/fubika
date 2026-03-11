@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { handleGetMe, handleGetUsersCount, handlePostPfp, handleUserBestOnMapReq, handleUserLogin, handleUserRecentReq, handleUserRegister, handleUserReq } from "./user.controller";
+import { handleGetMe, handleGetUsersCount, handlePostPfp, handleUserBestOnMapReq, handleUserLogin, handleUserRecentReq, handleUserRegister, handleUserReq, handleGetUserRankHistoryReq } from "./user.controller";
 import { authenticate } from "../../middlewares/auth.middleware";
 import { authorizeDiscordOwnership } from "../../middlewares/ownership.middleware";
 import { 
@@ -10,12 +10,14 @@ import {
     PostPfpInput,
     CreateUserInput,
     LoginUserInput,
+    GetRankHistoryInput,
     createUserInputSchema,
     loginUserInputSchema,
     getUserInputSchema,
     getUserMapInputSchema,
     scoreQuerySchema,
-    scoreQueryModeSchema
+    scoreQueryModeSchema,
+    getRankHistorySchema
 } from "./user.schema";
 
 const userRoutes = async (server: FastifyInstance) => {
@@ -54,6 +56,14 @@ const userRoutes = async (server: FastifyInstance) => {
         },
         preHandler: [authenticate]
     }, handleUserRecentReq);
+
+    server.get<{ Params: GetUserInput, Querystring: GetRankHistoryInput }>('/:id/history', {
+        schema: {
+            params: getUserInputSchema,
+            querystring: getRankHistorySchema
+        },
+        preHandler: [authenticate]
+    }, handleGetUserRankHistoryReq);
 
     server.get<{ Params: GetUserMapInput, Querystring: ScoreQueryModeInput }>('/:id/map/:map', {
         schema: {

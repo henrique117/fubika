@@ -1,23 +1,23 @@
-import { FastifyRequest, FastifyReply } from "fastify";
-import z from "zod";
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { z } from "zod";
 
-export class ServerError extends Error {
+export class AppError extends Error {
     public readonly statusCode: number;
 
     constructor(message: string, statusCode = 400) {
         super(message);
         this.statusCode = statusCode;
-        Object.setPrototypeOf(this, ServerError.prototype);
+        Object.setPrototypeOf(this, AppError.prototype);
     }
 }
 
 export const Errors = {
-    BadRequest: (msg: string) => new ServerError(msg, 400),
-    Unauthorized: (msg = "Não autorizado") => new ServerError(msg, 401),
-    Forbidden: (msg = "Acesso negado") => new ServerError(msg, 403),
-    NotFound: (msg = "Recurso não encontrado") => new ServerError(msg, 404),
-    Conflict: (msg: string) => new ServerError(msg, 409),
-    Internal: (msg = "Erro interno no servidor") => new ServerError(msg, 500),
+    BadRequest: (msg: string) => new AppError(msg, 400),
+    Unauthorized: (msg = "Não autorizado") => new AppError(msg, 401),
+    Forbidden: (msg = "Acesso negado") => new AppError(msg, 403),
+    NotFound: (msg = "Recurso não encontrado") => new AppError(msg, 404),
+    Conflict: (msg: string) => new AppError(msg, 409),
+    Internal: (msg = "Erro interno no servidor") => new AppError(msg, 500),
 };
 
 export const globalErrorHandler = (
@@ -33,7 +33,15 @@ export const globalErrorHandler = (
         });
     }
 
-    if (error instanceof ServerError) {
+    if (error.validation) {
+        return reply.status(400).send({
+            error: "Validation Error",
+            message: "Dados de entrada inválidos.",
+            details: error.validation,
+        });
+    }
+
+    if (error instanceof AppError) {
         return reply.status(error.statusCode).send({
             error: getStatusName(error.statusCode),
             message: error.message,

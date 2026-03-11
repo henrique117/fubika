@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { z } from 'zod'
-import { ServerError, Errors, globalErrorHandler } from '../src/utils/errorHandler'
+import { AppError, Errors, globalErrorHandler } from '../src/utils/errorHandler'
 
 const mockReply = () => {
     const reply = {
@@ -24,20 +24,20 @@ const mockRequest = () => ({
     log: { error: vi.fn() }
 })
 
-describe('ServerError', () => {
+describe('AppError', () => {
     it('cria um erro com statusCode 400 por padrão', () => {
-        const err = new ServerError('algo errado')
+        const err = new AppError('algo errado')
         expect(err.statusCode).toBe(400)
         expect(err.message).toBe('algo errado')
     })
 
     it('cria um erro com statusCode customizado', () => {
-        const err = new ServerError('não encontrado', 404)
+        const err = new AppError('não encontrado', 404)
         expect(err.statusCode).toBe(404)
     })
 
     it('é instância de Error', () => {
-        expect(new ServerError('x')).toBeInstanceOf(Error)
+        expect(new AppError('x')).toBeInstanceOf(Error)
     })
 })
 
@@ -96,7 +96,7 @@ describe('globalErrorHandler', () => {
         expect(reply._body.details).toBeDefined()
     })
 
-    it('trata ServerError com o statusCode correto', () => {
+    it('trata AppError com o statusCode correto', () => {
         const err = Errors.NotFound('mapa não encontrado')
         globalErrorHandler(err, request as any, reply as any)
 
@@ -105,13 +105,13 @@ describe('globalErrorHandler', () => {
         expect(reply._body.error).toBe('Not Found')
     })
 
-    it('trata ServerError 403', () => {
+    it('trata AppError 403', () => {
         globalErrorHandler(Errors.Forbidden(), request as any, reply as any)
         expect(reply._status).toBe(403)
         expect(reply._body.error).toBe('Forbidden')
     })
 
-    it('trata ServerError 409', () => {
+    it('trata AppError 409', () => {
         globalErrorHandler(Errors.Conflict('conflito'), request as any, reply as any)
         expect(reply._status).toBe(409)
         expect(reply._body.error).toBe('Conflict')

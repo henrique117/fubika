@@ -298,6 +298,32 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
     return await populateScoresWithCache(recentScoresRaw);
 }
 
+export const getUserRankHistory = async (filter: UserFilter, mode: number, days: number) => {
+    const user = await prisma.users.findUnique({ where: filter as any });
+    
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
+    if (user.id < 3) throw Errors.NotFound("Perfil indisponível.");
+
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() - days);
+
+    const history = await prisma.user_rank_history.findMany({
+        where: {
+            user_id: user.id,
+            mode: mode,
+            date: { gte: dateLimit }
+        },
+        orderBy: { date: 'asc' },
+        select: {
+            date: true,
+            rank: true,
+            pp: true
+        }
+    });
+
+    return history;
+}
+
 export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, input: ScoreQueryModeInput) => {
     const { mode } = input;
 

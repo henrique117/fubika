@@ -101,6 +101,59 @@ const mapDatabaseToScoreWithoutMap = (row: any): Omit<IScore, 'beatmap'> => {
     };
 };
 
+export const ensureBeatmapsCache = async (mapIds: number[]): Promise<void> => {
+    if (!mapIds || mapIds.length === 0) return;
+
+    const existingLocalMaps = await prisma.maps.findMany({
+        where: { id: { in: mapIds } },
+        select: { id: true }
+    });
+    
+    const validMapIds = existingLocalMaps.map(m => m.id);
+    if (validMapIds.length === 0) return;
+
+    const existingCache = await prisma.api_beatmap_cache.findMany({
+        where: { map_id: { in: validMapIds } },
+        select: { map_id: true }
+    });
+
+    const existingCacheIds = new Set(existingCache.map(c => c.map_id));
+
+    const missingIds = validMapIds.filter(id => !existingCacheIds.has(id));
+
+    if (missingIds.length === 0) {
+        return;
+    }
+
+    const chunkSize = 50;
+    for (let i = 0; i < missingIds.length; i += chunkSize) {
+        const chunk = missingIds.slice(i, i + chunkSize);
+        
+        try {
+            const queryParams = chunk.map(id => `ids[]=${id}`).join('&');
+            const response = await osuApiClient.get(`/beatmaps?${queryParams}`);
+            const beatmapsData = response.data?.beatmaps || [];
+
+            if (beatmapsData.length === 0) continue;
+
+            const cachePayload = beatmapsData.map((map: any) => ({
+                map_id: map.id,
+                cover: map.beatmapset?.covers?.cover || null,
+                thumbnail: map.beatmapset?.covers?.['list@2x'] || null,
+                tags: map.beatmapset?.tags || null
+            }));
+
+            await prisma.api_beatmap_cache.createMany({
+                data: cachePayload,
+                skipDuplicates: true
+            });
+
+        } catch (error) {
+            console.error(`[Cache] Falha ao buscar lote de mapas na API oficial.`);
+        }
+    }
+}
+
 const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<IScore, 'beatmap'>[]> => {
     let bmap_md5 = knownMd5;
     
@@ -207,6 +260,8 @@ export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
         getBeatmapPlaycount(bmap.beatmap_md5),
         getBeatmapPasscount(bmap.beatmap_md5)
     ]);
+
+    ensureBeatmapsCache([input.id]).catch(() => {});
 
     return { 
         ...bmap,

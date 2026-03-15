@@ -1,15 +1,25 @@
 import z from "zod";
 
-const createDiscordLink = z.object({
-    discord_id: z.string('Campo discord_id é obrigatório'),
-    osu_name: z.string('Campo osu_name é obrigatório')
+export const createDiscordLinkSchema = z.object({
+    discord_id: z.string({ 
+        error: "O campo discord_id é obrigatório e deve ser um texto." 
+    }).min(1, "O discord_id não pode estar vazio."),
+    
+    osu_name: z.string({ 
+        error: "O campo osu_name é obrigatório e deve ser um texto." 
+    }).min(1, "O osu_name não pode estar vazio.")
 });
 
-export type CreateDiscordLink = z.infer<typeof createDiscordLink>;
+export type CreateDiscordLink = z.infer<typeof createDiscordLinkSchema>;
 
-const checkDiscordLink = z.object({
-    discord_id: z.string('Campo discord_id é obrigatório'),
-    code: z.string('Campo code é obrigatório')
+export const checkDiscordLinkSchema = z.object({
+    discord_id: z.string({ 
+        error: "O campo discord_id é obrigatório e deve ser um texto." 
+    }).min(1, "O discord_id não pode estar vazio."),
+    
+    code: z.string({ 
+        error: "O campo code é obrigatório e deve ser um texto." 
+    }).min(1, "O código de verificação não pode estar vazio.")
 });
 
-export type CheckDiscordLink = z.infer<typeof checkDiscordLink>;
+export type CheckDiscordLink = z.infer<typeof checkDiscordLinkSchema>;

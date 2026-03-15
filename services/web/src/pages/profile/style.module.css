@@ -157,6 +157,95 @@
     border-radius: 16px;
 }
 
+.mapsPill {
+    position: relative;
+    height: 45px;
+    width: 100%;
+    margin-bottom: 10px;
+    border-radius: 50px; /* Formato de cápsula */
+    background-size: cover;
+    background-position: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.mapsPill:hover {
+    transform: scale(1.01) translateX(5px);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.mapInfo {
+    padding: 0 25px;
+    width: 100%;
+    display: grid;
+    grid-template-areas: 
+        "name name"
+        "pp acc";
+    align-items: center;
+}
+
+.mapName {
+    grid-area: name;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.mapPP {
+    grid-area: pp;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+.mapPP::after {
+    content: "pp";
+    font-size: 9px;
+    margin-left: 2px;
+}
+
+.mapAcc {
+    grid-area: acc;
+    justify-self: end;
+    color: #a55eea; /* Cor lilás característica */
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.viewMoreBtn {
+    height: 50px;
+    width: 100%;
+    border-radius: 50px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-top: 5px;
+}
+
+.viewMoreBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+
 .rightColumn {
     width: 50%;
     margin-right: 3%;

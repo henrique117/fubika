@@ -1,16 +1,18 @@
 import { FastifyInstance } from "fastify";
 import { handleBeatmapReq, handleBeatmapsetReq } from "./beatmap.controller";
 import { authenticate } from "../../middlewares/auth.middleware";
-
-interface BeatmapProps {
-    id: number;
-}
+import { searchBeatmapsSchema } from "./beatmap.schema";
 
 const beatmapRoutes = async (server: FastifyInstance) => {
     server.addHook('onRequest', authenticate);
     
-    server.get<{ Params: BeatmapProps }>('/:id', handleBeatmapReq);
-    server.get<{ Params: BeatmapProps }>('/c/:id', handleBeatmapsetReq);
+    server.get('/:id', {
+        schema: { params: searchBeatmapsSchema }
+    }, handleBeatmapReq);
+
+    server.get('/c/:id', {
+        schema: { params: searchBeatmapsSchema }
+    }, handleBeatmapsetReq);
 }
 
 export default beatmapRoutes;

@@ -71,6 +71,7 @@ from app.repositories import users as users_repo
 from app.repositories.achievements import Achievement
 from app.usecases import achievements as achievements_usecases
 from app.usecases import user_achievements as user_achievements_usecases
+from app.usecases.performance import calculate_performances, ScoreParams
 from app.utils import escape_enum
 from app.utils import pymysql_encode
 
@@ -880,22 +881,56 @@ async def osuSubmitModularSelector(
                     if announce_chan:
                         announce_chan.send(" ".join(ann), sender=score.player, to_self=True)
 
+        calculated_sr = score.bmap.diff
+        
+        if hasattr(score, 'pp') and score.pp > 0:
+            osu_file_available = await ensure_osu_file_is_available(score.bmap.id)
+            
+            if osu_file_available:
+                osu_file_path = f".data/osu/{score.bmap.id}.osu"
+                
+                try:
+                    res = calculate_performances(
+                        osu_file_path, 
+                        [ScoreParams(
+                            mode=score.mode.as_vanilla, 
+                            mods=int(score.mods), 
+                            acc=float(score.acc), 
+                            combo=int(score.max_combo), 
+                            nmiss=int(score.nmiss)
+                        )]
+                    )
+                    
+                    if res and len(res) > 0:
+                        first_res = res[0]
+                        calculated_sr = first_res.get('stars', first_res.get('sr', score.bmap.diff))
+                
+                except Exception as e:
+                    app.logging.log(f"Falha ao calcular SR para o score: {e}", app.logging.Ansi.LRED)
+
+        query = (
+            "INSERT INTO scores ("
+            "id, map_md5, score, pp, acc, max_combo, mods, "
+            "n300, n100, n50, nmiss, ngeki, nkatu, grade, "
+            "status, mode, play_time, time_elapsed, client_flags, "
+            "userid, perfect, online_checksum, score_sr"
+            ") VALUES ("
+            "NULL, :map_md5, :score, :pp, :acc, :max_combo, :mods, "
+            ":n300, :n100, :n50, :nmiss, :ngeki, :nkatu, :grade, "
+            ":status, :mode, :play_time, :time_elapsed, :client_flags, "
+            ":user_id, :perfect, :checksum, :score_sr"
+            ")"
+        )
+
         score.id = await app.state.services.database.execute(
-            "INSERT INTO scores "
-            "VALUES (NULL, "
-            ":map_md5, :score, :pp, :acc, "
-            ":max_combo, :mods, :n300, :n100, "
-            ":n50, :nmiss, :ngeki, :nkatu, "
-            ":grade, :status, :mode, :play_time, "
-            ":time_elapsed, :client_flags, :user_id, :perfect, "
-            ":checksum)",
+            query,
             {
                 "map_md5": score.bmap.md5,
                 "score": score.score,
                 "pp": score.pp,
                 "acc": score.acc,
                 "max_combo": score.max_combo,
-                "mods": score.mods,
+                "mods": int(score.mods),
                 "n300": score.n300,
                 "n100": score.n100,
                 "n50": score.n50,
@@ -911,6 +946,7 @@ async def osuSubmitModularSelector(
                 "user_id": score.player.id,
                 "perfect": score.perfect,
                 "checksum": score.client_checksum,
+                "score_sr": calculated_sr 
             },
         )
 

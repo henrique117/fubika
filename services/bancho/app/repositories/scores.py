@@ -47,6 +47,7 @@ class ScoresTable(Base):
     userid = Column("userid", Integer, nullable=False)
     perfect = Column("perfect", TINYINT(1), nullable=False)
     online_checksum = Column("online_checksum", String(32), nullable=False)
+    score_sr = Column("score_sr", FLOAT, nullable=False, server_default="0")
 
     __table_args__ = (
         Index("scores_map_md5_index", map_md5),
@@ -84,6 +85,7 @@ READ_PARAMS = (
     ScoresTable.userid,
     ScoresTable.perfect,
     ScoresTable.online_checksum,
+    ScoresTable.score_sr,
 )
 
 
@@ -110,6 +112,7 @@ class Score(TypedDict):
     userid: int
     perfect: int
     online_checksum: str
+    score_sr: float
 
 
 async def create(
@@ -134,6 +137,7 @@ async def create(
     user_id: int,
     perfect: int,
     online_checksum: str,
+    score_sr: float,
 ) -> Score:
     insert_stmt = insert(ScoresTable).values(
         map_md5=map_md5,
@@ -157,13 +161,14 @@ async def create(
         userid=user_id,
         perfect=perfect,
         online_checksum=online_checksum,
+        score_sr=score_sr,
     )
     rec_id = await app.state.services.database.execute(insert_stmt)
 
     select_stmt = select(*READ_PARAMS).where(ScoresTable.id == rec_id)
     _score = await app.state.services.database.fetch_one(select_stmt)
     assert _score is not None
-    return cast(Score, _score)
+    return cast(Score | None, _score)
 
 
 async def fetch_one(id: int) -> Score | None:

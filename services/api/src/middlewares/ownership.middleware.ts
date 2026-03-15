@@ -1,8 +1,9 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest } from "fastify";
 import prisma from "../utils/prisma";
+import { Errors } from "../utils/errorHandler";
 
-export async function authorizeDiscordOwnership(req: FastifyRequest, reply: FastifyReply) {
-    const userFromToken = req.user as { id: number };
+export async function authorizeDiscordOwnership(req: FastifyRequest, _: any) {
+    const userAuth = req.user as { id: number };
 
     let requestedDiscordId: string | undefined;
 
@@ -10,7 +11,7 @@ export async function authorizeDiscordOwnership(req: FastifyRequest, reply: Fast
         requestedDiscordId = (req.params as any).discord_id;
     } else if (req.body && (req.body as any).discord_id) {
         requestedDiscordId = (req.body as any).discord_id;
-    } else {
+    } else if (req.isMultipart()) {
         const data = await req.file();
         if (data && data.fields.discord_id) {
             requestedDiscordId = (data.fields.discord_id as any).value;
@@ -21,28 +22,22 @@ export async function authorizeDiscordOwnership(req: FastifyRequest, reply: Fast
 
     const validMatch = await prisma.users.findFirst({
         where: {
-            id: userFromToken.id,
+            id: userAuth.id,
             discord_id: requestedDiscordId
         }
     });
 
     if (!validMatch) {
-        console.error(`[Security Warning] Usuário ID:${userFromToken.id} tentou agir sobre Discord:${requestedDiscordId}`);
-        return reply.status(403).send({ 
-            error: "Forbidden", 
-            message: "Você não tem permissão para alterar dados de outra conta." 
-        });
+        console.warn(`[Segurança] Tentativa de acesso indevido: User ID ${userAuth.id} -> Discord ID ${requestedDiscordId}`);
+        throw Errors.Forbidden("Acesso negado. Este Discord ID não pertence à sua conta.");
     }
 }
 
-export async function authorizeUserIdentity(req: FastifyRequest, reply: FastifyReply) {
-    const userFromToken = req.user as { id: number };
+export async function authorizeUserIdentity(req: FastifyRequest, _: any) {
+    const userAuth = req.user as { id: number };
     const targetId = Number((req.params as any).id);
 
-    if (targetId && userFromToken.id !== targetId) {
-        return reply.status(403).send({ 
-            error: "Forbidden", 
-            message: "Você só pode modificar o seu próprio perfil." 
-        });
+    if (targetId && userAuth.id !== targetId) {
+        throw Errors.Forbidden("Acesso negado. Só pode realizar esta acção na sua própria conta.");
     }
 }

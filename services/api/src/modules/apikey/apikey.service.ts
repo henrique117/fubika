@@ -1,32 +1,28 @@
 import prisma from "../../utils/prisma";
 import { randomBytes } from "crypto";
 import { CreateApikeyInput } from "./apikey.schema";
+import { Errors } from "../../utils/errorHandler";
 
 export const createApikey = async (input: CreateApikeyInput) => {
-
-    const user = await prisma.users.findUnique({
-        where: {
-            discord_id: input.id_target.toString()
-        }
+    const requester = await prisma.users.findUnique({
+        where: { discord_id: input.id_req.toString() }
     });
 
-    if (!user || !user.is_dev) {
-        throw new Error('Você não tem permissão para gerar chaves da API');
+    if (!requester || !requester.is_dev) {
+        throw Errors.Forbidden("Você não tem permissão para gerar chaves de API.");
     }
 
     const target = await prisma.users.findUnique({
-        where: {
-            discord_id: input.id_target.toString()
-        }
+        where: { discord_id: input.id_target.toString() }
     });
 
     if (!target) {
-        throw new Error('Usuário não encontrado');
+        throw Errors.NotFound("Usuário de destino não encontrado.");
     }
 
     const generatedKey = 'fubika_live_' + randomBytes(16).toString('hex');
 
-    const apikey = await prisma.api_keys.create({
+    return await prisma.api_keys.create({
         data: {
             name: input.name,
             owner_id: target.id,
@@ -34,9 +30,7 @@ export const createApikey = async (input: CreateApikeyInput) => {
             can_write: false
         }
     });
-
-    return apikey;
-}
+};
 
 export const checkApiKey = async (apikey: string) => {
     return await prisma.api_keys.findUnique({
@@ -45,4 +39,4 @@ export const checkApiKey = async (apikey: string) => {
             user: true
         }
     });
-}
+};

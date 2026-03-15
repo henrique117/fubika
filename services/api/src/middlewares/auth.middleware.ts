@@ -1,14 +1,15 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest } from "fastify";
 import { checkApiKey } from "../modules/apikey/apikey.service";
+import { Errors } from "../utils/errorHandler";
 
-export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
+export async function authenticate(req: FastifyRequest, _: any) {
     const apiKey = req.headers['x-api-key'] as string;
 
     if (apiKey) {
         const tokenData = await checkApiKey(apiKey);
 
         if (!tokenData) {
-            return reply.status(401).send({ message: "API Key inválida" });
+            throw Errors.Unauthorized("API Key inválida.");
         }
 
         req.user = {
@@ -16,13 +17,14 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
             name: tokenData.user.name,
             priv: tokenData.user.priv,
         };
-
+        
         return;
     }
 
     try {
         await req.jwtVerify();
+        (req.user as any).isBot = false;
     } catch (err) {
-        return reply.status(401).send({ message: "Token inválido ou não fornecido" });
+        throw Errors.Unauthorized("Token inválido ou não fornecido.");
     }
 }

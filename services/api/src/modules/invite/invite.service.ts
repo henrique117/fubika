@@ -1,13 +1,13 @@
 import { randomBytes } from "crypto";
 import { CheckInviteInput, CreateInviteInput } from "./invite.schema";
 import prisma from "../../utils/prisma";
+import { Errors } from "../../utils/errorHandler";
 
 export const createInvite = async (input: CreateInviteInput) => {
-
     let user;
 
     if (typeof input.id === "number") {
-        user = await prisma.users.findUniqueOrThrow({
+        user = await prisma.users.findUnique({
             where: { id: input.id },
             select: { is_admin: true, id: true }
         });
@@ -18,12 +18,8 @@ export const createInvite = async (input: CreateInviteInput) => {
         });
     }
 
-    if (!user) {
-        throw new Error('Permissão negada: Apenas administradores podem criar convites.');
-    }
-
-    if (!user.is_admin) {
-        throw new Error('Permissão negada: Apenas administradores podem criar convites.');
+    if (!user || !user.is_admin) {
+        throw Errors.Forbidden('Permissão negada: Apenas administradores podem criar convites.');
     }
 
     let code: string = '';
@@ -46,15 +42,13 @@ export const createInvite = async (input: CreateInviteInput) => {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 7);
 
-    const invite = await prisma.invites.create({
+    return await prisma.invites.create({
         data: {
             code: code,
             expires_at: expirationDate,
             created_by_id: user.id
         }
     });
-
-    return invite;
 }
 
 export const checkInvite = async (input: string) => {
@@ -74,14 +68,16 @@ export const useInvite = async (input: CheckInviteInput) => {
         where: { code: input.code }
     });
 
-    if (!invite) throw new Error('Código inválido.');
+    if (!invite) {
+        throw Errors.NotFound('Código de convite inválido.');
+    }
     
     if (invite.used_by_id) {
-        throw new Error('Este convite já foi utilizado.');
+        throw Errors.Conflict('Este convite já foi utilizado.');
     }
 
     if (invite.expires_at < new Date()) {
-        throw new Error('Este convite expirou.');
+        throw Errors.BadRequest('Este convite expirou.');
     }
 
     const updatedInvite = await prisma.invites.update({

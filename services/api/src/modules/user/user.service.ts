@@ -6,13 +6,14 @@ import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
-import { CreateUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
+import { CreateUserInput, DeleteUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
 import { calculateLevel } from "../../utils/level";
 import path from "path";
 import { pipeline } from "stream/promises";
 import fs from "fs";
+import { Errors } from "../../utils/errorHandler";
 
 const toSafeName = (name: string): string => {
     return name.trim().toLowerCase().replace(/ /g, '_');
@@ -134,8 +135,11 @@ export const getPlayerPlaycount = async (player_id: number): Promise<number> => 
 
 export const createUser = async (input: CreateUserInput) => {
     const { password, name, email, key } = input;
-    const isValidKey = await checkInvite(key)
-    if (!isValidKey) throw new Error('O Código é inválido');
+    const isValidKey = await checkInvite(key);
+    
+    if (!isValidKey) {
+        throw Errors.BadRequest('O código de convite é inválido ou já foi utilizado.');
+    }
 
     const safeName = toSafeName(name);
     const hash = await hashPassword(password);
@@ -156,7 +160,7 @@ export const createUser = async (input: CreateUserInput) => {
             is_admin: user_priv > 1,
             is_dev: user_priv > 1
         }
-    })
+    });
 
     if (key !== "FIRSTINVITE") await useInvite({ code: key, id: user.id });
     await createUserStats(user.id);
@@ -172,12 +176,18 @@ export const loginUser = async (input: LoginUserInput): Promise<IPlayer> => {
         where: { safe_name: safeName }
     });
 
-    if (!user) throw new Error('Usuário ou senha inválidos');
+    if (!user) {
+        throw Errors.Unauthorized('Usuário ou senha inválidos.');
+    }
 
     const isPasswordValid = await verifyPassword(password, user.pw_bcrypt);
-    if (!isPasswordValid) throw new Error('Usuário ou senha inválidos');
+    if (!isPasswordValid) {
+        throw Errors.Unauthorized('Usuário ou senha inválidos.');
+    }
     
-    if ((user.priv & 1) === 0) throw new Error('Esta conta está restrita/banida.');
+    if ((user.priv & 1) === 0) {
+        throw Errors.Forbidden('Esta conta está restrita ou banida.');
+    }
 
     return await getUserStats({ id: user.id }, 0);
 }
@@ -202,8 +212,8 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         where: filter as any
     });
 
-    if (!user) throw new Error("Usuário não encontrado");
-    if (user.id < 3) throw new Error("Usuário inválido (Bot ou Bancho)");
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
+    if (user.id < 3) throw Errors.NotFound("Perfil indisponível.");
 
     const playerId = user.id;
 
@@ -293,8 +303,9 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
     const { mode, limit } = input;
     
     const user = await prisma.users.findUnique({ where: filter as any });
-    if (!user) throw new Error("Usuário não encontrado");
-    if (user.id < 3) throw new Error("Usuário inválido (Bot ou Bancho)");
+    
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
+    if (user.id < 3) throw Errors.NotFound("Perfil indisponível.");
 
     const recentScoresRaw = await prisma.$queryRaw<any[]>`
         SELECT 
@@ -330,11 +341,38 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
     return populatedScores;
 }
 
+
+export const getUserRankHistory = async (filter: UserFilter, mode: number, days: number) => {
+    const user = await prisma.users.findUnique({ where: filter as any });
+    
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
+    if (user.id < 3) throw Errors.NotFound("Perfil indisponível.");
+
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() - days);
+
+    const history = await prisma.user_rank_history.findMany({
+        where: {
+            user_id: user.id,
+            mode: mode,
+            date: { gte: dateLimit }
+        },
+        orderBy: { date: 'asc' },
+        select: {
+            date: true,
+            rank: true,
+            pp: true
+        }
+    });
+
+    return history;
+}
+
 export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, input: ScoreQueryModeInput) => {
     const { mode } = input;
 
     const user = await prisma.users.findUnique({ where: filter as any });
-    if (!user) throw new Error("Usuário não encontrado");
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
 
     let mapMd5 = "";
 
@@ -352,7 +390,7 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
                 mapMd5 = response.data.checksum;
             }
         } catch (error) {
-            console.error("Erro ao buscar MD5 do mapa na API:", error);
+            console.error("Erro ao buscar MD5 do mapa na API (silenciado para fallback).");
         }
     }
 
@@ -415,6 +453,20 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
     };
 }
 
+
+export const deleteUser = async (userId: number, input: DeleteUserInput): Promise<void> => {
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
+
+    const isPasswordValid = await verifyPassword(input.password, user.pw_bcrypt);
+    if (!isPasswordValid) throw Errors.Unauthorized("Senha incorreta.");
+
+    await prisma.stats.deleteMany({ where: { id: userId } });
+    await prisma.scores.deleteMany({ where: { userid: userId } });
+    await prisma.users.delete({ where: { id: userId } });
+}
+
 export const getUsersCount = async () => {
     const now = Math.floor(Date.now() / 1000);
     const fiveMinutesAgo = now - 300;
@@ -448,7 +500,7 @@ export const setUserPfp = async (data: PostPfpInput) => {
     });
 
     if (!user) {
-        throw new Error("Usuário não encontrado ou não vinculado.");
+        throw Errors.NotFound("Usuário não encontrado ou não vinculado.");
     }
 
     const avatarDir = path.join(process.cwd(), '.data', 'avatars');
@@ -477,6 +529,6 @@ export const setUserPfp = async (data: PostPfpInput) => {
 
     } catch (err) {
         console.error("Erro no processamento do avatar:", err);
-        throw new Error("Falha ao gravar o ficheiro no servidor.");
+        throw Errors.Internal("Falha ao gravar a imagem de perfil no servidor.");
     }
 }

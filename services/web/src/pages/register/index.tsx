@@ -44,12 +44,14 @@ const Register: React.FC = () => {
         const newErrors: FormErrors = {}
         const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
         
+        const usernameRegex = /^[a-zA-Z0-9áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ\+\-_\[\] ]+$/
+        
         if (!username || username.length < 3) {
             newErrors.name = "Nome de usuário muito curto (min 3 chars)."
-        }
-
-        if (username.length > 15) {
+        } else if (username.length > 15) {
             newErrors.name = "Nome de usuário muito longo (max 15 chars)."
+        } else if (!usernameRegex.test(username)) {
+            newErrors.name = "O nome contém caracteres inválidos (apenas letras, números, +, - e _)."
         }
         
         if (!email || !emailRegex.test(email)) {
@@ -130,7 +132,7 @@ const Register: React.FC = () => {
                                 id="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="orlandoalmeida0000@gmail.com"
+                                placeholder="orlandaodogas@gmail.com"
                                 className={`${style.input} ${errors.email ? style.inputError : ''}`}
                             />
                             {errors.email && <span className={style.errorText}>{errors.email}</span>}

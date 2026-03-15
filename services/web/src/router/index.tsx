@@ -36,13 +36,13 @@ const router = createBrowserRouter([
         element: <HowToConnectPage />
     },
     {
-    path: '/profile/:id',
-    element: <ProfilePage />, 
+        path: '/profile/:id',
+        element: <ProfilePage />,
     },
 
     {
-    path: '/profile/:id/top-plays', 
-    element: <ProfileTopPlays />
+        path: '/profile/:id/top-plays',
+        element: <ProfileTopPlays />
     },
     {
         element: <ProtectedLayout />,

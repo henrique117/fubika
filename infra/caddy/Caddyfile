@@ -49,3 +49,8 @@ tickets.fubika.com.br {
     {$TLS_OPTS}
     reverse_proxy tickets_app:8169
 }
+
+app.fubika.com.br {
+    {$TLS_OPTS}
+    reverse_proxy avaliacao_app:80
+}

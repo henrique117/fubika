@@ -34,6 +34,15 @@ export const globalErrorHandler = (
     }
 
     if (error instanceof ServerError) {
+        if (error.statusCode === 500) {
+            request.log.error({
+                err: error,
+                msg: `[500 Internal] ${error.message}`,
+                route: request.url,
+                method: request.method,
+                stack: error.stack,
+            });
+        }
         return reply.status(error.statusCode).send({
             error: getStatusName(error.statusCode),
             message: error.message,
@@ -41,13 +50,26 @@ export const globalErrorHandler = (
     }
 
     if (error.code?.startsWith("P")) {
-        request.log.error(`[Prisma Error ${error.code}]: ${error.message}`);
+        request.log.error({
+            err: error,
+            msg: `[Prisma Error ${error.code}] ${error.message}`,
+            route: request.url,
+            method: request.method,
+            stack: error.stack,
+        });
         return reply.status(500).send({
             error: "Database Error",
             message: "Ocorreu um erro na persistência dos dados.",
         });
     }
 
+    request.log.error({
+        err: error,
+        msg: `[500 Unhandled] ${error?.message ?? "Erro desconhecido"}`,
+        route: request.url,
+        method: request.method,
+        stack: error?.stack,
+    });
     return reply.status(500).send({
         error: "Internal Server Error",
         message: "Algo correu muito mal. O administrador foi avisado.",

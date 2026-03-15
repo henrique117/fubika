@@ -1,0 +1,110 @@
+.pageWrapper {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    color: #fff;
+
+}
+
+.rankingContainer {
+    width: 100%;
+    max-width: 1100px;
+}
+
+.tableCard {
+    background-color: #1a1a1a; 
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.backButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 40px;    
+    display: block;      
+}
+
+.title {
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.gridStructure {
+    display: grid;
+    grid-template-columns: 50px 1fr 80px 50px 50px 50px 50px 90px 80px 120px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 25px;
+}
+
+.tableHeader {
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.playerRow {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50px;
+    height: 60px;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+}
+.playerRow:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.grade {
+    font-size: 24px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.rankS, .rankSH { color: #f0ad4e; }
+.rankA { color: #5cb85c; }
+.rankB { color: #5bc0de; }
+.rankC { color: #d9534f; }
+.rankD { color: #888; }
+
+
+.mapInfo {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.songTitle {
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.versionName {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.statValue, .hitValue {
+    font-size: 14px;
+    text-align: center;
+}
+
+.ppValue {
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+}
+
+.statusMsg {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}

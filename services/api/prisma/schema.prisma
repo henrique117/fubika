@@ -250,6 +250,8 @@ model maps {
   hp           Float       @default(0.00) @db.Float
   diff         Float       @default(0.000) @db.Float
 
+  api_cache    api_beatmap_cache?
+
   @@id([server, id])
   @@index([set_id])
   @@index([status])
@@ -257,6 +259,16 @@ model maps {
   @@index([plays])
   @@index([mode])
   @@index([frozen])
+}
+
+model api_beatmap_cache {
+  map_id        Int      @id
+  cover         String?  @db.VarChar(255)
+  thumbnail     String?  @db.VarChar(255)
+  tags          String?  @db.Text
+  updated_at    DateTime @default(now()) @updatedAt
+
+  map           maps     @relation(fields: [map_id], references: [id], onDelete: Cascade)
 }
 
 model mapsets {

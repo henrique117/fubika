@@ -63,3 +63,17 @@ export const postPfpSchema = z.object({
 });
 
 export type PostPfpInput = z.infer<typeof postPfpSchema>;
+
+export const getRankHistorySchema = z.object({
+    mode: z.coerce.number().int().min(0).max(8).default(0),
+    days: z.coerce.number().int().min(1).max(365).default(90)
+});
+
+export type GetRankHistoryInput = z.infer<typeof getRankHistorySchema>;
+
+export const deleteUserSchema = z.object({
+    password: z.string({ error: "A senha deve ser um texto." })
+        .min(1, "Por favor, digite sua senha para confirmar a exclusão.")
+});
+
+export type DeleteUserInput = z.infer<typeof deleteUserSchema>;

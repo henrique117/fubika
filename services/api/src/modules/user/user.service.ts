@@ -6,7 +6,7 @@ import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
 import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
-import { CreateUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
+import { CreateUserInput, DeleteUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
 import { calculateLevel } from "../../utils/level";
@@ -153,7 +153,7 @@ export const createUser = async (input: CreateUserInput) => {
             email: email,
             pw_bcrypt: hash,
             safe_name: safeName,
-            country: 'BR',
+            country: 'br',
             priv: user_priv,
             creation_time: Math.floor(Date.now() / 1000),
             latest_activity: Math.floor(Date.now() / 1000),
@@ -341,6 +341,33 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
     return populatedScores;
 }
 
+
+export const getUserRankHistory = async (filter: UserFilter, mode: number, days: number) => {
+    const user = await prisma.users.findUnique({ where: filter as any });
+    
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
+    if (user.id < 3) throw Errors.NotFound("Perfil indisponível.");
+
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() - days);
+
+    const history = await prisma.user_rank_history.findMany({
+        where: {
+            user_id: user.id,
+            mode: mode,
+            date: { gte: dateLimit }
+        },
+        orderBy: { date: 'asc' },
+        select: {
+            date: true,
+            rank: true,
+            pp: true
+        }
+    });
+
+    return history;
+}
+
 export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, input: ScoreQueryModeInput) => {
     const { mode } = input;
 
@@ -424,6 +451,20 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
             total_score: 0, ranked_score: 0, max_combo: 0, playtime: 0
         }
     };
+}
+
+
+export const deleteUser = async (userId: number, input: DeleteUserInput): Promise<void> => {
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
+
+    const isPasswordValid = await verifyPassword(input.password, user.pw_bcrypt);
+    if (!isPasswordValid) throw Errors.Unauthorized("Senha incorreta.");
+
+    await prisma.stats.deleteMany({ where: { id: userId } });
+    await prisma.scores.deleteMany({ where: { userid: userId } });
+    await prisma.users.delete({ where: { id: userId } });
 }
 
 export const getUsersCount = async () => {

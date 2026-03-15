@@ -1,68 +1,69 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('ioredis', () => {
-    const mockRedis = {
-        publish: vi.fn(),
-        on: vi.fn(),
+const mockPublish = vi.fn()
+
+vi.mock('ioredis', () => ({
+    default: class Redis {
+        publish = mockPublish
+        on = vi.fn()
     }
-    return { default: vi.fn(() => mockRedis) }
-})
+}))
 
 vi.mock('../src/utils/errorHandler', () => ({
     Errors: {
-        Internal: (msg: string) => new Error(msg),
-    },
+        Internal: (msg: string) => ({ statusCode: 500, message: msg })
+    }
 }))
 
 describe('sendIngameMessage', () => {
-    let redisMock: { publish: ReturnType<typeof vi.fn>; on: ReturnType<typeof vi.fn> }
-
-    beforeEach(async () => {
-        vi.resetModules()
-        vi.clearAllMocks()
-
-        const Redis = (await import('ioredis')).default as any
-        redisMock = new Redis()
-        redisMock.publish.mockReset()
+    beforeEach(() => {
+        mockPublish.mockReset()
     })
 
     it('publica no canal correto com payload JSON válido', async () => {
-        redisMock.publish.mockResolvedValueOnce(1)
+        mockPublish.mockResolvedValueOnce(1)
 
         const { sendIngameMessage } = await import('../src/utils/redis')
-        await sendIngameMessage(42, 'Bem-vindo ao servidor!')
 
-        expect(redisMock.publish).toHaveBeenCalledWith(
+        await sendIngameMessage(42, 'Olá jogador!')
+
+        expect(mockPublish).toHaveBeenCalledOnce()
+        expect(mockPublish).toHaveBeenCalledWith(
             'api:notification',
-            JSON.stringify({ target_id: 42, msg: 'Bem-vindo ao servidor!' })
+            JSON.stringify({ target_id: 42, msg: 'Olá jogador!' })
         )
     })
 
     it('lança erro quando o Redis falha', async () => {
-        redisMock.publish.mockRejectedValueOnce(new Error('conexão recusada'))
+        mockPublish.mockRejectedValueOnce(new Error('Redis down'))
 
         const { sendIngameMessage } = await import('../src/utils/redis')
 
-        await expect(sendIngameMessage(1, 'teste')).rejects.toThrow()
+        await expect(sendIngameMessage(1, 'teste')).rejects.toMatchObject({
+            statusCode: 500
+        })
     })
 
     it('serializa corretamente userId e mensagem no payload', async () => {
-        redisMock.publish.mockResolvedValueOnce(1)
+        mockPublish.mockResolvedValueOnce(1)
 
         const { sendIngameMessage } = await import('../src/utils/redis')
-        await sendIngameMessage(999, 'score submetido!')
+        await sendIngameMessage(99, 'mensagem teste')
 
-        const call = redisMock.publish.mock.calls[0]
-        const payload = JSON.parse(call[1])
+        const [, payload] = mockPublish.mock.calls[0]
+        const parsed = JSON.parse(payload)
 
-        expect(payload.target_id).toBe(999)
-        expect(payload.msg).toBe('score submetido!')
+        expect(parsed.target_id).toBe(99)
+        expect(parsed.msg).toBe('mensagem teste')
     })
 
     it('funciona com userId 0', async () => {
-        redisMock.publish.mockResolvedValueOnce(1)
+        mockPublish.mockResolvedValueOnce(1)
 
         const { sendIngameMessage } = await import('../src/utils/redis')
-        await expect(sendIngameMessage(0, 'msg')).resolves.not.toThrow()
+        await sendIngameMessage(0, 'msg')
+
+        const [, payload] = mockPublish.mock.calls[0]
+        expect(JSON.parse(payload).target_id).toBe(0)
     })
 })

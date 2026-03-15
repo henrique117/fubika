@@ -823,14 +823,13 @@ async def handle_osu_login_request(
             ),
         }
 
-    if db_country == "xx":
-        # bugfix for old bancho.py versions when
-        # country wasn't stored on registration.
-        log(f"Fixing {login_data['username']}'s country.", Ansi.LGREEN)
+    detected_state = geoloc["country"]["acronym"]
+    if db_country != detected_state:
+        log(f"Atualizando estado de {login_data['username']}: {db_country} -> {detected_state}", Ansi.LGREEN)
 
         await users_repo.partial_update(
             id=user_info["id"],
-            country=geoloc["country"]["acronym"],
+            country=detected_state,
         )
 
     client_details = ClientDetails(

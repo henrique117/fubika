@@ -9,6 +9,13 @@ const LoginPage: React.FC = () => {
     const navigate = useNavigate()
     const { signIn, signed, loading } = useAuth()
 
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    
+    const [showPassword, setShowPassword] = useState(false)
+    const [isloading, setLoading] = useState(false)
+    const [error, setError] = useState('')
+
     if (loading) {
         return null
     }
@@ -16,13 +23,6 @@ const LoginPage: React.FC = () => {
     if (signed) {
         return <Navigate to="/" replace />
     }
-
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    
-    const [showPassword, setShowPassword] = useState(false)
-    const [isloading, setLoading] = useState(false)
-    const [error, setError] = useState('')
 
     const togglePassword = () => setShowPassword(!showPassword)
 

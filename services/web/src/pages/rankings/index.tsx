@@ -24,7 +24,7 @@ interface RankedUser {
     s_count: number
     sh_count: number
     a_count: number
-    country?: string
+    country: string
 }
 
 const GlobalRanking: React.FC = () => {
@@ -33,6 +33,23 @@ const GlobalRanking: React.FC = () => {
     const [loading, setLoading] = useState(true)
     const [page, setPage] = useState(1)
 
+    const [selectedState, setSelectedState] = useState<string>('') // Define o estado inicial como vazio (Brasil Geral)
+    // Lista de UFs
+    const states = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
+
+    // Dicionário para traduzir a sigla para o nome completo
+    const stateNames: Record<string, string> = {
+        "AC": "Acre", "AL": "Alagoas", "AP": "Amapá", "AM": "Amazonas",
+        "BA": "Bahia", "CE": "Ceará", "DF": "Distrito Federal", "ES": "Espírito Santo",
+        "GO": "Goiás", "MA": "Maranhão", "MT": "Mato Grosso", "MS": "Mato Grosso do Sul",
+        "MG": "Minas Gerais", "PA": "Pará", "PB": "Paraíba", "PR": "Paraná",
+        "PE": "Pernambuco", "PI": "Piauí", "RJ": "Rio de Janeiro", "RN": "Rio Grande do Norte",
+        "RS": "Rio Grande do Sul", "RO": "Rondônia", "RR": "Roraima", "SC": "Santa Catarina",
+        "SP": "São Paulo", "SE": "Sergipe", "TO": "Tocantins",
+        "BR": "Brasil",
+        "xx": "Desconhecido"
+    };
+
     const modes = [
         { id: 0, label: 'Standard' },
         { id: 1, label: 'Taiko' },
@@ -40,13 +57,14 @@ const GlobalRanking: React.FC = () => {
         { id: 3, label: 'Mania' }
     ]
 
-    const fetchRanking = async (mode: number, pageNum: number) => {
+    const fetchRanking = async (mode: number, pageNum: number, countryCode: string) => {
         setLoading(true)
         try {
             const response = await api.get('/ranking/global', {
                 params: {
                     mode: mode,
-                    page: pageNum
+                    page: pageNum,
+                    country: countryCode || undefined // Envia para a API
                 }
             });
             
@@ -63,8 +81,11 @@ const GlobalRanking: React.FC = () => {
     }
 
     useEffect(() => {
-        fetchRanking(activeMode, page)
-    }, [activeMode, page])
+        // Comando que envia o estado selecionado para a API
+        fetchRanking(activeMode, page, selectedState) 
+    // Comando que coloca o selectedState na lista de dependências para recarregar a tabela quando a opção mudar
+    }, [activeMode, page, selectedState])
+
     // Nova função que impede o jogador de continuar passando as páginas infinitamente caso o número de jogadores exibidos na pág seja menor que 50.
     const isLastPage = players.length < 50;
 
@@ -98,6 +119,19 @@ const GlobalRanking: React.FC = () => {
 
                         <div className={style.titleContainer}>
                             <h2 className={style.title}>Colocações</h2>
+                            <select 
+                                className={style.stateSelector}
+                                value={selectedState}
+                                onChange={(e) => {
+                                    setSelectedState(e.target.value);
+                                    setPage(1); // Volta para a página 1 ao trocar de estado
+                                }}
+                            >
+                                <option value="">Brasil (Geral)</option>
+                                {states.map(uf => (
+                                    <option key={uf} value={uf}>{stateNames[uf]}</option>
+                                ))}
+                            </select>
                             
                             <div className={style.arrows}>
                                 <img 
@@ -146,6 +180,14 @@ const GlobalRanking: React.FC = () => {
 
                                         <div className={style.colPlayer}>
                                             <div className={style.nameInfo}>
+                                                {/* Renderiza a bandeira. Se der erro (ex: não achar a imagem), usa a do BR de fallback */}
+                                                <img 
+                                                    src={`/flags/${user.country}.svg`} 
+                                                    alt={stateNames[user.country] || user.country} 
+                                                    title={stateNames[user.country] || user.country} /* <-- O BALÃOZINHO MÁGICO AQUI */
+                                                    className={style.flagIcon}
+                                                    onError={(e) => { e.currentTarget.src = '/flags/BR.svg' }} 
+                                                />
                                                 <span className={style.username}>{user.name}</span>
                                             </div>
                                         </div>

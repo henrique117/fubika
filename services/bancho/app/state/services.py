@@ -44,11 +44,11 @@ if str(app.settings.DATADOG_API_KEY) and str(app.settings.DATADOG_APP_KEY):
 
 
 country_codes = {
-    "ac": 1, "al": 2, "ap": 3, "am": 4, "ba": 5, "ce": 6, "df": 7, "es": 8,
-    "go": 9, "ma": 10, "mt": 11, "ms": 12, "mg": 13, "pa": 14, "pb": 15,
-    "pr": 16, "pe": 17, "pi": 18, "rj": 19, "rn": 20, "rs": 21, "ro": 22,
-    "rr": 23, "sc": 24, "sp": 25, "se": 26, "to": 27,
-    "xx": 28 # Fallback para IPs desconhecidos
+    "AC": 1, "AL": 2, "AP": 3, "AM": 4, "BA": 5, "CE": 6, "DF": 7, "ES": 8,
+    "GO": 9, "MA": 10, "MT": 11, "MS": 12, "MG": 13, "PA": 14, "PB": 15,
+    "PR": 16, "PE": 17, "PI": 18, "RJ": 19, "RN": 20, "RS": 21, "RO": 22,
+    "RR": 23, "SC": 24, "SP": 25, "SE": 26, "TO": 27,
+    "XX": 28 # Fallback
 }
 
 class Country(TypedDict):
@@ -90,17 +90,12 @@ class IPResolver:
         return ip
 
 ip_resolver = IPResolver()
-
-async def fetch_geoloc(
-    ip: IPAddress, 
-    headers: Mapping[str, str] | None = None
-) -> Geolocation | None:
-    """Detecta a geolocalização priorizando o ESTADO (region) via IP-API."""
-    
+# Ajustando a geolocalização pra funcionar com as UFs em maíusculo.
+async def fetch_geoloc(ip: IPAddress, headers: Mapping[str, str] | None = None) -> Geolocation | None:
     if ip.is_private or ip.is_loopback:
         return {
             "latitude": -23.5505, "longitude": -46.6333,
-            "country": {"acronym": "sp", "numeric": 25}
+            "country": {"acronym": "SP", "numeric": 25} # Alterado para SP maiúsculo
         }
 
     url = f"http://ip-api.com/json/{ip}"
@@ -117,10 +112,10 @@ async def fetch_geoloc(
             log(f"IP-API Error: {data.get('message')} para {ip}", Ansi.LYELLOW)
             return None
 
-        state_acronym = data["region"].lower()
+        state_acronym = data["region"].upper()
         
         if state_acronym not in country_codes:
-            state_acronym = "xx"
+            state_acronym = "XX" # Alterado para XX maiúsculo
 
         return {
             "latitude": float(data["lat"]),
@@ -130,6 +125,7 @@ async def fetch_geoloc(
                 "numeric": country_codes[state_acronym],
             },
         }
+    
     except Exception as e:
         log(f"Falha ao obter dados geográficos: {e}", Ansi.LRED)
         return None

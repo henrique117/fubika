@@ -14,7 +14,11 @@ export const getGlobalRankSchema = z.object({
     .int("O modo deve ser um número inteiro.")
     .min(0, "O modo não pode ser menor que 0.")
     .max(8, "Modo de jogo desconhecido.")
-    .default(0)
+    .default(0),
+
+    country: z.string()
+    .length(2, "A sigla do estado deve ter 2 letras.")
+    .optional(), // Opcional para não quebrar o ranking global geral
 });
 
 export type GetGlobalRankInput = z.infer<typeof getGlobalRankSchema>;

@@ -390,17 +390,13 @@ class Beatmap:
 
     @property
     def has_leaderboard(self) -> bool:
-        """Return whether the map has a ranked leaderboard."""
-        return self.status in (
-            RankedStatus.Ranked,
-            RankedStatus.Approved,
-            RankedStatus.Loved,
-        )
+        """Sempre permite leaderboard, independente do status do mapa."""
+        return True
 
     @property
     def awards_ranked_pp(self) -> bool:
-        """Return whether the map's status awards ranked pp for scores."""
-        return self.status in (RankedStatus.Ranked, RankedStatus.Approved)
+        """Permite que o jogador ganhe PP e suba de Rank em qualquer mapa."""
+        return True
 
     @property  # perhaps worth caching some of?
     def as_dict(self) -> dict[str, object]:

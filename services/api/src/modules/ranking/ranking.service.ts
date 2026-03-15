@@ -7,7 +7,7 @@ import { Errors } from "../../utils/errorHandler";
 
 export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<IPlayer[]> => {
     const itemsPerPage = 50;
-    const { page, mode } = input;
+    const { page, mode, country } = input;
     
     if (page < 1) {
         throw Errors.BadRequest("A página deve ser maior ou igual a 1.");
@@ -18,7 +18,8 @@ export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<I
             mode: mode,
             pp: { gt: 0 },
             user: {
-                priv: { gt: 0 }
+                priv: { gt: 0 },
+                country: country ? country : undefined
             }
         },
         orderBy: {
@@ -43,6 +44,7 @@ export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<I
             id: row.user.id,
             name: row.user.name,
             safe_name: row.user.safe_name,
+            country: row.user.country,
             pfp: `https://a.${process.env.DOMAIN}/${row.user.id}`,
             banner: `https://assets.${process.env.DOMAIN}/user-profile-covers/${row.user.id}.jpg`,
             

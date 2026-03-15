@@ -219,7 +219,7 @@ class Players(list[Player]):
                 "longitude": 0.0,
                 "country": {
                     "acronym": player["country"],
-                    "numeric": app.state.services.country_codes[player["country"]],
+                    "numeric": app.state.services.country_codes.get(player["country"], 0),
                 },
             },
             silence_end=player["silence_end"],

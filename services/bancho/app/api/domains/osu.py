@@ -1366,9 +1366,9 @@ async def getScores(
     
     if not bmap:
         return Response(b"-1|false")
-
-    if bmap.status < 0:
-        return Response(f"{int(bmap.status)}|false".encode())
+# Alteração que permite que mapas "Graveyard" apareçam na leaderboard.
+#    if bmap.status < 0:
+#        return Response(f"{int(bmap.status)}|false".encode())
 
     if not requesting_from_editor_song_select:
         score_rows, personal_best_score_row = await get_leaderboard_scores(

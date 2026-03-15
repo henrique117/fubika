@@ -1,11 +1,12 @@
 import IPlayer from "../../interfaces/player.interface";
 import IScore from "../../interfaces/score.interface";
+import IBeatmap from "../../interfaces/beatmap.interface";
 import { getModString } from "../../utils/getModString";
 import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
+import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
-import { ensureBeatmapsCache } from "../beatmap/beatmap.service";
-import { CreateUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
+import { CreateUserInput, DeleteUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
 import { ptBR } from "date-fns/locale";
 import { formatDistance } from "date-fns";
 import { calculateLevel } from "../../utils/level";
@@ -34,7 +35,77 @@ export const getLastActivity = (unixTimestamp: number): string => {
     });
 }
 
-const formatScoreData = (row: any, cache?: any): Omit<IScore, 'player'> => {
+const mapOsuApiDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
+    return {
+        artist: data.artist || data.beatmapset?.artist || 'Artista desconhecido',
+        beatmap_id: data.id,
+        beatmapset_id: data.beatmapset_id,
+        beatmap_md5: data.checksum,
+        title: data.beatmapset?.title || 'Sem título', 
+        mode: data.mode,
+        mode_int: data.mode_int,
+        status: data.status,
+        total_length: data.total_length,
+        author_id: data.user_id, 
+        author_name: data.beatmapset?.creator || 'Desconhecido',
+        cover: data.beatmapset?.covers?.cover || '',
+        thumbnail: data.beatmapset?.covers?.['list@2x'] || '',
+        diff: data.version,
+        star_rating: data.difficulty_rating,
+        bpm: data.bpm,
+        od: data.accuracy,
+        ar: data.ar,
+        cs: data.cs,
+        hp: data.drain,
+        max_combo: data.max_combo,
+        count_circles: data.count_circles,
+        count_sliders: data.count_sliders,
+        passcount: data.passcount,
+        playcount: data.playcount
+    };
+};
+
+const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player'>> => {
+    let beatmapData: Omit<IBeatmap, 'scores'>;
+
+    try {
+        const response = await osuApiClient.get(`/beatmaps/${row.map_id}`);
+        
+        if (response.data) {
+            beatmapData = mapOsuApiDataToBeatmap(response.data);
+        } else {
+            throw new Error("Dados vazios");
+        }
+    } catch (error) {
+        beatmapData = {
+            artist: row.artist || 'Artista Desconhecido',
+            beatmap_id: row.map_id || 0,
+            beatmapset_id: row.map_set_id || 0,
+            beatmap_md5: row.map_md5,
+            title: 'Mapa não encontrado',
+            mode: 'osu',
+            mode_int: 0,
+            status: 'unknown',
+            total_length: 0,
+            author_id: 0,
+            author_name: 'Desconhecido',
+            cover: '',
+            thumbnail: '',
+            diff: 'Unknown',
+            star_rating: 0,
+            bpm: 0,
+            od: 0,
+            ar: 0,
+            cs: 0,
+            hp: 0,
+            max_combo: 0,
+            count_circles: 0,
+            count_sliders: 0,
+            passcount: 0,
+            playcount: 0
+        };
+    }
+
     return {
         id: Number(row.score_id),
         score: Number(row.score_val),
@@ -51,50 +122,8 @@ const formatScoreData = (row: any, cache?: any): Omit<IScore, 'player'> => {
         perfect: Boolean(row.perfect),
         play_time: row.play_time,
         
-        beatmap: {
-            artist: row.map_artist || 'Artista Desconhecido',
-            beatmap_id: Number(row.map_id) || 0,
-            beatmapset_id: Number(row.map_set_id) || 0,
-            beatmap_md5: row.map_md5,
-            title: row.map_title || 'Sem Título',
-            mode: row.mode,
-            mode_int: row.mode,
-            status: row.map_status || 0,
-            total_length: row.map_total_length || 0,
-            author_id: 0,
-            author_name: row.map_creator || 'Desconhecido',
-            cover: cache?.cover || '',
-            thumbnail: cache?.thumbnail || '',
-            diff: row.map_diff_name || 'Normal',
-            star_rating: row.map_sr || 0,
-            bpm: row.map_bpm || 0,
-            od: row.map_od || 0,
-            ar: row.map_ar || 0,
-            cs: row.map_cs || 0,
-            hp: row.map_hp || 0,
-            max_combo: row.map_max_combo || 0,
-            count_circles: 0,
-            count_sliders: 0,
-            passcount: row.map_passes || 0,
-            playcount: row.map_plays || 0
-        }
+        beatmap: beatmapData
     };
-};
-
-const populateScoresWithCache = async (rawScores: any[]): Promise<Omit<IScore, 'player'>[]> => {
-    if (!rawScores || rawScores.length === 0) return [];
-
-    const mapIds = Array.from(new Set(rawScores.map(r => Number(r.map_id))));
-    
-    await ensureBeatmapsCache(mapIds);
-
-    const cachedData = await prisma.api_beatmap_cache.findMany({
-        where: { map_id: { in: mapIds } }
-    });
-
-    const cacheMap = new Map(cachedData.map(c => [c.map_id, c]));
-
-    return rawScores.map(row => formatScoreData(row, cacheMap.get(Number(row.map_id))));
 };
 
 export const getPlayerPlaycount = async (player_id: number): Promise<number> => {
@@ -124,7 +153,7 @@ export const createUser = async (input: CreateUserInput) => {
             email: email,
             pw_bcrypt: hash,
             safe_name: safeName,
-            country: 'BR',
+            country: 'br',
             priv: user_priv,
             creation_time: Math.floor(Date.now() / 1000),
             latest_activity: Math.floor(Date.now() / 1000),
@@ -209,15 +238,17 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
 
     const topScoresRaw = await prisma.$queryRaw<any[]>`
         SELECT 
-            s.id as score_id, s.score as score_val, s.pp as score_pp, s.acc as score_acc, 
-            s.max_combo, s.mods, s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
+            s.id as score_id, 
+            s.score as score_val, 
+            s.pp as score_pp, 
+            s.acc as score_acc, 
+            s.max_combo, s.mods, 
+            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
             s.play_time, s.map_md5, s.mode, s.status,
             
-            m.id as map_id, m.set_id as map_set_id, m.title as map_title, m.artist as map_artist,
-            m.version as map_diff_name, m.creator as map_creator, m.status as map_status, 
-            m.total_length as map_total_length, m.bpm as map_bpm, m.cs as map_cs, m.ar as map_ar, 
-            m.od as map_od, m.hp as map_hp, m.max_combo as map_max_combo, m.plays as map_plays, 
-            m.passes as map_passes, m.diff as map_sr
+            m.id as map_id,
+            m.set_id as map_set_id,
+            m.status
 
         FROM scores s
         INNER JOIN maps m ON s.map_md5 = m.md5
@@ -233,7 +264,9 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
 
     const totalScoreNumber = Number(userStats.tscore);
 
-    const populatedScores = await populateScoresWithCache(topScoresRaw);
+    const populatedScores = await Promise.all(
+        topScoresRaw.map(row => mapProfileScoreWithApiMap(row))
+    );
 
     return {
         id: user.id,
@@ -276,15 +309,21 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
 
     const recentScoresRaw = await prisma.$queryRaw<any[]>`
         SELECT 
-            s.id as score_id, s.score as score_val, s.pp as score_pp, s.acc as score_acc, 
-            s.max_combo, s.mods, s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
+            s.id as score_id, 
+            s.score as score_val, 
+            s.pp as score_pp, 
+            s.acc as score_acc, 
+            s.max_combo, s.mods, 
+            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
             s.play_time, s.map_md5, s.mode, s.status,
             
-            m.id as map_id, m.set_id as map_set_id, m.title as map_title, m.artist as map_artist,
-            m.version as map_diff_name, m.creator as map_creator, m.status as map_status, 
-            m.total_length as map_total_length, m.bpm as map_bpm, m.cs as map_cs, m.ar as map_ar, 
-            m.od as map_od, m.hp as map_hp, m.max_combo as map_max_combo, m.plays as map_plays, 
-            m.passes as map_passes, m.diff as map_sr
+            m.id as map_id,
+            m.set_id as map_set_id,
+            m.title as map_title,
+            m.version as map_version,
+            m.creator as map_creator,
+            m.diff as map_diff,
+            m.status as map_status
 
         FROM scores s
         INNER JOIN maps m ON s.map_md5 = m.md5
@@ -295,8 +334,13 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
         LIMIT ${limit};
     `;
 
-    return await populateScoresWithCache(recentScoresRaw);
+    const populatedScores = await Promise.all(
+        recentScoresRaw.map(row => mapProfileScoreWithApiMap(row))
+    );
+
+    return populatedScores;
 }
+
 
 export const getUserRankHistory = async (filter: UserFilter, mode: number, days: number) => {
     const user = await prisma.users.findUnique({ where: filter as any });
@@ -330,25 +374,62 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
     const user = await prisma.users.findUnique({ where: filter as any });
     if (!user) throw Errors.NotFound("Usuário não encontrado.");
 
+    let mapMd5 = "";
+
+    const localMap = await prisma.maps.findFirst({
+        where: { id: bmap_id },
+        select: { md5: true }
+    });
+
+    if (localMap) {
+        mapMd5 = localMap.md5;
+    } else {
+        try {
+            const response = await osuApiClient.get(`/beatmaps/${bmap_id}`);
+            if (response.data?.checksum) {
+                mapMd5 = response.data.checksum;
+            }
+        } catch (error) {
+            console.error("Erro ao buscar MD5 do mapa na API (silenciado para fallback).");
+        }
+    }
+
+    if (!mapMd5) {
+        return null; 
+    }
+
     const bestScoreRaw = await prisma.$queryRaw<any[]>`
         SELECT 
-            s.id as score_id, s.score as score_val, s.pp as score_pp, s.acc as score_acc, 
-            s.max_combo, s.mods, s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
+            s.id as score_id, 
+            s.score as score_val, 
+            s.pp as score_pp, 
+            s.acc as score_acc, 
+            s.max_combo, s.mods, 
+            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
             s.play_time, s.map_md5, s.mode, s.status,
             
-            m.id as map_id, m.set_id as map_set_id, m.title as map_title, m.artist as map_artist,
-            m.version as map_diff_name, m.creator as map_creator, m.status as map_status, 
-            m.total_length as map_total_length, m.bpm as map_bpm, m.cs as map_cs, m.ar as map_ar, 
-            m.od as map_od, m.hp as map_hp, m.max_combo as map_max_combo, m.plays as map_plays, 
-            m.passes as map_passes, m.diff as map_sr
+            -- Forçamos o ID do mapa que veio do parâmetro para o mapper usar na API
+            ${bmap_id} as map_id,
+            
+            -- Campos de fallback do banco local (caso o mapper da API falhe)
+            m.set_id as map_set_id,
+            m.title as map_title,
+            m.version as map_version,
+            m.creator as map_creator,
+            m.diff as map_diff,
+            m.status as map_status,
+            m.total_length as map_total_length,
+            m.bpm as map_bpm,
+            m.cs as map_cs, m.ar as map_ar, m.od as map_od, m.hp as map_hp,
+            m.max_combo as map_max_combo
 
         FROM scores s
-        INNER JOIN maps m ON s.map_md5 = m.md5
+        LEFT JOIN maps m ON s.map_md5 = m.md5
         WHERE 
             s.userid = ${user.id} 
-            AND m.id = ${bmap_id}
+            AND s.map_md5 = ${mapMd5}
             AND s.mode = ${mode}
-            AND s.status = 2
+            AND s.status = 2 -- Apenas scores passados/rankeados
         ORDER BY s.pp DESC, s.score DESC
         LIMIT 1;
     `;
@@ -357,8 +438,7 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
         return null;
     }
 
-    const populatedArray = await populateScoresWithCache(bestScoreRaw);
-    const scoreWithoutPlayer = populatedArray[0];
+    const scoreWithoutPlayer = await mapProfileScoreWithApiMap(bestScoreRaw[0]);
 
     return {
         ...scoreWithoutPlayer,
@@ -371,6 +451,20 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
             total_score: 0, ranked_score: 0, max_combo: 0, playtime: 0
         }
     };
+}
+
+
+export const deleteUser = async (userId: number, input: DeleteUserInput): Promise<void> => {
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+
+    if (!user) throw Errors.NotFound("Usuário não encontrado.");
+
+    const isPasswordValid = await verifyPassword(input.password, user.pw_bcrypt);
+    if (!isPasswordValid) throw Errors.Unauthorized("Senha incorreta.");
+
+    await prisma.stats.deleteMany({ where: { id: userId } });
+    await prisma.scores.deleteMany({ where: { userid: userId } });
+    await prisma.users.delete({ where: { id: userId } });
 }
 
 export const getUsersCount = async () => {

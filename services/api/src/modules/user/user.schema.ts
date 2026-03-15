@@ -70,3 +70,10 @@ export const getRankHistorySchema = z.object({
 });
 
 export type GetRankHistoryInput = z.infer<typeof getRankHistorySchema>;
+
+export const deleteUserSchema = z.object({
+    password: z.string({ error: "A senha deve ser um texto." })
+        .min(1, "Por favor, digite sua senha para confirmar a exclusão.")
+});
+
+export type DeleteUserInput = z.infer<typeof deleteUserSchema>;

@@ -5,12 +5,11 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 
 vi.mock('../src/utils/prisma', () => ({
     default: {
-        users: { findUnique: vi.fn(), create: vi.fn(), count: vi.fn() },
-        stats: { findUnique: vi.fn(), createMany: vi.fn(), count: vi.fn() },
+        users: { findUnique: vi.fn(), create: vi.fn(), count: vi.fn(), delete: vi.fn() },
+        stats: { findUnique: vi.fn(), createMany: vi.fn(), count: vi.fn(), deleteMany: vi.fn() },
         invites: { findUnique: vi.fn(), update: vi.fn() },
-        scores: { count: vi.fn() },
-        maps: { findFirst: vi.fn(), findMany: vi.fn() },
-        api_beatmap_cache: { findMany: vi.fn(), createMany: vi.fn() },
+        scores: { count: vi.fn(), deleteMany: vi.fn() },
+        maps: { findFirst: vi.fn() },
         user_rank_history: { findMany: vi.fn() },
         $queryRaw: vi.fn()
     }
@@ -43,10 +42,6 @@ const buildServer = async () => {
     const app = Fastify()
     app.setValidatorCompiler(validatorCompiler)
     app.setSerializerCompiler(serializerCompiler)
-    
-    const { globalErrorHandler } = await import('../src/utils/errorHandler')
-    app.setErrorHandler(globalErrorHandler)
-
     await app.register(fastifyJwt, { secret: 'test_secret' })
     const routes = (await import('../src/modules/user/user.route')).default
     await app.register(routes, { prefix: '/user' })
@@ -434,10 +429,6 @@ describe('GET /user/:id/map/:map', () => {
             map_set_id: 456, map_status: 2
         }])
 
-        vi.mocked(prisma.maps.findMany).mockResolvedValue([{ id: 123 }] as any)
-        vi.mocked(prisma.api_beatmap_cache.findMany).mockResolvedValue([])
-        vi.mocked(prisma.api_beatmap_cache.createMany).mockResolvedValue({ count: 1 } as any)
-
         const osuApi = (await import('../src/utils/axios')).default
         vi.mocked(osuApi.get).mockResolvedValueOnce({ data: {
             id: 123, checksum: 'abc123md5', beatmapset: { artist: 'Artist', title: 'Title', creator: 'Creator', covers: {} },
@@ -470,11 +461,13 @@ describe('GET /user/:id/map/:map', () => {
         expect(res.statusCode).toBe(404)
     })
 
-    it('não chama a API do osu! para buscar md5 (otimização de cache e join)', async () => {
+    it('busca md5 na API osu! quando mapa não está no banco local', async () => {
         const prisma = (await import('../src/utils/prisma')).default
         vi.mocked(prisma.users.findUnique).mockResolvedValueOnce({ ...mockUser } as any)
-        
+        vi.mocked(prisma.maps.findFirst).mockResolvedValueOnce(null)
+
         const osuApi = (await import('../src/utils/axios')).default
+        vi.mocked(osuApi.get).mockResolvedValueOnce({ data: { checksum: 'apimd5hash' } })
 
         vi.mocked(prisma.$queryRaw).mockResolvedValueOnce([])
 
@@ -483,7 +476,7 @@ describe('GET /user/:id/map/:map', () => {
             headers: { authorization: 'Bearer fake_token' }
         })
 
-        expect(osuApi.get).not.toHaveBeenCalled()
+        expect(osuApi.get).toHaveBeenCalledWith('/beatmaps/999')
         expect(res.statusCode).toBe(404)
     })
 })
@@ -670,5 +663,96 @@ describe('GET /user/:id/history', () => {
         expect(prisma.user_rank_history.findMany).toHaveBeenCalledWith(
             expect.objectContaining({ orderBy: { date: 'asc' } })
         )
+    })
+})
+
+describe('DELETE /user/me', () => {
+    let app: FastifyInstance
+
+    beforeEach(async () => {
+        vi.clearAllMocks()
+        app = await buildServer()
+    })
+
+    afterEach(async () => { if (app) await app.close() })
+
+    it('deleta a conta com sucesso e retorna 200', async () => {
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.users.findUnique).mockResolvedValueOnce({ ...mockUser } as any)
+        const { verifyPassword } = await import('../src/utils/hash')
+        vi.mocked(verifyPassword).mockResolvedValueOnce(true)
+        vi.mocked(prisma.stats.deleteMany).mockResolvedValueOnce({ count: 8 } as any)
+        vi.mocked(prisma.scores.deleteMany).mockResolvedValueOnce({ count: 42 } as any)
+        vi.mocked(prisma.users.delete).mockResolvedValueOnce({ ...mockUser } as any)
+
+        const res = await app.inject({
+            method: 'DELETE', url: '/user/me',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ password: 'senha123' })
+        })
+
+        expect(res.statusCode).toBe(200)
+        expect(JSON.parse(res.body)).toHaveProperty('message')
+    })
+
+    it('deleta stats e scores antes de deletar o usuário', async () => {
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.users.findUnique).mockResolvedValueOnce({ ...mockUser } as any)
+        const { verifyPassword } = await import('../src/utils/hash')
+        vi.mocked(verifyPassword).mockResolvedValueOnce(true)
+        vi.mocked(prisma.stats.deleteMany).mockResolvedValueOnce({ count: 8 } as any)
+        vi.mocked(prisma.scores.deleteMany).mockResolvedValueOnce({ count: 0 } as any)
+        vi.mocked(prisma.users.delete).mockResolvedValueOnce({ ...mockUser } as any)
+
+        await app.inject({
+            method: 'DELETE', url: '/user/me',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ password: 'senha123' })
+        })
+
+        expect(prisma.stats.deleteMany).toHaveBeenCalledWith({ where: { id: mockUser.id } })
+        expect(prisma.scores.deleteMany).toHaveBeenCalledWith({ where: { userid: mockUser.id } })
+        expect(prisma.users.delete).toHaveBeenCalledWith({ where: { id: mockUser.id } })
+    })
+
+    it('retorna 401 para senha incorreta', async () => {
+        const prisma = (await import('../src/utils/prisma')).default
+        vi.mocked(prisma.users.findUnique).mockResolvedValueOnce({ ...mockUser } as any)
+        const { verifyPassword } = await import('../src/utils/hash')
+        vi.mocked(verifyPassword).mockResolvedValueOnce(false)
+
+        const res = await app.inject({
+            method: 'DELETE', url: '/user/me',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({ password: 'senhaerrada' })
+        })
+
+        expect(res.statusCode).toBe(401)
+        expect(prisma.users.delete).not.toHaveBeenCalled()
+    })
+
+    it('retorna 400 para body sem password', async () => {
+        const res = await app.inject({
+            method: 'DELETE', url: '/user/me',
+            headers: { authorization: 'Bearer fake_token', 'content-type': 'application/json' },
+            body: JSON.stringify({})
+        })
+
+        expect(res.statusCode).toBe(400)
+    })
+
+    it('retorna 401 sem token', async () => {
+        const { authenticate } = await import('../src/middlewares/auth.middleware')
+        vi.mocked(authenticate).mockImplementationOnce(async (_req: any, res: any) => {
+            return res.code(401).send({ message: 'Unauthorized' })
+        })
+
+        const res = await app.inject({
+            method: 'DELETE', url: '/user/me',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ password: 'senha123' })
+        })
+
+        expect(res.statusCode).toBe(401)
     })
 })

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { handleGetMe, handleGetUsersCount, handlePostPfp, handleUserBestOnMapReq, handleUserLogin, handleUserRecentReq, handleUserRegister, handleUserReq, handleGetUserRankHistoryReq } from "./user.controller";
+import { handleGetMe, handleGetUsersCount, handlePostPfp, handleUserBestOnMapReq, handleUserLogin, handleUserRecentReq, handleUserRegister, handleUserReq, handleGetUserRankHistoryReq, handleDeleteMe } from "./user.controller";
 import { authenticate } from "../../middlewares/auth.middleware";
 import { authorizeDiscordOwnership } from "../../middlewares/ownership.middleware";
 import { 
@@ -17,7 +17,9 @@ import {
     getUserMapInputSchema,
     scoreQuerySchema,
     scoreQueryModeSchema,
-    getRankHistorySchema
+    getRankHistorySchema,
+    DeleteUserInput,
+    deleteUserSchema
 } from "./user.schema";
 
 const userRoutes = async (server: FastifyInstance) => {
@@ -74,6 +76,13 @@ const userRoutes = async (server: FastifyInstance) => {
     }, handleUserBestOnMapReq);
 
     server.get('/count', handleGetUsersCount);
+
+    server.delete<{ Body: DeleteUserInput }>('/me', {
+        schema: {
+            body: deleteUserSchema
+        },
+        preHandler: [authenticate]
+    }, handleDeleteMe);
 }
 
 export default userRoutes;

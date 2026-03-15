@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createUser, getUserBestOnMap, getUserRecent, getUsersCount, getUserStats, loginUser, setUserPfp, getUserRankHistory } from "./user.service";
-import { CreateUserInput, GetUserInput, GetUserMapInput, LoginUserInput, PostPfpInput, postPfpSchema, ScoreQueryInput, ScoreQueryModeInput, GetRankHistoryInput } from "./user.schema";
+import { createUser, deleteUser, getUserBestOnMap, getUserRankHistory, getUserRecent, getUsersCount, getUserStats, loginUser, setUserPfp } from "./user.service";
+import { CreateUserInput, DeleteUserInput, GetRankHistoryInput, GetUserInput, GetUserMapInput, LoginUserInput, PostPfpInput, postPfpSchema, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
 import { Errors } from "../../utils/errorHandler";
 
 const toSafeName = (name: string) => name.trim().toLowerCase().replace(/ /g, '_');
@@ -89,6 +89,13 @@ export const handleGetMe = async (req: FastifyRequest, res: FastifyReply) => {
     const userFromToken = req.user as { id: number };
     const userProfile = await getUserStats({ id: userFromToken.id });
     return res.send(userProfile);
+}
+
+
+export const handleDeleteMe = async (req: FastifyRequest<{ Body: DeleteUserInput }>, res: FastifyReply) => {
+    const userFromToken = req.user as { id: number };
+    await deleteUser(userFromToken.id, req.body);
+    return res.code(200).send({ message: "Conta deletada com sucesso." });
 }
 
 export const handlePostPfp = async (req: FastifyRequest<{ Body: PostPfpInput }>, res: FastifyReply) => {

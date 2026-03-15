@@ -4,3 +4,4 @@ export {default as discordRoutes} from "./discord/discord.route";
 export {default as beatmapRoutes} from "./beatmap/beatmap.route";
 export {default as rankingRoutes} from "./ranking/ranking.route";
 export {default as apikeyRoutes} from "./apikey/apikey.route";
+export {default as adminRoutes} from "./admin/admin.route";

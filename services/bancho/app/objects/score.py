@@ -351,15 +351,6 @@ class Score:
     async def process_top_score_logic(self, am_i_v2: bool, metric: str, v2_bit: int):
         """Busca a vítima e envia os dados para o Bot via Redis."""
         try:
-            dedup_key = f"top1_announced:{self.player.id}:{self.bmap.id}:{int(self.pp)}"
-            
-            already_announced = not await app.state.services.redis.set(
-                dedup_key, "1", nx=True, ex=60
-            )
-            
-            if already_announced:
-                log(f"[Dedup] Top1 duplicado ignorado para {self.player.name} no mapa {self.bmap.id}", Ansi.LYELLOW)
-                return
 
             v2_op = "!=" if am_i_v2 else "="
             

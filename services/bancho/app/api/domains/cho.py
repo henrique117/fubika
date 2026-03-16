@@ -829,7 +829,7 @@ async def handle_osu_login_request(
 
         await users_repo.partial_update(
             id=user_info["id"],
-            country=detected_state,
+            country=detected_state.upper(),
         )
 
     client_details = ClientDetails(

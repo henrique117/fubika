@@ -162,7 +162,13 @@
 }
 
 .rankNumber {
-    padding-left: 20px;
+    width: 35px; 
+    flex-shrink: 0; 
+    text-align: right; 
+    font-variant-numeric: tabular-nums;
+    font-size: 10px;
+    color: var(--color-branco);
+    margin-left: 20px; 
 }
 
 .nameInfo {

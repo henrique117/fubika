@@ -72,9 +72,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    # Pode deixar o env_file aí se quiser, mas o environment abaixo vai forçar a URL correta:
-    environment:
-      DATABASE_URL: "mysql://cmyui:lol123@mysql:3306/banchopy"
+    env_file: .env
     volumes:
       - ../volumes/avatars:/app/.data/avatars
       - ../backups:/app/backups

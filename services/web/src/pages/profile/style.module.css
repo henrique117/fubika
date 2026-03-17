@@ -35,6 +35,22 @@
     box-sizing: border-box;
 }
 
+.chartContainer {
+    width: 350px;
+    height: 140px;
+    margin-left: auto; 
+    border-radius: 12px;
+    background-color: rgba(25, 23, 21, 0.2);
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
 .profileImg {
     width: 140px;
     height: 140px;

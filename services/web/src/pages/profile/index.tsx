@@ -103,7 +103,6 @@ const Profile: React.FC = () => {
                                         </div>
                                         <div>
                                             <span style={{ paddingLeft: '5px', fontSize: '8px', color: '#FFFFFF' }}>Ranque Estadual</span><br />
-                                            {/* <span style={{ paddingLeft: '26px' }} className={`${style.rankNumber} ${getRankClass(stateRank)} `}>­­­­­­­­#{stateRank}</span> */}
                                         </div>
                                     </div>
                                     <div className={style.profileButtons}>
@@ -115,7 +114,9 @@ const Profile: React.FC = () => {
                                         </button>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div className={style.chartContainer}>
                             </div>
                         </div>
 

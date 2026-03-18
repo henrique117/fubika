@@ -1,6 +1,8 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Outlet, RouterProvider, useLocation, useOutlet } from 'react-router-dom';
 import { BeatmapPage, ForgotPassPage, GlobalRankingPage, HomePage, HowToConnectPage, LoginPage, NotFoundPage, RedefinePassPage, RegisterPage, ProfilePage, ProfileTopPlays } from '../pages/pages.export'
-import PrivateRoute from './private'
+import { AnimatePresence } from "framer-motion";
+import PrivateRoute from './private';
+import React from 'react';
 
 const ProtectedLayout = () => {
     return (
@@ -10,56 +12,74 @@ const ProtectedLayout = () => {
     )
 }
 
+const AnimationWrapper = () => {
+    const location = useLocation();
+    const element = useOutlet();
+
+    return (
+        <AnimatePresence mode="wait">
+            {/* O segredo é a 'key' baseada no pathname */}
+            {element && React.cloneElement(element, { key: location.pathname })}
+        </AnimatePresence>
+    );
+};
+
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <HomePage />
-    },
-    {
-        path: '/login',
-        element: <LoginPage />
-    },
-    {
-        path: '/register',
-        element: <RegisterPage />
-    },
-    {
-        path: '/forgotpass',
-        element: <ForgotPassPage />
-    },
-    {
-        path: '/redefinepass',
-        element: <RedefinePassPage />
-    },
-    {
-        path: '/howtoconnect',
-        element: <HowToConnectPage />
-    },
-    {
-        path: '/profile/:id',
-        element: <ProfilePage />,
-    },
-
-    {
-        path: '/profile/:id/top-plays',
-        element: <ProfileTopPlays />
-    },
-    {
-        element: <ProtectedLayout />,
+        element: <AnimationWrapper />,
         children: [
             {
-                path: '/ranking',
-                element: <GlobalRankingPage />
+                path: '/',
+                element: <HomePage />
             },
             {
-                path: '/beatmap/:id',
-                element: <BeatmapPage />
+                path: '/login',
+                element: <LoginPage />
             },
+            {
+                path: '/register',
+                element: <RegisterPage />
+            },
+            {
+                path: '/forgotpass',
+                element: <ForgotPassPage />
+            },
+            {
+                path: '/redefinepass',
+                element: <RedefinePassPage />
+            },
+            {
+                path: '/howtoconnect',
+                element: <HowToConnectPage />
+            },
+            {
+                path: '/profile/:id',
+                element: <ProfilePage />,
+            },
+
+            {
+                path: '/profile/:id/top-plays',
+                element: <ProfileTopPlays />
+            },
+            {
+                element: <ProtectedLayout />,
+                children: [
+                    {
+                        path: '/ranking',
+                        element: <GlobalRankingPage />
+                    },
+                    {
+                        path: '/beatmap/:id',
+                        element: <BeatmapPage />
+                    },
+                ]
+            },
+            {
+                path: '*',
+                element: <NotFoundPage />
+            }
         ]
-    },
-    {
-        path: '*',
-        element: <NotFoundPage />
     }
 ])
 

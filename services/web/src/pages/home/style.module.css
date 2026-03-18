@@ -1,3 +1,8 @@
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
 .pageWrapper {
     width: 100%;
     position: relative;

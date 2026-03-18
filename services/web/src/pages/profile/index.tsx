@@ -196,19 +196,13 @@ const Profile: React.FC = () => {
                                         <img src={catHead} style={{ height: '120px', width: '160px' }} />
                                     </div>
                                 </div>
-                                <div className="profileTop">
-
-                                </div>
-                                <div className="profileTop">
-
-                                </div>
-
+                                                                {player?.top_200 && player.top_200.length > 0 && (
+                                    <Link to={`recent`} className={style.viewMoreBtn}>
+                                        View Recent Plays
+                                    </Link>
+                                )}
                             </div>
-
                         </div>
-
-
-
                     </div>
                 </div>
             </div>

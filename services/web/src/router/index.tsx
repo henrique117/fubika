@@ -1,5 +1,5 @@
 import { createBrowserRouter, Outlet, RouterProvider, useLocation, useOutlet } from 'react-router-dom';
-import { BeatmapPage, ForgotPassPage, GlobalRankingPage, HomePage, HowToConnectPage, LoginPage, NotFoundPage, RedefinePassPage, RegisterPage, ProfilePage, ProfileTopPlays } from '../pages/pages.export'
+import { BeatmapPage, ForgotPassPage, GlobalRankingPage, HomePage, HowToConnectPage, LoginPage, NotFoundPage, RedefinePassPage, RegisterPage, ProfilePage, ProfileTopPlays, ProfileRecent } from '../pages/pages.export'
 import { AnimatePresence } from "framer-motion";
 import PrivateRoute from './private';
 import React from 'react';
@@ -61,6 +61,10 @@ const router = createBrowserRouter([
             {
                 path: '/profile/:id/top-plays',
                 element: <ProfileTopPlays />
+            },
+            {
+                path: '/profile/:id/recent',
+                element: <ProfileRecent />
             },
             {
                 element: <ProtectedLayout />,

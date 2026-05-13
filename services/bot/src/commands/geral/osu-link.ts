@@ -1,4 +1,5 @@
-import { postCreateLink, postCheckLink } from "../../services/apiCalls"
+import { executeOsuLinkInitiate } from "../../services/logic/osuLink.logic"
+import { postCheckLink } from "../../services/apiCalls"
 import { SlashCommandBuilder, ChatInputCommandInteraction, MessageFlags, Message, GuildMember, TextChannel } from "discord.js"
 import { defaultEmbedBuilder } from "../../utils/utils.export"
 import { GUILD_CONFIG } from "../../constants"
@@ -13,15 +14,26 @@ export default {
                 .setRequired(true)
         ),
 
+    isAdmin: false,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
         try {
 
-            const insertedNick = interaction.options.getString('nick', true) // Pega o nick fornecido no comando
-            const { message } = await postCreateLink(interaction.user.id, insertedNick.replace(" ", "_").toLowerCase())
+            const insertedNick = interaction.options.getString('nick', true)
+            const result = await executeOsuLinkInitiate(interaction.user.id, insertedNick)
 
-            const followUpEmbed = await defaultEmbedBuilder(message + '\nEnvie-o em minha DM para concluir a vinculação!')
+            if (!result.success) {
+                await interaction.followUp({
+                    ephemeral: true,
+                    content: result.error || 'Erro ao iniciar vinculação'
+                })
+                return
+            }
+
+            const followUpEmbed = await defaultEmbedBuilder(result.message + '\nEnvie-o em minha DM para concluir a vinculação!')
 
             await interaction.followUp({
                 ephemeral: true,
@@ -107,15 +119,7 @@ export default {
             }
 
         } catch (error) {
-            let message
-            if (String(error).includes('Usuário não encontrado'))
-                message = `Usuário \`${interaction.options.getString('nick')}\` não encontrado!`
-            else if (String(error).includes('usuário já está vinculado'))
-                message = `Usuário \`${interaction.options.getString('nick')}\` já está vinculado a um Discord!`
-            else
-                message = String(error)
-
-            const embed = await defaultEmbedBuilder(message)
+            const embed = await defaultEmbedBuilder(String(error))
 
             await interaction.followUp({
                 ephemeral: true,

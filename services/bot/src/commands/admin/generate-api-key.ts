@@ -1,4 +1,4 @@
-import { postGenerateApiKey } from "../../services/apiCalls"
+import { executeGenerateApiKey } from "../../services/logic/generateApiKey.logic"
 import { SlashCommandBuilder, ChatInputCommandInteraction, MessageFlags } from "discord.js"
 import { defaultEmbedBuilder } from "../../utils/utils.export"
 
@@ -12,15 +12,22 @@ export default {
             .setRequired(true)
         ),
 
+    isAdmin: true,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
         
         try{
-
             const application_name = interaction.options.getString('application-name', true)
-            const { key } = await postGenerateApiKey(interaction.user.id, application_name) 
+            const result = await executeGenerateApiKey(interaction.user.id, application_name)
 
-            const dmEmbed = await defaultEmbedBuilder(`▸**Api key:** ||**${key}**||`)
+            if (!result.success) {
+                await interaction.followUp(result.error || 'Erro ao gerar API key')
+                return
+            }
+
+            const dmEmbed = await defaultEmbedBuilder(`▸**Api key:** ||**${result.key}**||`)
             dmEmbed.setFooter({ text: 'Não compartilhe ela com outras pessoas!'})
             await interaction.user.send({ embeds: [dmEmbed] })
 
@@ -31,7 +38,6 @@ export default {
             })
 
         }catch(error){
-
             await interaction.followUp(String(error))
         }
     }

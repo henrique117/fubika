@@ -1,3 +1,4 @@
+import { executeHelp } from "../../services/logic/help.logic"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
 import {
     reply,
@@ -35,10 +36,13 @@ export default {
 
     aliases: ['h'],
 
+    isAdmin: false,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
 
-        const selectedCommand = interaction.options.getString('command') // Pega o comando fornecido (ou não)
+        const selectedCommand = interaction.options.getString('command')
 
         await this.handleHelpCommand(interaction, selectedCommand)
     },
@@ -74,14 +78,22 @@ export default {
 
         try {
 
+            const result = await executeHelp(selectedCommand)
+
+            if (!result.success) {
+                const embed = await defaultEmbedBuilder(result.error || 'Erro ao buscar help')
+                await reply(source, { embeds: [embed], allowedMentions: { parse: [] } })
+                return
+            }
+
             let embed
-            if (!selectedCommand) {
+            if (!result.command) {
 
                 embed = defaultHelpEmbed()
 
             } else {
 
-                switch (selectedCommand) {
+                switch (result.command) {
                     case 'compare':     embed = helpCompareEmbed();     break
                     case 'help':        embed = helpHelpEmbed();        break
                     case 'leaderboard': embed = helpLeaderboardEmbed(); break
@@ -97,10 +109,8 @@ export default {
 
         } catch (error) {
             const message = String(error)
-
             const embed = await defaultEmbedBuilder(message)
-
-            await reply(source, { embeds: [embed] })
+            await reply(source, { embeds: [embed], allowedMentions: { parse: [] } })
         }
     }
 }

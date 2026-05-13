@@ -1,4 +1,4 @@
-import { getPlayer } from "../../services/apiCalls"
+import { executeUserProfile } from "../../services/logic/userProfile.logic"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
 import { reply, userEmbedBuilder, defaultEmbedBuilder, parseOnlyUsername } from "../../utils/utils.export"
 
@@ -14,10 +14,13 @@ export default {
 
     aliases: ['std', 'osu', 'u'],
 
+    isAdmin: false,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
 
-        const username = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
+        const username = interaction.options.getString('player')
 
         await this.handleUserCommand(interaction, username)
     },
@@ -36,11 +39,15 @@ export default {
                 ? source.user
                 : source.author
 
-            const finalUser = username || user.id  // Player fornecido || Player não foi fornecido
+            const result = await executeUserProfile(username, user.id)
 
-            const player = await getPlayer(finalUser)
+            if (!result.success) {
+                const embed = await defaultEmbedBuilder(result.error || 'Erro ao buscar player')
+                await reply(source, { embeds: [embed] })
+                return
+            }
 
-            const { embed, attachment } = await userEmbedBuilder(player)
+            const { embed, attachment } = await userEmbedBuilder(result.player)
 
             await reply(source, {
                 embeds: [embed],
@@ -48,14 +55,7 @@ export default {
             })
 
         } catch (error) {
-            let message
-            if (String(error).includes('Usuário não encontrado')) // Player não encontrado
-                message = `Player \`${username}\` não encontrado!`
-            else
-                message = String(error) // Outro erro
-
-            const embed = await defaultEmbedBuilder(message)
-
+            const embed = await defaultEmbedBuilder(String(error))
             await reply(source, { embeds: [embed] })
         }
     }

@@ -1,4 +1,4 @@
-import { getPlayer, getRecentScores } from "../../services/apiCalls"
+import { executeRecent } from "../../services/logic/recent.logic"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
 import { reply, recentEmbedBuilder, noRecentScoresEmbedBuilder, noIndexScoresEmbedBuilder, defaultEmbedBuilder, parseOnlyUsername } from "../../utils/utils.export"
 
@@ -21,12 +21,14 @@ export default {
 
     aliases: ['r', 'rs'],
 
+    isAdmin: false,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
 
-        const username = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
-
-        const index = interaction.options.getNumber('index') // Pega o index fornecido (ou não) no comando
+        const username = interaction.options.getString('player')
+        const index = interaction.options.getNumber('index')
 
         await this.handleRecentCommand(interaction, username, index)
     },
@@ -46,63 +48,38 @@ export default {
                 ? source.user
                 : source.author
 
-            const finalUser = username || user.id // Player fornecido || Player não foi fornecido
+            const result = await executeRecent(username, user.id, index)
 
-            const player = await getPlayer(finalUser.replace(" ", "_").toLowerCase())
-
-            const scores = await getRecentScores(finalUser.replace(" ", "_").toLowerCase())
-
-            // Caso o player ainda não possua scores
-            if (!scores[0]) {
-
-                const { embed, attachment } = await noRecentScoresEmbedBuilder(player)
-
-                reply(source, {
-                    embeds: [embed],
-                    files: [attachment]
-                }
-                )
-
+            if (!result.success) {
+                const embed = await defaultEmbedBuilder(result.error || 'Erro ao buscar recent')
+                await reply(source, { embeds: [embed] })
                 return
             }
 
-            let embed
-            if (index === null) {
-
-                embed = await recentEmbedBuilder(player, scores[0])
-
-            } else if (1 > index || index > 200) {
-
-                embed = await defaultEmbedBuilder('Insira um index válido!')
-
-            } else {
-
-                const score = scores[index - 1]
-
-                if (!score) {
-                    const { embed, attachment } = await noIndexScoresEmbedBuilder(player)
-                    await reply(source, {
-                        embeds: [embed],
-                        files: [attachment]
-                    })
-                    return
-                }
-
-                embed = await recentEmbedBuilder(player, score)
+            if (!result.hasScores) {
+                const { embed, attachment } = await noRecentScoresEmbedBuilder(result.player)
+                await reply(source, {
+                    embeds: [embed],
+                    files: [attachment]
+                })
+                return
             }
 
-            reply(source, { embeds: [embed] })
+            if (!result.score && index !== null) {
+                const { embed, attachment } = await noIndexScoresEmbedBuilder(result.player)
+                await reply(source, {
+                    embeds: [embed],
+                    files: [attachment]
+                })
+                return
+            }
+
+            const embed = await recentEmbedBuilder(result.player, result.score)
+            await reply(source, { embeds: [embed] })
 
         } catch (error) {
-            let message
-            if (String(error).includes('Usuário não encontrado')) // Player não encontrado
-                message = `Player \`${username}\` não encontrado!`
-            else
-                message = String(error) // Outro erro
-
-            const embed = await defaultEmbedBuilder(message)
-
-            reply(source, { embeds: [embed] })
+            const embed = await defaultEmbedBuilder(String(error))
+            await reply(source, { embeds: [embed] })
         }
     }
 }

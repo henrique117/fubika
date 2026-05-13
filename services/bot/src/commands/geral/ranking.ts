@@ -1,4 +1,4 @@
-import { getGlobalRanking } from "../../services/apiCalls"
+import { executeRanking } from "../../services/logic/ranking.logic"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
 import { reply, rankingEmbedsBuilder, embedPagination, defaultEmbedBuilder } from "../../utils/utils.export"
 
@@ -20,10 +20,13 @@ export default {
 
     aliases: ['ppr', 'pplb', 'ppranking', 'ppleaderboard'],
 
+    isAdmin: false,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
 
-        const selectedMode = Number(interaction.options.getString('gamemode')) // Pega o modo de jogo fornecido (ou não) no comando
+        const selectedMode = Number(interaction.options.getString('gamemode'))
 
         await this.handleRankingCommand(interaction, selectedMode)
     },
@@ -44,15 +47,17 @@ export default {
 
         try {
 
-            const gamemode = selectedGamemode ?? 0 // Modo fornecido ?? Std como padrão
+            const result = await executeRanking(selectedGamemode)
 
-            const ranking = await getGlobalRanking(gamemode)
+            if (!result.success) {
+                const embed = await defaultEmbedBuilder(result.error || 'Erro ao buscar ranking')
+                await reply(source, { embeds: [embed] })
+                return
+            }
 
-            const embeds = await rankingEmbedsBuilder(ranking, gamemode)
+            const embeds = await rankingEmbedsBuilder(result.ranking, result.gamemode!)
 
             await embedPagination(source, embeds, "", false, 60000)
-
-
 
         } catch (error) {
             const message = String(error)

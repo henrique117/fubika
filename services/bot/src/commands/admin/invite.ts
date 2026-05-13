@@ -1,4 +1,4 @@
-import { postCreateInvite } from "../../services/apiCalls"
+import { executeSendInvite } from "../../services/logic/sendInvite.logic"
 import { SlashCommandBuilder, ChatInputCommandInteraction, MessageFlags } from "discord.js"
 import { defaultEmbedBuilder } from "../../utils/utils.export"
 
@@ -12,13 +12,21 @@ export default {
             .setRequired(false)
         ),
 
+    isAdmin: true,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
         
         try{
-            
-            const { code } = await postCreateInvite(interaction.user.id)
-            const inviteEmbed = await defaultEmbedBuilder(`▸**Chave de acesso:** ||**${code}**||`)
+            const result = await executeSendInvite(interaction.user.id)
+
+            if (!result.success) {
+                await interaction.followUp(result.error || 'Erro ao gerar invite')
+                return
+            }
+
+            const inviteEmbed = await defaultEmbedBuilder(`▸**Chave de acesso:** ||**${result.code}**||`)
             
             let followUpEmbed
             const targetUser = interaction.options.getUser('user')

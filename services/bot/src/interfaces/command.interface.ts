@@ -5,6 +5,10 @@ export default interface ICommand {
     
     aliases?: string[]; // Configs dos comandos de texto
     
+    isAdmin?: boolean; // Flag para bloquear no MCP
+    
+    isDestructive?: boolean; // Flag para comandos destrutivos
+    
     execute(interaction: ChatInputCommandInteraction): Promise<void> // Execução do Slash Command
     
     executePrefix?(message: Message, index?: number | null, args?: string[]): Promise<void>

@@ -1,4 +1,4 @@
-import { getBeatmap } from "../../services/apiCalls"
+import { executeLeaderboard } from "../../services/logic/leaderboard.logic"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
 import { reply, leaderboardEmbedsBuilder, embedPagination, defaultEmbedBuilder, extractBeatmapId, parseOnlyBeatmapId, getBeatmapIdFromMessage, fetchLastBeatmapId } from "../../utils/utils.export"
 
@@ -14,10 +14,13 @@ export default {
 
     aliases: ['lb'],
 
+    isAdmin: false,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
 
-        const insertedBeatmap = interaction.options.getString('beatmap') // Pega o link ou id do beatmap fornecido (ou não) no comando
+        const insertedBeatmap = interaction.options.getString('beatmap')
 
         const beatmapId = (insertedBeatmap?.includes('/'))
             ? await extractBeatmapId(insertedBeatmap)
@@ -30,9 +33,8 @@ export default {
 
         const { beatmapId } = await parseOnlyBeatmapId(message.content)
 
-        let inputBeatmapId = beatmapId // Tenta pegar beatmap inserido
+        let inputBeatmapId = beatmapId
 
-        // Se não foi inserido nada && houver uma mensagem respondida, tenta pegar dela
         if (!inputBeatmapId && message.reference?.messageId) {
             try {
                 const repliedMessage = await message.channel.messages.fetch(message.reference.messageId)
@@ -66,9 +68,19 @@ export default {
                 finalBeatmapId = channelBeatmapId
             }
 
-            const beatmap = await getBeatmap(finalBeatmapId)
+            const result = await executeLeaderboard(finalBeatmapId)
 
-            const embeds = await leaderboardEmbedsBuilder(beatmap)
+            if (!result.success) {
+                let errorMsg = result.error || 'Erro desconhecido'
+                if (errorMsg.includes('Mapa não encontrado no canal')) {
+                    errorMsg = 'Não foi encontrado nenhum mapa recente no canal!\nForneça o link ou apenas o id do mapa.'
+                }
+                const embed = await defaultEmbedBuilder(errorMsg)
+                await reply(source, { embeds: [embed] })
+                return
+            }
+
+            const embeds = await leaderboardEmbedsBuilder(result.beatmap)
 
             await embedPagination(source, embeds, "", false, 60000)
 

@@ -28,7 +28,7 @@ for (const folder of commandFolders) {
 }
 
 // Prepara o módulo REST
-const rest = new REST().setToken(process.env.TOKEN!)
+const rest = new REST().setToken(process.env.DISCORD_TOKEN!)
 
 // Faz o upload
 ;(async () => {

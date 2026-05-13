@@ -1,4 +1,4 @@
-import { getPlayer } from "../../services/apiCalls"
+import { executeTopScores } from "../../services/logic/topScores.logic"
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message } from "discord.js"
 import { reply, top200EmbedsBuilder, embedPagination, topIndexEmbedBuilder, defaultEmbedBuilder, noIndexScoresEmbedBuilder, parseOnlyUsername } from "../../utils/utils.export"
 
@@ -21,12 +21,14 @@ export default {
 
     aliases: ['t'],
 
+    isAdmin: false,
+    isDestructive: false,
+
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply()
 
-        const username = interaction.options.getString('player') // Pega o player fornecido (ou não) no comando
-
-        const index = interaction.options.getNumber('index') // Pega o index fornecido (ou não) no comando
+        const username = interaction.options.getString('player')
+        const index = interaction.options.getNumber('index')
 
         await this.handleTopCommand(interaction, username, index)
     },
@@ -46,48 +48,34 @@ export default {
                 ? source.user
                 : source.author
 
-            const finalUser = username || user.id // Player fornecido || Player não foi fornecido
+            const result = await executeTopScores(username, user.id, index)
 
-            const player = await getPlayer(finalUser.replace(" ", "_").toLowerCase())
+            if (!result.success) {
+                const embed = await defaultEmbedBuilder(result.error || 'Erro ao buscar top')
+                await reply(source, { embeds: [embed] })
+                return
+            }
 
             if (index === null) {
-                const { embeds, attachment } = await top200EmbedsBuilder(player)
+                const { embeds, attachment } = await top200EmbedsBuilder(result.player)
                 await embedPagination(source, embeds, "", false, 60000, attachment)
 
-            } else if (1 > index || index > 200) {
-                const embed = await defaultEmbedBuilder('Insira um index válido!')
-                await reply(source, { embeds: [embed] })
+            } else if (!result.hasScoreAtIndex) {
+                const { embed, attachment } = await noIndexScoresEmbedBuilder(result.player)
+                await reply(source, {
+                    embeds: [embed],
+                    files: [attachment]
+                })
                 return
 
             } else {
-
-                if (!player.top_200)
-                    throw new Error("Scores data are missing")
-
-                const score = player.top_200[index - 1]
-
-                if (!score) {
-                    const { embed, attachment } = await noIndexScoresEmbedBuilder(player)
-                    await reply(source, {
-                        embeds: [embed],
-                        files: [attachment]
-                    })
-                    return
-                }
-
-                const embed = await topIndexEmbedBuilder(player, score, index)
+                const score = result.player.top_200[result.index! - 1]
+                const embed = await topIndexEmbedBuilder(result.player, score, result.index!)
                 await reply(source, { embeds: [embed] })
             }
 
         } catch (error) {
-            let message
-            if (String(error).includes('Usuário não encontrado')) // Player não encontrado
-                message = `Player \`${username}\` não encontrado!`
-            else
-                message = String(error) // Outro erro
-
-            const embed = await defaultEmbedBuilder(message)
-
+            const embed = await defaultEmbedBuilder(String(error))
             await reply(source, { embeds: [embed] })
         }
     }

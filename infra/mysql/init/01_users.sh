@@ -11,10 +11,10 @@ mysql -u root -p"${DB_ROOT_PASS}" <<-EOSQL
     CREATE DATABASE IF NOT EXISTS \`${DB_NAME}_shadow\`;
 
     -- 3. Criar o utilizador da aplicação se não existir
-    CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';
+    CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED WITH mysql_native_password BY '${DB_PASS}';
     
-    -- 4. Garantir que a senha está sincronizada com o .env
-    ALTER USER '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';
+    -- 4. Garantir que a senha está sincronizada com o .env e usar o plugin correto
+    ALTER USER '${DB_USER}'@'%' IDENTIFIED WITH mysql_native_password BY '${DB_PASS}';
 
     -- 5. PERMISSÕES NA BASE PRINCIPAL (${DB_NAME})
     -- Adicionado 'DROP' para permitir que o 'db push' funcione quando houver mudanças estruturais

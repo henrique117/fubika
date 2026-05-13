@@ -15,13 +15,13 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 RUN npm install
-RUN npx prisma generate
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 COPY . .
 RUN npm run build
 
-COPY scripts/start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
+COPY scripts/diagnose.sh /usr/local/bin/diagnose.sh
+RUN chmod +x /usr/local/bin/diagnose.sh
 
 RUN mkdir -p ../backups:/app/backups
 

@@ -39,6 +39,7 @@
     "vitest": "^4.0.18"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "binaryTargets": ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
   }
 }

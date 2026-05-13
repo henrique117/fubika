@@ -65,7 +65,7 @@ services:
   api:
     container_name: fubika_api
     build: ../services/api
-    restart: always
+    restart: unless-stopped
     ports:
       - "${API_PORT}:${API_PORT}"
     depends_on:

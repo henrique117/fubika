@@ -13,6 +13,43 @@ import {
     executeTool
 } from '@/services/mcp-tools'
 
+import { ErrorFormatter } from '@/services/errorFormatter'
+
+/**
+ * Preprocessa o texto para extrair menções Discord
+ * Converte <@ID> em {@username} e retorna o userName extraído
+ */
+function preprocessMentions(
+    text: string
+): { processedText: string; userName?: string } {
+    const mentionRegex = /<@!?(\d+)>/g
+
+    let userName: string | undefined
+    let match
+
+    // Extrair primeira menção (ID do usuário mencionado)
+    while ((match = mentionRegex.exec(text)) !== null) {
+        const userId = match[1]
+        // Por enquanto, usar o ID como placeholder
+        // Em uma versão futura, poderia resolver para o nome via API
+        text = text.replace(match[0], `{@user:${userId}}`)
+        if (!userName) {
+            userName = userId // Usar ID como fallback
+        }
+    }
+
+    // Também buscar @username (text mentions)
+    const textMentionRegex = /@(\w+)/g
+    while ((match = textMentionRegex.exec(text)) !== null) {
+        const username = match[1]
+        if (!userName) {
+            userName = username
+        }
+    }
+
+    return { processedText: text, userName }
+}
+
 export default {
     name: Events.MessageCreate,
 
@@ -91,9 +128,13 @@ async function processMessageWithQueue(
     const groqService =
         getGroqService()
 
+    // Preprocessar menções
+    const { processedText, userName } =
+        preprocessMentions(userMessage)
+
     queue.enqueueMessage(
         message.author.id,
-        userMessage,
+        processedText,
         message.id,
         message.channelId
     )
@@ -104,14 +145,21 @@ async function processMessageWithQueue(
 
             const result =
                 await groqService.processMessage(
-                    userMessage,
-                    allTools
+                    processedText,
+                    allTools,
+                    userName || message.author.username
                 )
 
             if (result.error) {
 
+                const elaboratedError =
+                    ErrorFormatter.elaborate(
+                        result.error,
+                        result.error
+                    )
+
                 await message.reply({
-                    content: result.error
+                    content: elaboratedError
                 })
 
                 return
@@ -147,9 +195,14 @@ async function processMessageWithQueue(
                 error
             )
 
+            const elaboratedError =
+                ErrorFormatter.elaborate(
+                    String(error),
+                    error instanceof Error ? error.message : String(error)
+                )
+
             await message.reply({
-                content:
-                    'Desculpe, houve um erro ao processar sua mensagem.'
+                content: elaboratedError
             })
         }
 
@@ -208,11 +261,15 @@ async function handleToolCall(
 
         if (!result.success) {
 
+            const elaboratedError =
+                ErrorFormatter.elaborateToolError(
+                    toolCall.name,
+                    result.error,
+                    result.message
+                )
+
             await message.reply({
-                content:
-                    result.message ||
-                    result.error ||
-                    'Erro ao executar comando.'
+                content: elaboratedError
             })
 
             return

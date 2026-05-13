@@ -1,4 +1,4 @@
-import { groqClient, llmConfig } from '@/config/llm.config'
+import { groqClient, llmConfig, getSystemPrompt } from '@/config/llm.config'
 
 export interface ToolDefinition {
     type: 'function'
@@ -31,17 +31,13 @@ export interface ProcessMessageResult {
  */
 
 export class GroqService {
-    private systemPrompt: string = `Você é um bot assistente amigável para o servidor de osu! Fubika. Você se chama Fubas.
-Sempre responda em português (mesma língua do usuário).
-Respostas CURTAS (máx 2 frases).
-Se o usuário pedir um comando, use as ferramentas disponíveis.
-Se for conversa normal, responda naturalmente.
-Não execute comandos de admin ou ações destrutivas.
-`
+    private baseSystemPrompt: string
 
     constructor(customSystemPrompt?: string) {
         if (customSystemPrompt) {
-            this.systemPrompt = customSystemPrompt
+            this.baseSystemPrompt = customSystemPrompt
+        } else {
+            this.baseSystemPrompt = getSystemPrompt()
         }
     }
 
@@ -50,13 +46,18 @@ Não execute comandos de admin ou ações destrutivas.
      */
     async processMessage(
         userMessage: string,
-        tools: ToolDefinition[]
+        tools: ToolDefinition[],
+        userName?: string
     ): Promise<ProcessMessageResult> {
         try {
+            const systemPrompt = this.baseSystemPrompt.includes('📋')
+                ? this.baseSystemPrompt // já tem instruções customizadas
+                : getSystemPrompt(userName)
+
             const messages: Message[] = [
                 {
                     role: 'system',
-                    content: this.systemPrompt
+                    content: systemPrompt
                 },
                 {
                     role: 'user',
@@ -120,7 +121,7 @@ Não execute comandos de admin ou ações destrutivas.
      * Define um system prompt customizado
      */
     setSystemPrompt(prompt: string): void {
-        this.systemPrompt = prompt
+        this.baseSystemPrompt = prompt
     }
 }
 

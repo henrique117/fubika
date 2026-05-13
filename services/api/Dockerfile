@@ -22,6 +22,8 @@ RUN npm run build
 
 COPY scripts/diagnose.sh /usr/local/bin/diagnose.sh
 RUN chmod +x /usr/local/bin/diagnose.sh
+COPY scripts/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
 
 RUN mkdir -p ../backups:/app/backups
 

@@ -44,12 +44,12 @@ export const allTools = [
  * Map de executores de ferramentas para fácil acesso
  */
 export const toolExecutors: Record<string, Function> = {
-    userProfile: (userId: string, params: any) => executeUserProfileTool(userId, params),
+    user_profile: (userId: string, params: any) => executeUserProfileTool(userId, params),
     leaderboard: (params: any) => executeLeaderboardTool(params),
     ranking: (params: any) => executeRankingTool(params),
-    recentScores: (userId: string, params: any) => executeRecentTool(userId, params),
-    topScores: (userId: string, params: any) => executeTopScoresTool(userId, params),
-    compareScores: (userId: string, params: any) => executeCompareTool(userId, params),
+    recent_scores: (userId: string, params: any) => executeRecentTool(userId, params),
+    top_scores: (userId: string, params: any) => executeTopScoresTool(userId, params),
+    compare_scores: (userId: string, params: any) => executeCompareTool(userId, params),
     help: (params: any) => executeHelpTool(params),
 }
 

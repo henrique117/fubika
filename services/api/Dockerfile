@@ -27,4 +27,4 @@ RUN mkdir -p ../backups:/app/backups
 
 EXPOSE 3000
 
-CMD ["/usr/local/bin/start.sh"]
+CMD ["sh", "/usr/local/bin/start.sh"]

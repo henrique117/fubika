@@ -28,7 +28,7 @@ export async function executeTopScores(username: string | null, userId: string, 
         }
 
         if (index !== null) {
-            const score = player.top_200[index - 1]
+            const score = player.top_200?.[index - 1]
             return {
                 success: true,
                 player,

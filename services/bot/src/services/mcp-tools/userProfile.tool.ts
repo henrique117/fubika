@@ -1,8 +1,8 @@
 import { executeUserProfile } from '../logic/userProfile.logic'
-import { userEmbedBuilder, defaultEmbedBuilder } from '../../utils/utils.export'
+import { userEmbedBuilder } from '../../utils/utils.export'
 
 export const userProfileTool = {
-    type: 'function',
+    type: 'function' as const,
 
     function: {
         name: 'user_profile',

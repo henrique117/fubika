@@ -81,13 +81,13 @@ Não execute comandos de admin ou ações destrutivas.
 
                 if (toolCall) {
                     try {
-                        const params = typeof toolCall.function.arguments === 'string'
-                            ? JSON.parse(toolCall.function.arguments)
-                            : toolCall.function.arguments
+                        const params = typeof (toolCall as any).function.arguments === 'string'
+                            ? JSON.parse((toolCall as any).function.arguments)
+                            : (toolCall as any).function.arguments
 
                         return {
                             toolCall: {
-                                name: toolCall.function.name,
+                                name: (toolCall as any).function.name,
                                 params
                             }
                         }

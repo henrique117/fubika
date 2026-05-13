@@ -1,8 +1,8 @@
 import { executeRanking } from '../logic/ranking.logic'
-import { rankingEmbedsBuilder, defaultEmbedBuilder } from '../../utils/utils.export'
+import { rankingEmbedsBuilder } from '../../utils/utils.export'
 
 export const rankingTool = {
-    type: 'function',
+    type: 'function' as const,
 
     function: {
         name: 'ranking',

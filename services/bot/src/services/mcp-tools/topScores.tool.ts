@@ -1,8 +1,8 @@
 import { executeTopScores } from '../logic/topScores.logic'
-import { top200EmbedsBuilder, topIndexEmbedBuilder, noIndexScoresEmbedBuilder, defaultEmbedBuilder } from '../../utils/utils.export'
+import { top200EmbedsBuilder, topIndexEmbedBuilder, noIndexScoresEmbedBuilder } from '../../utils/utils.export'
 
 export const topScoresTool = {
-    type: 'function',
+    type: 'function' as const,
 
     function: {
         name: 'top_scores',

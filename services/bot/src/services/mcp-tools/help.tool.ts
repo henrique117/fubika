@@ -8,11 +8,10 @@ import {
     helpRecentEmbed,
     helpTopEmbed,
     helpUserEmbed,
-    defaultEmbedBuilder,
 } from '../../utils/utils.export'
 
 export const helpTool = {
-    type: 'function',
+    type: 'function' as const,
 
     function: {
         name: 'help',

@@ -1,8 +1,8 @@
 import { executeLeaderboard } from '../logic/leaderboard.logic'
-import { leaderboardEmbedsBuilder, defaultEmbedBuilder } from '../../utils/utils.export'
+import { leaderboardEmbedsBuilder } from '../../utils/utils.export'
 
 export const leaderboardTool = {
-    type: 'function',
+    type: 'function' as const,
 
     function: {
         name: 'leaderboard',

@@ -15,10 +15,10 @@ export async function executeChangeAvatar(userId: string, imageUrl: string): Pro
         const response = await axios.get(imageUrl, { responseType: 'arraybuffer' })
         const buffer = Buffer.from(response.data)
 
-        if (buffer.size > MAX_SIZE) {
+        if (buffer.length > MAX_SIZE) {
             return {
                 success: false,
-                error: `A imagem é muito grande! O limite é de **2MB**. (A sua tem ${(buffer.size / (1024 * 1024)).toFixed(2)}MB)`
+                error: `A imagem é muito grande! O limite é de **2MB**. (A sua tem ${(buffer.length / (1024 * 1024)).toFixed(2)}MB)`
             }
         }
 

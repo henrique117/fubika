@@ -1,8 +1,8 @@
 import { executeRecent } from '../logic/recent.logic'
-import { recentEmbedBuilder, noRecentScoresEmbedBuilder, defaultEmbedBuilder } from '../../utils/utils.export'
+import { recentEmbedBuilder, noRecentScoresEmbedBuilder } from '../../utils/utils.export'
 
 export const recentTool = {
-    type: 'function',
+    type: 'function' as const,
 
     function: {
         name: 'recent_scores',

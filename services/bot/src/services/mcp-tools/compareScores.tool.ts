@@ -1,8 +1,8 @@
 import { executeCompare } from '../logic/compare.logic'
-import { compareEmbedBuilder, defaultEmbedBuilder } from '../../utils/utils.export'
+import { compareEmbedBuilder } from '../../utils/utils.export'
 
 export const compareTool = {
-    type: 'function',
+    type: 'function' as const,
 
     function: {
         name: 'compare_scores',

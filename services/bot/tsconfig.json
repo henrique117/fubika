@@ -1,17 +1,14 @@
 {
   "compilerOptions": {
-    /* --- Project Structure --- */
     "rootDir": "./src",
     "outDir": "./dist",
     "removeComments": true,
 
-    /* --- Modern Environment (Node.js) --- */
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "lib": ["ESNext"],
 
-    /* --- Rigor and Quality --- */
     "strict": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
@@ -19,7 +16,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
 
-    /* --- Interoperability and Modules --- */
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,

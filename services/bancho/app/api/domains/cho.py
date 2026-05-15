@@ -947,12 +947,16 @@ async def handle_osu_login_request(
             read=False,
         )
 
+        # [Correção de Bug] 
+        # Criei um 'set' pra rastrear os IDs únicos de quem enviou as mensagens offline.
         sent_to: set[int] = set()
 
         for msg in mail_rows:
             # Add "Unread messages" header as the first message
             # for any given sender, to make it clear that the
             # messages are coming from the mail system.
+
+            # Registramos o ID do remetente
             if msg["from_id"] not in sent_to:
                 data += app.packets.send_message(
                     sender=msg["from_name"],
@@ -968,6 +972,18 @@ async def handle_osu_login_request(
                 msg=f'[{msg_time:%a %b %d @ %H:%M%p}] {msg["msg"]}',
                 recipient=msg["to_name"],
                 sender_id=msg["from_id"],
+            )
+
+        # [Correção de Bug]
+        # Após entregar os pacotes no cliente, o server varre os remententes registrados e 
+        # atualiza o banco de dados marcando essas conversas como lidas (read=1).
+        # Isso evita o reenvio fantasma nos próximos logins, já que o banco de dados agora é
+        # avisado de que o jogador "viu e leu" a mensagem logo que a mensagem é entregue pra ele
+        # (Algo óbvio, mas o banco de dados só sabia entregar a mensagem e voltar ela pra fila de novo)
+        for sender_id in sent_to:
+            await mail_repo.mark_conversation_as_read(
+                to_id=player.id,
+                from_id=sender_id,
             )
 
         if not player.priv & Privileges.VERIFIED:

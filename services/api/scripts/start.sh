@@ -3,7 +3,7 @@ set -e
 
 echo "⏳ Aguardando o MySQL estar pronto na porta 3306..."
 
-while ! nc -z mysql 3306; do
+while ! nc -z fubika_mysql 3306; do
   sleep 1
 done
 

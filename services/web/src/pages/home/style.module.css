@@ -6,6 +6,8 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    padding: calc(var(--space-lg) + 6px) 0 calc(var(--space-lg) + 14px);
+    animation: fadeIn var(--anim-slow) var(--easing-out) both;
 }
 
 .centerContent {
@@ -13,52 +15,75 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: var(--space-lg);
     width: 100%;
-    max-width: 800px;
-    padding: 20px;
+    max-width: 900px;
+    padding: 24px;
 }
 
 .infoCard {
     background-color: var(--color-background-dark);
     border-radius: 20px;
-    padding-inline: 20px;
+    padding-inline: var(--space-md);
     padding-bottom: 15px;
     width: 100%;
-    margin-top: 71px;
+    max-width: 860px;
+    margin: 90px auto 0 auto;
+    animation: fadeIn calc(var(--anim-slow) + 100ms) var(--easing-out) both;
 }
 
 .cardHeader {
     display: flex;
-    justify-content: space-between;
-    align-items: stretch; 
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: var(--space-md);
+    flex-wrap: wrap;
 }
 
 .cardUpperText {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    flex: 1;
+    min-width: 240px;
+    text-align: left;
 }
 
 .logoSvg {
     padding-top: 5px;
-    width: 40%;
+    width: min(220px, 100%);
+    max-width: 220px;
     display: flex;
     align-items: flex-start;
+    justify-content: flex-start;
+    margin-top: 12px; 
+}
+
+.logoSvg img {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
 .stats {
-    font-size: 10px;
+    font-size: 12px;
     display: flex;
-    gap: 7px;
+    gap: var(--space-md);
     align-items: center;
     margin-top: 20px;
-    padding-left: 30px;
+    padding-left: 0;
     font-weight: bold;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.stats span {
+    display: inline-flex;
+    align-items: center;
 }
 
 .statsNumber {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
 
     background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
@@ -69,30 +94,134 @@
     -webkit-text-fill-color: transparent;
     color: transparent;
     
-    display: inline-block; 
+    display: inline-block;
 }
 
 .description {
-    height: 100%;
-    display: flex;
-    align-items: flex-end;
-    font-size: 17.5px;
+    width: 100%;
+    font-size: 17px;
     line-height: 1.6;
-    padding-left: 30px;
+    padding-left: 0;
     font-weight: bold;
     text-align: justify;
+    margin-top: 10px;
+    opacity: 0.95;
+    animation: fadeIn calc(var(--anim-slow) + 120ms) var(--easing-out) both;
+}
+
+@media (max-width: 768px) {
+    .pageWrapper {
+        padding: 20px 12px 40px;
+    }
+
+    .centerContent {
+        padding: 18px;
+    }
+
+    .cardHeader {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .logoSvg {
+        width: 100%;
+        max-width: 240px;
+        justify-content: center;
+    }
+
+    .cardUpperText {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .stats {
+        justify-content: center;
+        text-align: center;
+        padding-left: 0;
+    }
+
+    .description {
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .buttonsRow {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .btnWrapper {
+        max-width: 100%;
+        width: 100%;
+    }
 }
 
 .buttonsRow {
     display: flex;
-    gap: 20px;
+    gap: var(--space-md);
     width: 100%;
     justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    animation: fadeInSlow calc(var(--anim-slow) + 200ms) var(--easing-out) both;
 }
 
+
 .btnWrapper {
-    flex: 1;
-    max-width: 300px;
-    height: 50px;
+    flex: 1 1 40%;
+    max-width: 420px;
+    min-width: 220px;
+    height: var(--btn-height);
     position: relative;
+}
+
+.btnWrapper > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.btnWrapper > a > * {
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 980px) {
+    .btnWrapper {
+        flex: 1 1 48%;
+        max-width: 48%;
+        min-width: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .btnWrapper {
+        flex: 1 1 100%;
+        max-width: 100%;
+        min-width: 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .centerContent {
+        text-align: center;
+    }
+
+    .logoSvg {
+        max-width: 140px;
+        justify-content: center;
+    }
+
+    .btnWrapper {
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btnWrapper {
+        min-width: 120px;
+        max-width: 100%;
+        height: auto;
+    }
 }

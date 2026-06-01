@@ -31,7 +31,6 @@ export function applyModsToStats(bpm: number, lengthSeconds: number, mods: strin
     }
 }
 
-
 export function formatTime(seconds: number): string {
     const hrs = Math.floor(seconds / 3600)
     const min = Math.floor((seconds % 3600) / 60)
@@ -45,7 +44,6 @@ export function formatTime(seconds: number): string {
 
     return `${pad(min)}:${pad(sec)}`
 }
-
 
 export function capitalizeFirstLetter(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1)

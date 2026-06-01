@@ -22,16 +22,16 @@ const toSafeName = (name: string): string => {
 export const getLastActivity = (unixTimestamp: number): string => {
     const now = Math.floor(Date.now() / 1000);
     const diff = now - unixTimestamp;
-    
+
     if (diff < 300) {
         return "Online";
     }
 
     const date = new Date(unixTimestamp * 1000);
 
-    return formatDistance(date, new Date(), { 
+    return formatDistance(date, new Date(), {
         addSuffix: true,
-        locale: ptBR 
+        locale: ptBR
     });
 }
 
@@ -41,12 +41,12 @@ const mapOsuApiDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
         beatmap_id: data.id,
         beatmapset_id: data.beatmapset_id,
         beatmap_md5: data.checksum,
-        title: data.beatmapset?.title || 'Sem título', 
+        title: data.beatmapset?.title || 'Sem título',
         mode: data.mode,
         mode_int: data.mode_int,
         status: data.status,
         total_length: data.total_length,
-        author_id: data.user_id, 
+        author_id: data.user_id,
         author_name: data.beatmapset?.creator || 'Desconhecido',
         cover: data.beatmapset?.covers?.cover || '',
         thumbnail: data.beatmapset?.covers?.['list@2x'] || '',
@@ -70,7 +70,7 @@ const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player
 
     try {
         const response = await osuApiClient.get(`/beatmaps/${row.map_id}`);
-        
+
         if (response.data) {
             beatmapData = mapOsuApiDataToBeatmap(response.data);
         } else {
@@ -121,7 +121,7 @@ const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player
         grade: row.grade,
         perfect: Boolean(row.perfect),
         play_time: row.play_time,
-        
+
         beatmap: beatmapData
     };
 };
@@ -136,7 +136,7 @@ export const getPlayerPlaycount = async (player_id: number): Promise<number> => 
 export const createUser = async (input: CreateUserInput) => {
     const { password, name, email, key } = input;
     const isValidKey = await checkInvite(key);
-    
+
     if (!isValidKey) {
         throw Errors.BadRequest('O código de convite é inválido ou já foi utilizado.');
     }
@@ -184,7 +184,7 @@ export const loginUser = async (input: LoginUserInput): Promise<IPlayer> => {
     if (!isPasswordValid) {
         throw Errors.Unauthorized('Usuário ou senha inválidos.');
     }
-    
+
     if ((user.priv & 1) === 0) {
         throw Errors.Forbidden('Esta conta está restrita ou banida.');
     }
@@ -197,7 +197,7 @@ export const createUserStats = async (playerId: number): Promise<void> => {
     const statsData = modes.map(mode => ({
         id: playerId,
         mode: mode,
-        tscore: 0, rscore: 0, pp: 0, acc: 0.0, plays: 0, playtime: 0, max_combo: 0, 
+        tscore: 0, rscore: 0, pp: 0, acc: 0.0, plays: 0, playtime: 0, max_combo: 0,
         total_hits: 0, replay_views: 0, xh_count: 0, x_count: 0, sh_count: 0, s_count: 0, a_count: 0
     }));
 
@@ -218,14 +218,14 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
     const playerId = user.id;
 
     const stats = await prisma.stats.findUnique({
-        where: { 
-            id_mode: { id: playerId, mode: mode } 
+        where: {
+            id_mode: { id: playerId, mode: mode }
         }
     });
 
     const userStats = stats || {
-        pp: 0, acc: 0, tscore: 0n, rscore: 0n, 
-        max_combo: 0, playtime: 0, 
+        pp: 0, acc: 0, tscore: 0n, rscore: 0n,
+        max_combo: 0, playtime: 0,
         x_count: 0, xh_count: 0, s_count: 0, sh_count: 0, a_count: 0
     };
 
@@ -237,23 +237,23 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
     }) + 1;
 
     const topScoresRaw = await prisma.$queryRaw<any[]>`
-        SELECT 
-            s.id as score_id, 
-            s.score as score_val, 
-            s.pp as score_pp, 
-            s.acc as score_acc, 
-            s.max_combo, s.mods, 
-            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
+        SELECT
+            s.id as score_id,
+            s.score as score_val,
+            s.pp as score_pp,
+            s.acc as score_acc,
+            s.max_combo, s.mods,
+            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect,
             s.play_time, s.map_md5, s.mode, s.status,
-            
+
             m.id as map_id,
             m.set_id as map_set_id,
             m.status
 
         FROM scores s
         INNER JOIN maps m ON s.map_md5 = m.md5
-        WHERE 
-            s.userid = ${playerId} 
+        WHERE
+            s.userid = ${playerId}
             AND s.mode = ${mode}
             AND s.status = 2
             AND s.pp > 0
@@ -272,13 +272,13 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         id: user.id,
         name: user.name,
         safe_name: user.safe_name,
-        pfp: `https://a.${process.env.DOMAIN}/${user.id}`,
-        banner: `https://assets.ppy.sh/user-profile-covers/${user.id}.jpg`,
-        
+        pfp: `https:
+        banner: `https:
+
         rank: rank,
         pp: userStats.pp,
         acc: userStats.acc,
-        
+
         playtime: userStats.playtime,
         playcount: await getPlayerPlaycount(user.id),
         max_combo: userStats.max_combo,
@@ -301,22 +301,22 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
 
 export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) => {
     const { mode, limit } = input;
-    
+
     const user = await prisma.users.findUnique({ where: filter as any });
-    
+
     if (!user) throw Errors.NotFound("Usuário não encontrado.");
     if (user.id < 3) throw Errors.NotFound("Perfil indisponível.");
 
     const recentScoresRaw = await prisma.$queryRaw<any[]>`
-        SELECT 
-            s.id as score_id, 
-            s.score as score_val, 
-            s.pp as score_pp, 
-            s.acc as score_acc, 
-            s.max_combo, s.mods, 
-            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
+        SELECT
+            s.id as score_id,
+            s.score as score_val,
+            s.pp as score_pp,
+            s.acc as score_acc,
+            s.max_combo, s.mods,
+            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect,
             s.play_time, s.map_md5, s.mode, s.status,
-            
+
             m.id as map_id,
             m.set_id as map_set_id,
             m.title as map_title,
@@ -327,8 +327,8 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
 
         FROM scores s
         INNER JOIN maps m ON s.map_md5 = m.md5
-        WHERE 
-            s.userid = ${user.id} 
+        WHERE
+            s.userid = ${user.id}
             AND s.mode = ${mode}
         ORDER BY s.play_time DESC
         LIMIT ${limit};
@@ -341,10 +341,9 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
     return populatedScores;
 }
 
-
 export const getUserRankHistory = async (filter: UserFilter, mode: number, days: number) => {
     const user = await prisma.users.findUnique({ where: filter as any });
-    
+
     if (!user) throw Errors.NotFound("Usuário não encontrado.");
     if (user.id < 3) throw Errors.NotFound("Perfil indisponível.");
 
@@ -395,22 +394,22 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
     }
 
     if (!mapMd5) {
-        return null; 
+        return null;
     }
 
     const bestScoreRaw = await prisma.$queryRaw<any[]>`
-        SELECT 
-            s.id as score_id, 
-            s.score as score_val, 
-            s.pp as score_pp, 
-            s.acc as score_acc, 
-            s.max_combo, s.mods, 
-            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect, 
+        SELECT
+            s.id as score_id,
+            s.score as score_val,
+            s.pp as score_pp,
+            s.acc as score_acc,
+            s.max_combo, s.mods,
+            s.n300, s.n100, s.n50, s.nmiss, s.grade, s.perfect,
             s.play_time, s.map_md5, s.mode, s.status,
-            
+
             -- Forçamos o ID do mapa que veio do parâmetro para o mapper usar na API
             ${bmap_id} as map_id,
-            
+
             -- Campos de fallback do banco local (caso o mapper da API falhe)
             m.set_id as map_set_id,
             m.title as map_title,
@@ -425,8 +424,8 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
 
         FROM scores s
         LEFT JOIN maps m ON s.map_md5 = m.md5
-        WHERE 
-            s.userid = ${user.id} 
+        WHERE
+            s.userid = ${user.id}
             AND s.map_md5 = ${mapMd5}
             AND s.mode = ${mode}
             AND s.status = 2 -- Apenas scores passados/rankeados
@@ -446,13 +445,12 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
             id: user.id,
             name: user.name,
             safe_name: user.safe_name,
-            pfp: `https://a.${process.env.DOMAIN}/${user.id}`,
+            pfp: `https:
             rank: 0, pp: 0, acc: 0, a_count: 0, s_count: 0, ss_count: 0, sh_count: 0, ssh_count: 0,
             total_score: 0, ranked_score: 0, max_combo: 0, playtime: 0
         }
     };
 }
-
 
 export const deleteUser = async (userId: number, input: DeleteUserInput): Promise<void> => {
     const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -472,7 +470,7 @@ export const getUsersCount = async () => {
     const fiveMinutesAgo = now - 300;
 
     const usersCount = await prisma.users.count({
-        where: { 
+        where: {
             priv: { gt: 0 }
         }
     });
@@ -495,7 +493,7 @@ export const getUsersCount = async () => {
 export const setUserPfp = async (data: PostPfpInput) => {
     const user = await prisma.users.findFirst({
         where: {
-            discord_id: data.discord_id 
+            discord_id: data.discord_id
         }
     });
 
@@ -504,7 +502,7 @@ export const setUserPfp = async (data: PostPfpInput) => {
     }
 
     const avatarDir = path.join(process.cwd(), '.data', 'avatars');
-    
+
     if (!fs.existsSync(avatarDir)) {
         fs.mkdirSync(avatarDir, { recursive: true });
     }
@@ -524,7 +522,7 @@ export const setUserPfp = async (data: PostPfpInput) => {
         return {
             id: user.id,
             name: user.name,
-            avatar_url: `https://a.${process.env.DOMAIN || 'bpy.local'}/${user.id}?v=${Date.now()}`
+            avatar_url: `https:
         };
 
     } catch (err) {

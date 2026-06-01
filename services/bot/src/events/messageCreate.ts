@@ -1,5 +1,5 @@
 import { Events, Message } from 'discord.js'
-import { ICommand } from '../interfaces/interfaces.export' 
+import { ICommand } from '../interfaces/interfaces.export'
 
 const COMMAND_REGEX = /^([a-zA-Z]{1,16})(1000|\d{1,3})?$/
 
@@ -10,7 +10,6 @@ export default {
 
         if (message.author.bot || !message.content.startsWith('!')) return
 
-        
         const args = message.content.slice(1).trim().split(/ +/)
         const rawCommand = args.shift()?.toLowerCase()
 
@@ -21,17 +20,17 @@ export default {
         if (match) {
 
             commandName = match[1] ?? null
-            index = (match[2] !== undefined) 
+            index = (match[2] !== undefined)
                 ? Number(match[2])
                 : null
         }
 
         if (!commandName) return
 
-        let command = message.client.commands.get(commandName) as ICommand // Tenta achar pelo nome exato
+        let command = message.client.commands.get(commandName) as ICommand
 
-        if (!command) { // Se não achar, tenta pelos aliases
-            command = message.client.commands.find((cmd: ICommand) => 
+        if (!command) {
+            command = message.client.commands.find((cmd: ICommand) =>
                 cmd.aliases && cmd.aliases.includes(commandName)
             )
         }

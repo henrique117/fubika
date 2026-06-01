@@ -17,7 +17,7 @@ export async function authenticate(req: FastifyRequest, _: any) {
             name: tokenData.user.name,
             priv: tokenData.user.priv,
         };
-        
+
         return;
     }
 

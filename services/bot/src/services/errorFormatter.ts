@@ -1,8 +1,3 @@
-/**
- * Elabora mensagens de erro de forma amigável com sugestões de ações
- * Transforma erros técnicos em respostas bonitas para o usuário
- */
-
 interface ErrorContext {
     toolName?: string
     params?: Record<string, any>
@@ -10,11 +5,9 @@ interface ErrorContext {
 }
 
 export class ErrorFormatter {
-    /**
-     * Mapa de erros conhecidos com mensagens amigáveis + sugestões
-     */
+
     private static errorMap: Record<string, { message: string; suggestion?: string }> = {
-        // Erros de usuário/jogador não encontrado
+
         'não encontrado': {
             message: 'Ops! Não encontrei esse jogador.',
             suggestion: 'Verifique o nome e tente novamente, ou use `/ranking` para explorar.'
@@ -36,13 +29,11 @@ export class ErrorFormatter {
             suggestion: 'Verifique o nome e tente novamente.'
         },
 
-        // Erros de index/parâmetros inválidos
         'index válido': {
             message: 'Ops! O número que você pediu não é válido.',
             suggestion: 'Use um número entre 1 e 200 para as scores recentes.'
         },
 
-        // Erros de beatmap
         'BEATMAP_NOT_FOUND': {
             message: 'Ops! Não encontrei esse mapa.',
             suggestion: 'Verifique o ID do mapa ou tente procurar novamente.'
@@ -52,7 +43,6 @@ export class ErrorFormatter {
             suggestion: 'Use um número válido ou tente `/leaderboard` com outro mapa.'
         },
 
-        // Erros de autorização
         'Unauthorized': {
             message: 'Você não tem permissão para acessar isso.',
             suggestion: 'Entre em contato com um admin se achar que isso é um erro.'
@@ -62,7 +52,6 @@ export class ErrorFormatter {
             suggestion: 'Tente novamente mais tarde.'
         },
 
-        // Erros de timeout/conexão
         'Timeout': {
             message: 'Demorou muito para buscar os dados... 😅',
             suggestion: 'Tente novamente em alguns segundos.'
@@ -80,7 +69,6 @@ export class ErrorFormatter {
             suggestion: 'Verifique sua conexão e tente novamente.'
         },
 
-        // Erros de argumento/validação
         'Invalid argument': {
             message: 'Ops! Algo está errado no comando.',
             suggestion: 'Verifique o formato e tente novamente.'
@@ -90,7 +78,6 @@ export class ErrorFormatter {
             suggestion: 'Revise o comando e tente novamente.'
         },
 
-        // Erros genéricos do servidor
         '500': {
             message: 'Algo deu errado no servidor. 😕',
             suggestion: 'Tente novamente em alguns instantes.'
@@ -101,13 +88,6 @@ export class ErrorFormatter {
         }
     }
 
-    /**
-     * Elabora um erro em mensagem amigável
-     * @param error - Código de erro ou mensagem de erro
-     * @param originalMessage - Mensagem de erro original (para logging)
-     * @param context - Contexto do erro (nome da tool, parâmetros, etc)
-     * @returns Mensagem amigável elaborada
-     */
     static elaborate(
         error: string | undefined | null,
         originalMessage?: string,
@@ -117,22 +97,18 @@ export class ErrorFormatter {
             return 'Ops! Algo deu errado, mas não tenho detalhes. Tente novamente.'
         }
 
-        // Log para debug
         console.error(`[ErrorFormatter] Error: ${error}, Message: ${originalMessage}`, context)
 
-        // Procura match exato
         if (this.errorMap[error]) {
             return this.formatMessage(this.errorMap[error])
         }
 
-        // Procura match parcial (contains)
         for (const [key, value] of Object.entries(this.errorMap)) {
             if (error.includes(key) || originalMessage?.includes(key)) {
                 return this.formatMessage(value)
             }
         }
 
-        // Fallback: extrai informação útil da mensagem original
         if (originalMessage && originalMessage.length < 100) {
             return `Ops! ${originalMessage} Tente novamente.`
         }
@@ -140,9 +116,6 @@ export class ErrorFormatter {
         return 'Ops! Algo deu errado. Tente novamente em alguns segundos.'
     }
 
-    /**
-     * Formata a resposta do erro com sugestão (se houver)
-     */
     private static formatMessage(error: { message: string; suggestion?: string }): string {
         if (error.suggestion) {
             return `${error.message}\n💡 ${error.suggestion}`
@@ -150,9 +123,6 @@ export class ErrorFormatter {
         return error.message
     }
 
-    /**
-     * Trata erros de resposta HTTP
-     */
     static elaborateHttpError(status: number, _data?: any): string {
         const statusMap: Record<number, { message: string; suggestion?: string }> = {
             400: {
@@ -193,15 +163,12 @@ export class ErrorFormatter {
         return this.formatMessage(error)
     }
 
-    /**
-     * Trata erros de execução de tools
-     */
     static elaborateToolError(
         toolName: string,
         error: string | undefined,
         message?: string
     ): string {
-        // Erros específicos de tool
+
         const toolErrorMap: Record<string, string> = {
             'user_profile': 'Jogador não encontrado.',
             'recent_scores': 'Não consegui buscar as scores recentes.',
@@ -211,13 +178,11 @@ export class ErrorFormatter {
             'compare_scores': 'Não consegui comparar as scores.'
         }
 
-        // Se for erro genérico, tenta format normal
         const elaborated = this.elaborate(error, message)
         if (elaborated.includes('Ops!')) {
             return elaborated
         }
 
-        // Se tem erro específico de tool, adiciona contexto
         const toolError = toolErrorMap[toolName]
         if (toolError) {
             return `${toolError} ${elaborated}`
@@ -226,3 +191,4 @@ export class ErrorFormatter {
         return elaborated
     }
 }
+

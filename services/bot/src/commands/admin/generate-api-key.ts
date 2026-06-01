@@ -6,7 +6,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName('generate-api-key')
         .setDescription('Gera uma chave para a api do server do Fubika')
-        .addStringOption(option => 
+        .addStringOption(option =>
             option.setName('application-name')
             .setDescription('Nome da aplicação')
             .setRequired(true)
@@ -17,7 +17,7 @@ export default {
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
-        
+
         try{
             const application_name = interaction.options.getString('application-name', true)
             const result = await executeGenerateApiKey(interaction.user.id, application_name)

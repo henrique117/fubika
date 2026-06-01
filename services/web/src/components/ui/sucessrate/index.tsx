@@ -1,7 +1,6 @@
 import React from 'react';
 import style from './style.module.css';
 
-
 interface SuccessRateProps {
     rate: number;
 }

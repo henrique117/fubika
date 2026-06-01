@@ -11,13 +11,13 @@ export default interface IBeatmap {
     mode: string
     star_rating: number
     max_combo: number
-    total_length: number // em segundos
+    total_length: number
     bpm: number
     cs: number
     ar: number
     od: number
     hp: number
     author_name: string
-    status: string // Ranked, Loved, etc
+    status: string
     scores?: Omit<IScore, 'beatmap'>[]
 }

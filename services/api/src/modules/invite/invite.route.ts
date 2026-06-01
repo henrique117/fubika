@@ -5,7 +5,7 @@ import { authorizeDiscordOwnership } from "../../middlewares/ownership.middlewar
 import { createInviteSchema, CreateInviteInput } from "./invite.schema";
 
 const inviteRoutes = async (server: FastifyInstance) => {
-    
+
     server.post<{ Body: CreateInviteInput }>('/create', {
         schema: {
             body: createInviteSchema

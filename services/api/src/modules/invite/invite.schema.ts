@@ -10,12 +10,12 @@ export const createInviteSchema = z.object({
 export type CreateInviteInput = z.infer<typeof createInviteSchema>;
 
 export const checkInviteSchema = z.object({
-    code: z.string({ 
-        error: "O campo code é obrigatório e deve ser um texto." 
+    code: z.string({
+        error: "O campo code é obrigatório e deve ser um texto."
     }).min(1, "O código do convite não pode estar vazio."),
-    
-    id: z.number({ 
-        error: "O campo id é obrigatório e deve ser um número." 
+
+    id: z.number({
+        error: "O campo id é obrigatório e deve ser um número."
     }).int("O ID do utilizador deve ser um número inteiro.")
 });
 

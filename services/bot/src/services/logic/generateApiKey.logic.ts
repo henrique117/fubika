@@ -20,3 +20,4 @@ export async function executeGenerateApiKey(userId: string, applicationName: str
         }
     }
 }
+

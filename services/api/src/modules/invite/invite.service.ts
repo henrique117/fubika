@@ -71,7 +71,7 @@ export const useInvite = async (input: CheckInviteInput) => {
     if (!invite) {
         throw Errors.NotFound('Código de convite inválido.');
     }
-    
+
     if (invite.used_by_id) {
         throw Errors.Conflict('Este convite já foi utilizado.');
     }

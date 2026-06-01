@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const apiUrl = process.env.VITE_API_URL || 'https://api.fubika.com.br'
+const apiUrl = process.env.VITE_API_URL || 'https:
 
 const osuApiClient = axios.create({
     baseURL: apiUrl + '/api',

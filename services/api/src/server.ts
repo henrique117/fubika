@@ -4,13 +4,13 @@ import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import prisma from "./utils/prisma";
 
-import { 
-    userRoutes, 
-    inviteRoutes, 
-    discordRoutes, 
-    beatmapRoutes, 
-    rankingRoutes, 
-    apikeyRoutes 
+import {
+    userRoutes,
+    inviteRoutes,
+    discordRoutes,
+    beatmapRoutes,
+    rankingRoutes,
+    apikeyRoutes
 } from "./modules/barrel";
 
 import { globalErrorHandler } from "./utils/errorHandler";
@@ -21,7 +21,7 @@ import { validatorCompiler, serializerCompiler } from "fastify-type-provider-zod
     return Number(this);
 };
 
-export const server = Fastify({ 
+export const server = Fastify({
     logger: true
 });
 
@@ -45,7 +45,7 @@ async function main() {
         secret: process.env.JWT_SECRET || 'fubika_secret_2026'
     });
 
-    await server.register(cors, { 
+    await server.register(cors, {
         origin: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
@@ -56,9 +56,9 @@ async function main() {
         await prisma.$queryRaw`SELECT 1`;
         const end = performance.now();
 
-        return { 
-            status: 'alive', 
-            database: 'connected', 
+        return {
+            status: 'alive',
+            database: 'connected',
             latency_db_ms: Math.round(end - start)
         };
     });
@@ -75,11 +75,11 @@ async function main() {
     try {
         const port = Number(process.env.API_PORT) || 3000;
         await server.listen({ port: port, host: '0.0.0.0' });
-        
+
         console.log(`
         🚀 Fubika API está online!
         📡 Porta: ${port}
-        🔗 Host: http://0.0.0.0:${port}
+        🔗 Host: http:
         `);
     } catch (err) {
         server.log.error(err);

@@ -8,11 +8,11 @@ import { Errors } from "../../utils/errorHandler";
 export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<IPlayer[]> => {
     const itemsPerPage = 50;
     const { page, mode, country } = input;
-    
+
     if (page < 1) {
         throw Errors.BadRequest("A página deve ser maior ou igual a 1.");
     }
-    
+
     const leaderboardRaw = await prisma.stats.findMany({
         where: {
             mode: mode,
@@ -45,11 +45,11 @@ export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<I
             name: row.user.name,
             safe_name: row.user.safe_name,
             country: row.user.country,
-            pfp: `https://a.${process.env.DOMAIN}/${row.user.id}`,
-            banner: `https://assets.${process.env.DOMAIN}/user-profile-covers/${row.user.id}.jpg`,
-            
+            pfp: `https:
+            banner: `https:
+
             rank: currentRank,
-            
+
             pp: row.pp,
             acc: row.acc,
             playtime: row.playtime,

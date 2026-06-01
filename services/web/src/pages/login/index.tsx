@@ -11,7 +11,7 @@ const LoginPage: React.FC = () => {
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    
+
     const [showPassword, setShowPassword] = useState(false)
     const [isloading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -19,7 +19,7 @@ const LoginPage: React.FC = () => {
     if (loading) {
         return null
     }
-    
+
     if (signed) {
         return <Navigate to="/" replace />
     }
@@ -28,7 +28,7 @@ const LoginPage: React.FC = () => {
 
     const handleLogin = async (e?: React.FormEvent) => {
         if (e) e.preventDefault()
-        
+
         setError('')
 
         if (!username || !password) {
@@ -38,7 +38,7 @@ const LoginPage: React.FC = () => {
 
         try {
             setLoading(true)
-            
+
             const response = await api.post('/user/login', {
                 name: username,
                 password: password
@@ -102,21 +102,28 @@ const LoginPage: React.FC = () => {
                                     placeholder="••••••••••••"
                                     className={style.input}
                                 />
-                                <button 
-                                    type="button" 
-                                    onClick={togglePassword} 
+                                <button
+                                    type="button"
+                                    onClick={togglePassword}
                                     className={style.eyeButton}
                                     tabIndex={-1}
                                 >
                                     {showPassword ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
                                     ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+                                            <path d="M4.22 4.22l15.56 15.56" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
                                     )}
                                 </button>
                             </div>
                         </div>
-                        
+
                         <button type="submit" style={{ display: 'none' }}></button>
                     </form>
 
@@ -124,8 +131,8 @@ const LoginPage: React.FC = () => {
                         Esqueceu a senha?
                     </Link>
 
-                    <div 
-                        className={style.entrarButton} 
+                    <div
+                        className={style.entrarButton}
                         onClick={() => !isloading && handleLogin()}
                         style={{ cursor: isloading ? 'wait' : 'pointer', opacity: isloading ? 0.7 : 1 }}
                     >

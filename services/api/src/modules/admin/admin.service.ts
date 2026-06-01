@@ -20,9 +20,9 @@ export const banPlayer = async (input: TargetUserInput) => {
         data: { priv: 0 }
     });
 
-    return { 
-        success: true, 
-        message: `O jogador ${target.name} foi banido com sucesso.` 
+    return {
+        success: true,
+        message: `O jogador ${target.name} foi banido com sucesso.`
     };
 };
 
@@ -54,8 +54,8 @@ export const giveAdminPrivileges = async (requesterId: number, input: TargetUser
         }
     });
 
-    return { 
-        success: true, 
-        message: `Sucesso! O jogador ${target.name} agora é um Administrador.` 
+    return {
+        success: true,
+        message: `Sucesso! O jogador ${target.name} agora é um Administrador.`
     };
 };

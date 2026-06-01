@@ -26,3 +26,4 @@ export async function executeOsuLinkInitiate(userId: string, nick: string): Prom
         }
     }
 }
+

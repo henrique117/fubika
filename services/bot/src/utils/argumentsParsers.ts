@@ -1,24 +1,20 @@
 import { REGEX } from "../constants"
 import { extractBeatmapId } from "./auxiliarFunctions"
 
-// Captura "texto com espaço", 'texto com espaço' ou texto_sem_sepaço 
 const TOKENIZER_REGEX = /"([^"]*)"|'([^']*)'|(\S+)/g
 
 interface Token {
     value: string
-    isQuoted: boolean // Se está entre aspas simples ou duplas
+    isQuoted: boolean
 }
 
 function tokenize(content: string): Token[] {
     const tokens: Token[] = []
     let match
 
-    TOKENIZER_REGEX.lastIndex = 0 // Para evitar bugs se o regex for reutilizado
+    TOKENIZER_REGEX.lastIndex = 0
 
     while ((match = TOKENIZER_REGEX.exec(content)) !== null) {
-        // match[1] = em aspas duplas
-        // match[2] = aspas simples
-        // match[3] = sem aspas
 
         const value = match[1] || match[2] || match[3]
         const isQuoted = match[1] !== undefined || match[2] !== undefined
@@ -35,16 +31,15 @@ export async function parseCompareArguments(rawContent: string) {
 
     const allTokens = tokenize(rawContent)
 
-    const args = allTokens.slice(1) // Remove o token do comando
+    const args = allTokens.slice(1)
 
     let beatmapId: string | null = null
     const remainingTokens: Token[] = []
 
-    // Extração de mapas (e mods futuramente)
     for (const token of args) {
         const text = token.value
 
-        if (token.isQuoted) { // Se estiver entre aspas assume que é nome 
+        if (token.isQuoted) {
             remainingTokens.push(token)
             continue
         }
@@ -65,7 +60,6 @@ export async function parseCompareArguments(rawContent: string) {
 
     let username: string | null = null
 
-    // Procura primeiro token entre aspas
     const quotedToken = remainingTokens.find(t => t.isQuoted)
 
     if (quotedToken) {
@@ -81,7 +75,7 @@ export async function parseOnlyUsername(rawContent: string) {
 
     const allTokens = tokenize(rawContent)
 
-    const args = allTokens.slice(1) // Remove o token do comando
+    const args = allTokens.slice(1)
 
     let username: string | null = null
 
@@ -100,7 +94,7 @@ export async function parseOnlyBeatmapId(rawContent: string) {
 
     const allTokens = tokenize(rawContent)
 
-    const args = allTokens.slice(1) // Remove o token do comando
+    const args = allTokens.slice(1)
 
     let beatmapId: string | null = null
 

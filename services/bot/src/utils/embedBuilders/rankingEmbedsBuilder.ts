@@ -27,18 +27,17 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
     const embeds: EmbedBuilder[] = []
     const playersPerPage = 20
 
-    // Se não tiver jogadores
     if (!players || players.length === 0) {
         const embed = new EmbedBuilder()
             .setAuthor({
                 name: `Performance Ranking for ${getModeName(mode)}`,
                 iconURL: URLS.fubikaIcon,
-                url: 'https://fubika.com.br/ranking'
+                url: 'https:
             })
             .setColor(COLORS.blue)
             .setDescription("Ainda não há jogadores neste ranking!")
             .setFooter({
-                text: `Page 1/1`, 
+                text: `Page 1/1`,
                 iconURL: getModeIcon(mode)
             })
         embeds.push(embed)
@@ -46,9 +45,9 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
     }
 
     for (let i = 0; i < players.length; i += playersPerPage) {
-        
+
         const pagePlayers = players.slice(i, i + playersPerPage)
-        
+
         const leftSide = pagePlayers.slice(0, 10)
         const rightSide = pagePlayers.slice(10, 20)
 
@@ -81,13 +80,13 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
         const embed = new EmbedBuilder()
             .setAuthor({
                 name: `Performance Ranking for ${getModeName(mode)}`,
-                url: 'https://fubika.com.br/ranking',
+                url: 'https:
                 iconURL: URLS.fubikaIcon
             })
             .setColor(COLORS.blue)
             .setDescription(lines.join('\n'))
             .setFooter({
-                text: `Page ${Math.floor(i / playersPerPage) + 1}/${Math.ceil(players.length / playersPerPage)}`, 
+                text: `Page ${Math.floor(i / playersPerPage) + 1}/${Math.ceil(players.length / playersPerPage)}`,
                 iconURL: getModeIcon(mode)
             })
 

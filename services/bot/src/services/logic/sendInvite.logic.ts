@@ -20,3 +20,4 @@ export async function executeSendInvite(userId: string): Promise<SendInviteResul
         }
     }
 }
+

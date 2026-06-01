@@ -6,7 +6,7 @@ import { handleBan, handleGiveAdmin } from "./admin.controller";
 import { authorizeDiscordOwnership } from "../../middlewares/ownership.middleware";
 
 const adminRoutes = async (server: FastifyInstance) => {
-    
+
     server.post<{ Body: TargetUserInput }>('/ban', {
         schema: {
             body: targetUserSchema

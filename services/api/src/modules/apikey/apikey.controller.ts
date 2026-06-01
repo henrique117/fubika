@@ -3,7 +3,7 @@ import { CreateApikeyInput } from "./apikey.schema";
 import { createApikey } from "./apikey.service";
 
 export const handleApikeyCreate = async (
-    req: FastifyRequest<{ Body: CreateApikeyInput }>, 
+    req: FastifyRequest<{ Body: CreateApikeyInput }>,
     res: FastifyReply
 ) => {
     const apiKeyData = await createApikey(req.body);

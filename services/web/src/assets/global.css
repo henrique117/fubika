@@ -13,6 +13,19 @@
     --color-background: #2C2825;
     --color-background-dark: #191715;
     --color-background-light: #655A50;
+    --anim-fast: 200ms;
+    --anim-medium: 320ms;
+    --anim-slow: 650ms;
+    --easing-out: cubic-bezier(0.22,1,0.36,1);
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --transition-default: all var(--anim-fast) var(--easing-out);
+    --btn-height: 52px;
+    --btn-min-width: 180px;
+    --btn-padding-vertical: 12px;
+    --btn-padding-horizontal: 18px;
+    --btn-font-size: 16px;
 }
 
 @font-face {
@@ -41,4 +54,70 @@ h1 {
     font-weight: normal;
     font-style: normal;
     color: var(--color-branco);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.fadeIn {
+    animation: fadeIn var(--anim-slow) var(--easing-out) both;
+}
+
+.fadeInSlow {
+    animation: fadeIn calc(var(--anim-slow) + 200ms) var(--easing-out) both;
+}
+
+.transition-smooth {
+    transition: var(--transition-default);
+}
+
+.focus-ring:focus-visible {
+    outline: 2px solid rgba(255,255,255,0.85);
+    outline-offset: 3px;
+}
+
+
+.siteContainer {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+
+.centered {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

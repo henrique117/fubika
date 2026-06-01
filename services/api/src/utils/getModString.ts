@@ -43,7 +43,7 @@ export const getModString = (mods: number): string => {
     if (mods & OsuMods.TouchDevice) modParts.push("TD");
     if (mods & OsuMods.Hidden) modParts.push("HD");
     if (mods & OsuMods.HardRock) modParts.push("HR");
-    
+
     if (mods & OsuMods.Perfect) {
         modParts.push("PF");
     } else if (mods & OsuMods.SuddenDeath) {
@@ -59,7 +59,7 @@ export const getModString = (mods: number): string => {
     if (mods & OsuMods.HalfTime) modParts.push("HT");
     if (mods & OsuMods.Flashlight) modParts.push("FL");
     if (mods & OsuMods.SpunOut) modParts.push("SO");
-    
+
     if (mods & OsuMods.Relax) modParts.push("RX");
     if (mods & OsuMods.Relax2) modParts.push("AP");
     if (mods & OsuMods.Autoplay) modParts.push("AT");

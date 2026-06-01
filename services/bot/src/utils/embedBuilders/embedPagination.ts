@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, ComponentType, EmbedBuilder, Message, AttachmentBuilder, PartialGroupDMChannel } from 'discord.js'
 
 export default async function embedPagination(interaction: CommandInteraction | Message, pages: EmbedBuilder[], string: string = "", disapear: boolean = false, time: number = 40000, attachment?: AttachmentBuilder): Promise<void> {
-    
+
     const sendResponse = async (payload: any): Promise<any> => {
         if (interaction instanceof CommandInteraction) {
             if (interaction.deferred || interaction.replied) {
@@ -10,7 +10,7 @@ export default async function embedPagination(interaction: CommandInteraction | 
                 try {
                     return await interaction.reply({ ...payload, fetchReply: true })
                 } catch (err: any) {
-                    if (err.code === 40060) { 
+                    if (err.code === 40060) {
                         return await interaction.editReply(payload)
                     }
                     throw err
@@ -36,11 +36,11 @@ export default async function embedPagination(interaction: CommandInteraction | 
     }
 
     if (pages.length === 1) {
-        await sendResponse({ 
-            content: string, 
-            embeds: [pages[0]!.data], 
-            components: [], 
-            files: attachment ? [attachment] : [] 
+        await sendResponse({
+            content: string,
+            embeds: [pages[0]!.data],
+            components: [],
+            files: attachment ? [attachment] : []
         })
         return
     }
@@ -53,13 +53,13 @@ export default async function embedPagination(interaction: CommandInteraction | 
     const last = new ButtonBuilder().setCustomId('pagelast').setEmoji('⏩').setStyle(ButtonStyle.Primary)
 
     const buttons = new ActionRowBuilder<ButtonBuilder>().addComponents(first, prev, pageCount, next, last)
-    
+
     let msg: any
 
     try {
-        msg = await sendResponse({ 
-            content: string, 
-            embeds: [pages[index]!.data], 
+        msg = await sendResponse({
+            content: string,
+            embeds: [pages[index]!.data],
             components: [buttons],
             files: attachment ? [attachment] : []
         })
@@ -107,7 +107,7 @@ export default async function embedPagination(interaction: CommandInteraction | 
 
     } catch (e) {
         console.error("Erro na paginação: ", e)
-        
+
         if (interaction instanceof CommandInteraction && !interaction.replied) {
              const method = interaction.deferred ? 'editReply' : 'reply'
              await interaction[method]({ content: 'Error on loading pages', ephemeral: true }).catch(() => {})

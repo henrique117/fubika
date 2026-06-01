@@ -1,116 +1,136 @@
 .pageWrapper {
     width: 100%;
+    min-height: calc(100vh - 60px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding-top: 100px;
+    padding: 60px 0 40px;
+    animation: fadeIn 0.75s ease-out both;
 }
 
 .card {
-    width: 70%;
-    max-width: 720px;
-    height: 736px;
+    width: min(100%, 720px);
     display: flex;
     flex-direction: column;
     position: relative;
     align-items: center;
     background-color: var(--color-background-dark);
-    border-radius: 15px;
+    border-radius: 20px;
+    padding: 32px 32px 40px;
+    gap: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
 }
 
 .headerContainer {
-    display: contents; 
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }
 
 .backButton {
     position: absolute;
-    top: 20px;
+    top: 50%;
     left: 20px;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: white;
     cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.2s;
+    opacity: 0.85;
+    transition: opacity 0.2s, transform 0.2s;
 }
 
 .backButton:hover {
     opacity: 1;
+    transform: translateY(-50%) translateX(-2px);
 }
 
 .title {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
     width: 100%;
-    height: 13%;
-    font-size: 48px;
-    margin: 0 !important;
-    padding: 0 !important;
+    text-align: center;
+    font-size: 42px;
+    margin: 0;
+    padding: 0;
 }
 
 .instructions {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-evenly;
-    height: 87%;
+    justify-content: flex-start;
+    gap: 18px;
 }
 
 .dashedList {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
-    height: 100%;
-    width: 80%;
-
+    gap: 16px;
+    padding-left: 18px;
 }
 
 .dashedList li {
-    font-size: 17.5px;
+    font-size: 17px;
     font-weight: bold;
+    line-height: 1.5;
+    position: relative;
+}
+
+.dashedList li::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-azul-menos-baitola), var(--color-roxo-baitola));
 }
 
 .image {
     width: 70%;
+    max-width: 420px;
     height: auto;
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
 }
 
 @media (max-width: 768px) {
-    .headerContainer {
-        display: flex;
-        align-items: center;     
-        justify-content: center; 
-        position: relative;       
-        width: 100%;
-        height: 7%;    
-        padding: 15px;          
+    .pageWrapper {
+        padding: 50px 12px 30px;
     }
-    .title {
-        align-items: flex-start;
-        font-size: 28px;
 
+    .card {
+        width: min(100%, 92vw);
+        padding: 26px 18px 28px;
+    }
+
+    .title {
+        font-size: 30px;
+    }
+
+    .instructions {
+        gap: 14px;
+    }
+
+    .dashedList {
+        width: 100%;
+        padding-left: 14px;
     }
 
     .dashedList li {
         font-size: 15.5px;
-        font-weight: bold;
     }
 
     .image {
-        width: 90%;
-        height: auto;
+        width: 100%;
     }
 
     .backButton {
-        position:unset;
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        opacity: 0.8;
-        transition: opacity 0.2s;
+        left: 12px;
     }
-
 }

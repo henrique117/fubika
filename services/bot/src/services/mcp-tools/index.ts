@@ -27,9 +27,6 @@ import {
     executeHelpTool
 } from './help.tool'
 
-/**
- * Exporta todas as definições de ferramentas para o Groq
- */
 export const allTools = [
     userProfileTool,
     leaderboardTool,
@@ -40,9 +37,6 @@ export const allTools = [
     helpTool,
 ]
 
-/**
- * Map de executores de ferramentas para fácil acesso
- */
 export const toolExecutors: Record<string, Function> = {
     user_profile: (userId: string, params: any) => executeUserProfileTool(userId, params),
     leaderboard: (params: any) => executeLeaderboardTool(params),
@@ -53,9 +47,6 @@ export const toolExecutors: Record<string, Function> = {
     help: (params: any) => executeHelpTool(params),
 }
 
-/**
- * Executa um tool baseado em seu nome
- */
 export async function executeTool(
     toolName: string,
     params: any,
@@ -83,3 +74,4 @@ export async function executeTool(
         }
     }
 }
+

@@ -37,3 +37,4 @@ export async function executeChangeAvatar(userId: string, imageUrl: string): Pro
         }
     }
 }
+

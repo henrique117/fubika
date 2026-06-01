@@ -2,11 +2,11 @@ import { FastifyInstance } from "fastify";
 import { handleGetMe, handleGetUsersCount, handlePostPfp, handleUserBestOnMapReq, handleUserLogin, handleUserRecentReq, handleUserRegister, handleUserReq, handleGetUserRankHistoryReq, handleDeleteMe } from "./user.controller";
 import { authenticate } from "../../middlewares/auth.middleware";
 import { authorizeDiscordOwnership } from "../../middlewares/ownership.middleware";
-import { 
-    GetUserInput, 
-    GetUserMapInput, 
-    ScoreQueryInput, 
-    ScoreQueryModeInput, 
+import {
+    GetUserInput,
+    GetUserMapInput,
+    ScoreQueryInput,
+    ScoreQueryModeInput,
     PostPfpInput,
     CreateUserInput,
     LoginUserInput,
@@ -23,7 +23,7 @@ import {
 } from "./user.schema";
 
 const userRoutes = async (server: FastifyInstance) => {
-    
+
     server.post<{ Body: CreateUserInput }>('/register', {
         schema: {
             body: createUserInputSchema

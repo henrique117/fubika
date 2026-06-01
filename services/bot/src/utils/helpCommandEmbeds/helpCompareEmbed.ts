@@ -18,7 +18,7 @@ export default function helpCompareEmbed() {
             },
             {
                 name: "Exemplos",
-                value: "`!compare +iccy`\n`!c +iccy https://fubika.com.br/\nbeatmap/70077`\n`!gap`",
+                value: "`!compare +iccy`\n`!c +iccy https:
                 inline: true
             },
             {

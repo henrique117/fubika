@@ -15,10 +15,6 @@ import {
 
 import { ErrorFormatter } from '@/services/errorFormatter'
 
-/**
- * Preprocessa o texto para extrair menções Discord
- * Converte <@ID> em {@username} e retorna o userName extraído
- */
 function preprocessMentions(
     text: string
 ): { processedText: string; userName?: string } {
@@ -27,18 +23,15 @@ function preprocessMentions(
     let userName: string | undefined
     let match
 
-    // Extrair primeira menção (ID do usuário mencionado)
     while ((match = mentionRegex.exec(text)) !== null) {
         const userId = match[1]
-        // Por enquanto, usar o ID como placeholder
-        // Em uma versão futura, poderia resolver para o nome via API
+
         text = text.replace(match[0], `{@user:${userId}}`)
         if (!userName) {
-            userName = userId // Usar ID como fallback
+            userName = userId
         }
     }
 
-    // Também buscar @username (text mentions)
     const textMentionRegex = /@(\w+)/g
     while ((match = textMentionRegex.exec(text)) !== null) {
         const username = match[1]
@@ -128,7 +121,6 @@ async function processMessageWithQueue(
     const groqService =
         getGroqService()
 
-    // Preprocessar menções
     const { processedText, userName } =
         preprocessMentions(userMessage)
 

@@ -22,7 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (storagedToken && storagedUser) {
                 api.defaults.headers.common['Authorization'] = `Bearer ${storagedToken}`
-                
+
                 setUser(JSON.parse(storagedUser))
 
                 try {
@@ -48,18 +48,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signIn = (token: string, userData: any) => {
         localStorage.setItem('osu_token', token)
         localStorage.setItem('osu_user', JSON.stringify(userData))
-        
+
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`
-        
+
         setUser(userData)
     }
 
     const signOut = () => {
         localStorage.removeItem('osu_token')
         localStorage.removeItem('osu_user')
-        
+
         delete api.defaults.headers.common['Authorization']
-        
+
         setUser(null)
     }
 

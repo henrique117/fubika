@@ -18,7 +18,7 @@ export default function helpLeaderboardEmbed() {
             },
             {
                 name: "Exemplos",
-                value: "`!leaderboard`\n`!lb https://fubika.com.br/\nbeatmap/70077`\n`!lb 70077`",
+                value: "`!leaderboard`\n`!lb https:
                 inline: true
             },
             {

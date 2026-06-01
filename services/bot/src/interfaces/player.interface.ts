@@ -17,5 +17,5 @@ export default interface IPlayer {
     s_count: number
     a_count: number
     last_activity: string
-    top_200?: Omit<IScore, 'player'>[] 
+    top_200?: Omit<IScore, 'player'>[]
 }

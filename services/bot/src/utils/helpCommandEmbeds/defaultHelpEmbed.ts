@@ -3,12 +3,10 @@ import { URLS, COLORS } from "../../constants"
 
 export default function defaultHelpEmbed() {
 
-    // Usuários
     const fubasId = '1450602338925543537'
     const loopyngId = '332172346159005746'
     const iccyId = '520994132458471438'
 
-    // Canais
     const perguntasFrequentesId = '1450677083297812552'
     const suporteId = '1450659150257459292'
     const sugestoesId = '1450668789799587842'

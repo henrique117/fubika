@@ -9,12 +9,12 @@ let tokenExpirationTime = 0;
 let tokenRequest: Promise<string> | null = null;
 
 const osuAuthClient = axios.create({
-    baseURL: 'https://osu.ppy.sh/oauth/token',
+    baseURL: 'https:
     headers: { 'Content-Type': 'application/json' }
 });
 
 const osuApiClient = axios.create({
-    baseURL: 'https://osu.ppy.sh/api/v2',
+    baseURL: 'https:
     headers: {
         "Content-Type": "application/json"
     }
@@ -47,7 +47,7 @@ export const getApiAuthToken = async (): Promise<string> => {
             return access_token;
         } catch (err: any) {
             console.error("[osu! Auth Error]:", err.response?.data || err.message);
-            
+
             throw Errors.Internal("Falha crítica na conexão com a infraestrutura oficial do osu!.");
         } finally {
             tokenRequest = null;
@@ -73,9 +73,9 @@ osuApiClient.interceptors.response.use(
         if (status === 404) {
             throw Errors.NotFound("O recurso solicitado não foi encontrado no osu!.");
         }
-        
+
         if (status === 401) {
-            cachedAccessToken = null; 
+            cachedAccessToken = null;
             throw Errors.Unauthorized("Sessão com a API oficial expirada. Tente novamente.");
         }
 

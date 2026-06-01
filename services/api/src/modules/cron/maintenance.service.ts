@@ -45,8 +45,8 @@ const performBackup = async () => {
 
 const captureRankSnapshot = async () => {
     console.log('[Cron/History] Verificando mudanças nos rankings...');
-    
-    const modes = [0, 1, 2, 3, 4, 5, 6, 8]; 
+
+    const modes = [0, 1, 2, 3, 4, 5, 6, 8];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -54,7 +54,7 @@ const captureRankSnapshot = async () => {
         const leaderboard = await prisma.stats.findMany({
             where: { mode, pp: { gt: 0 } },
             orderBy: { pp: 'desc' },
-            select: { id: true, pp: true } 
+            select: { id: true, pp: true }
         });
 
         const changedEntries = [];
@@ -110,19 +110,19 @@ const cleanOldHistory = async () => {
 export const initCronJobs = () => {
     cron.schedule('0 0 * * *', async () => {
         console.log('🕒 [Cron] Iniciando rotina de manutenção (00:00 BRT)...');
-        
+
         try {
             await performBackup();
-            
+
             await captureRankSnapshot();
-            
+
             await cleanOldHistory();
 
             console.log('✅ [Cron] Manutenção diária finalizada com sucesso.');
         } catch (error) {
             console.error('❌ [Cron] Falha crítica na rotina de manutenção:', error);
         }
-        
+
     }, {
         timezone: "America/Sao_Paulo"
     });

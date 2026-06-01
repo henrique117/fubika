@@ -1,7 +1,6 @@
 import { Events, Client } from 'discord.js'
 import { startRedisListener } from '../services/redisClient'
 
-
 export default {
     name: Events.ClientReady,
     once: true,
@@ -15,3 +14,4 @@ export default {
         }
     }
 }
+

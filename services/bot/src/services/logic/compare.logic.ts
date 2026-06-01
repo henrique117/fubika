@@ -38,3 +38,4 @@ export async function executeCompare(beatmapId: string | null, username: string 
         }
     }
 }
+

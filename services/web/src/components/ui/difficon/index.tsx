@@ -8,7 +8,7 @@ interface DifficultyIconProps {
 
 const DiffIcon: React.FC<DifficultyIconProps> = ({ color, isSelected, onClick }) => {
     return (
-        <div 
+        <div
             onClick={onClick}
             style={{
                 display: 'flex',
@@ -22,18 +22,18 @@ const DiffIcon: React.FC<DifficultyIconProps> = ({ color, isSelected, onClick })
             }}
         >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <circle 
-                    cx="12" 
-                    cy="12" 
-                    r="11" 
-                    stroke={color} 
+                <circle
+                    cx="12"
+                    cy="12"
+                    r="11"
+                    stroke={color}
                     strokeWidth="2"
                     opacity="0.7"
                 />
-                <circle 
-                    cx="12" 
-                    cy="12" 
-                    r="6.7" 
+                <circle
+                    cx="12"
+                    cy="12"
+                    r="6.7"
                     fill={color}
                     opacity="0.7"
                 />

@@ -198,7 +198,7 @@ const Beatmap: React.FC = () => {
                             <button 
                                 className={`${style.btn} ${style.btnWide}`}
                                 onClick={() => {
-                                    window.location.href = `https:
+                                    window.location.href = `https://catboy.best/d/${currentBeatmap.beatmapset_id}`
                                 }}
                             >
                                 <span className={style.btnText}>Download</span>

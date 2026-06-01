@@ -2,7 +2,7 @@ import prisma from "../../utils/prisma";
 import { sendIngameMessage } from "../../utils/redis";
 import { CheckDiscordLink, CreateDiscordLink } from "./discord.schema";
 import crypto from "crypto";
-import { Errors } from "../../utils/errorHandler";
+import { Errors } from "../../utils/errorHandler"; // Importando o padrão novo
 
 export const startLinkProcess = async (input: CreateDiscordLink) => {
     const user = await prisma.users.findFirst({
@@ -35,9 +35,9 @@ export const startLinkProcess = async (input: CreateDiscordLink) => {
 
     await sendIngameMessage(user.id, `Seu código de verificação é: ${code}`);
 
-    return {
-        success: true,
-        message: "Código enviado no chat do jogo (F9)."
+    return { 
+        success: true, 
+        message: "Código enviado no chat do jogo (F9)." 
     };
 }
 

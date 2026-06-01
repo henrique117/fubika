@@ -33,10 +33,11 @@ const GlobalRanking: React.FC = () => {
     const [loading, setLoading] = useState(true)
     const [page, setPage] = useState(1)
 
-    const [selectedState, setSelectedState] = useState<string>('')
-
+    const [selectedState, setSelectedState] = useState<string>('') // Define o estado inicial como vazio (Brasil Geral)
+    // Lista de UFs
     const states = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
 
+    // Dicionário para traduzir a sigla para o nome completo
     const stateNames: Record<string, string> = {
         "AC": "Acre", "AL": "Alagoas", "AP": "Amapá", "AM": "Amazonas",
         "BA": "Bahia", "CE": "Ceará", "DF": "Distrito Federal", "ES": "Espírito Santo",
@@ -63,12 +64,12 @@ const GlobalRanking: React.FC = () => {
                 params: {
                     mode: mode,
                     page: pageNum,
-                    country: countryCode || undefined
+                    country: countryCode || undefined // Envia para a API
                 }
             });
-
+            
             const data = response.data
-
+            
             if (Array.isArray(data)) {
                 setPlayers(data)
             }
@@ -80,11 +81,12 @@ const GlobalRanking: React.FC = () => {
     }
 
     useEffect(() => {
-
-        fetchRanking(activeMode, page, selectedState)
-
+        // Comando que envia o estado selecionado para a API
+        fetchRanking(activeMode, page, selectedState) 
+    // Comando que coloca o selectedState na lista de dependências para recarregar a tabela quando a opção mudar
     }, [activeMode, page, selectedState])
 
+    // Nova função que impede o jogador de continuar passando as páginas infinitamente caso o número de jogadores exibidos na pág seja menor que 50.
     const isLastPage = players.length < 50;
 
     return (
@@ -94,7 +96,7 @@ const GlobalRanking: React.FC = () => {
 
                     <div className={style.modeSelector}>
                         {modes.map((mode) => (
-                            <button
+                            <button 
                                 key={mode.id}
                                 className={`${style.modeBtn} ${activeMode === mode.id ? style.activeMode : ''}`}
                                 onClick={() => {
@@ -117,12 +119,12 @@ const GlobalRanking: React.FC = () => {
 
                         <div className={style.titleContainer}>
                             <h2 className={style.title}>Colocações</h2>
-                            <select
+                            <select 
                                 className={style.stateSelector}
                                 value={selectedState}
                                 onChange={(e) => {
                                     setSelectedState(e.target.value);
-                                    setPage(1);
+                                    setPage(1); // Volta para a página 1 ao trocar de estado
                                 }}
                             >
                                 <option value="">Brasil (Geral)</option>
@@ -130,31 +132,31 @@ const GlobalRanking: React.FC = () => {
                                     <option key={uf} value={uf}>{stateNames[uf]}</option>
                                 ))}
                             </select>
-
+                            
                             <div className={style.arrows}>
-                                <img
-                                    src="arrow_pagination.svg"
-                                    alt="Anterior"
-                                    className={style.arrow}
+                                <img 
+                                    src="arrow_pagination.svg" 
+                                    alt="Anterior" 
+                                    className={style.arrow} 
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     style={{ cursor: 'pointer', opacity: page === 1 ? 0.5 : 1 }}
                                 />
-                                <img
-                                    src="arrow_pagination.svg"
-                                    alt="Próximo"
-                                    className={style.arrow}
-                                    style={{
-                                        transform: 'rotate(180deg)',
-                                        cursor: isLastPage ? 'default' : 'pointer',
-                                        opacity: isLastPage ? 0.5 : 1
-                                    }}
+                                <img 
+                                    src="arrow_pagination.svg" 
+                                    alt="Próximo" 
+                                    className={style.arrow} 
+                                    style={{ 
+                                        transform: 'rotate(180deg)', 
+                                        cursor: isLastPage ? 'default' : 'pointer', 
+                                        opacity: isLastPage ? 0.5 : 1 
+                                    }} 
                                     onClick={() => {
                                         if (!isLastPage) setPage(p => p + 1)
                                     }}
                                 />
-                            </div>
+                            </div>  
                         </div>
-
+                        
                         <div className={style.tableHeader}>
                             <span className={style.colRank}></span>
                             <span className={style.colPlayer}></span>
@@ -171,20 +173,20 @@ const GlobalRanking: React.FC = () => {
                             ) : players.length > 0 ? (
                                 players.map((user) => (
                                     <div key={user.id} className={style.playerRow}>
-
+                                        
                                         <div className={`${style.colRank} ${style.rankNumber}`}>
                                             #{user.rank}
                                         </div>
 
                                         <div className={style.colPlayer}>
                                             <div className={style.nameInfo}>
-                                                {}
-                                                <img
-                                                    src={`/flags/${user.country}.svg`}
-                                                    alt={stateNames[user.country] || user.country}
-                                                    title={stateNames[user.country] || user.country}
+                                                {/* Renderiza a bandeira. Se der erro (ex: não achar a imagem), usa a do BR de fallback */}
+                                                <img 
+                                                    src={`/flags/${user.country}.svg`} 
+                                                    alt={stateNames[user.country] || user.country} 
+                                                    title={stateNames[user.country] || user.country} /* <-- O BALÃOZINHO MÁGICO AQUI */
                                                     className={style.flagIcon}
-                                                    onError={(e) => { e.currentTarget.src = '/flags/BR.svg' }}
+                                                    onError={(e) => { e.currentTarget.src = '/flags/BR.svg' }} 
                                                 />
                                                 <span className={style.username}>{user.name}</span>
                                             </div>
@@ -193,11 +195,11 @@ const GlobalRanking: React.FC = () => {
                                         <div className={`${style.colPP} ${style.ppValue}`}>
                                             {Math.round(user.pp).toLocaleString()}pp
                                         </div>
-
+                                        
                                         <div className={`${style.colAcc} ${style.statValue}`}>
                                             {(user.acc).toFixed(2)}%
                                         </div>
-
+                                        
                                         <div className={`${style.colPlays} ${style.statValue}`}>
                                             {user.playcount.toLocaleString()}
                                         </div>
@@ -213,29 +215,29 @@ const GlobalRanking: React.FC = () => {
 
                         <div className={style.footerContainer}>
                             <div className={style.arrows}>
-                                <img
-                                    src="arrow_pagination.svg"
-                                    alt="Anterior"
-                                    className={style.arrow}
+                                <img 
+                                    src="arrow_pagination.svg" 
+                                    alt="Anterior" 
+                                    className={style.arrow} 
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     style={{ cursor: 'pointer', opacity: page === 1 ? 0.5 : 1 }}
                                 />
-
-                                <img
-                                    src="arrow_pagination.svg"
-                                    alt="Próximo"
-                                    className={style.arrow}
-                                    style={{
-                                        transform: 'rotate(180deg)',
-                                        cursor: isLastPage ? 'default' : 'pointer',
-                                        opacity: isLastPage ? 0.5 : 1
-                                    }}
+                                
+                                <img 
+                                    src="arrow_pagination.svg" 
+                                    alt="Próximo" 
+                                    className={style.arrow} 
+                                    style={{ 
+                                        transform: 'rotate(180deg)', 
+                                        cursor: isLastPage ? 'default' : 'pointer', 
+                                        opacity: isLastPage ? 0.5 : 1 
+                                    }} 
                                     onClick={() => {
                                         if (!isLastPage) setPage(p => p + 1)
                                     }}
                                 />
                                 <img src="cat_head.png" alt="" className={style.cat} />
-                            </div>
+                            </div>  
                         </div>
 
                     </div>

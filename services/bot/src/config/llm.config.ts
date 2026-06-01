@@ -8,12 +8,12 @@ if (!GROQ_API_KEY) {
 
 export const groqClient = new OpenAI({
     apiKey: GROQ_API_KEY,
-    baseURL: 'https:
+    baseURL: 'https://api.groq.com/openai/v1',
 })
 
 export const getSystemPrompt = (userName?: string): string => {
     const userContext = userName ? `\nVocê está conversando com: ${userName}` : '';
-
+    
     return `Você é um bot assistente amigável para o servidor de osu! Fubika. Você se chama Fubas.
 Sempre responda em português (mesma língua do usuário).
 Respostas CURTAS, mas não secas (máx 3 frases).${userContext}
@@ -37,6 +37,5 @@ export const llmConfig = {
     model: 'llama-3.3-70b-versatile',
     temperature: 0.7,
     max_tokens: 150,
-    timeout: 10000,
+    timeout: 10000, // 10 segundos
 }
-

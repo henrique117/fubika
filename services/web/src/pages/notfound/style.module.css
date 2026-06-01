@@ -1,47 +1,33 @@
 .container {
     display: flex;
-    width: 100vw; 
-    position: fixed; 
-    top: 60px; 
-    left: 0;
-    margin-left: 0;
-    height: 37vh; 
-    z-index: 9999; 
-
+    width: 100%;
+    height: 45%;
     background-color: #96A8B9;
-    padding: 0;
-    box-sizing: border-box;
-    overflow: visible; 
 }
 
-
 .footer {
-    height: 30vh; 
-    background: transparent;
+    width: 100%;
+    height: 5%;
+    background-color: var(--color-background-light);
 }
 
 .containerLeft {
     background-color: #768FA9;
-    width: 60%;
+    width: 50%;
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 28px 40px;
-    height: 100%;
-    position: relative;
-    z-index: 3;
-}
 
-.containerRight {
-    width: 40%;
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    z-index: 10008;
-    background: transparent;
+    margin-top: 50px;
+}
+
+.containerRight {
+    width: 50%;
+    position: relative;
+
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
 .imgNotFound {
@@ -52,39 +38,40 @@
 
 .imgCat {
     position: absolute;
-    width: 36%;
+    width: 25%;
     height: auto;
-    max-width: 320px;
-    bottom: -17px; 
-    right: calc(6% + 80px); 
-    transform: translateY(35%); 
-    z-index: 10010; 
+    max-height: 339px;
+    
+    bottom: -35px;
 }
 
 .speechBubble {
-    width: 220px;
+    width: 35%;
+    height: 35%;
+    max-height: 192px;
+    max-width: 306px;
     position: absolute;
     background-color: var(--color-branco);
     display: flex;
     align-items: center;
     justify-content: center;
-    bottom: 160px; 
-    right: 6%; 
-    border-radius: 12px;
-    transform: rotate(6deg);
-    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.25));
-    z-index: 4;
+    top: 90px;
+    left: 220px;
+    border-radius: 15px;
+    transform: rotate(10deg);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
 }
 
 .speechBubble::after {
     content: "";
     position: absolute;
-    bottom: -16px;
-    left: 22px;
-    width: 18px;
-    height: 18px;
+    bottom: -30px;
+    left: 30px;
+    width: 25%;
+    height: 35px;
     background-color: var(--color-branco);
-    clip-path: polygon(0 0, 100% 0, 0 100%);
+
+    clip-path: polygon(0 0, 100% 0, 0 100%, 0 100%);
 }
 
 .text {

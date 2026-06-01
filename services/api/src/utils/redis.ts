@@ -1,7 +1,7 @@
 import Redis from "ioredis";
 import { Errors } from "./errorHandler";
 
-const redisUrl = process.env.REDIS_URL || `redis:
+const redisUrl = process.env.REDIS_URL || `redis://${process.env.REDIS_HOST || 'redis'}:${process.env.REDIS_PORT || 6379}`;
 
 const redis = new Redis(redisUrl, {
     maxRetriesPerRequest: 3,
@@ -21,11 +21,11 @@ export const sendIngameMessage = async (userId: number, message: string) => {
         });
 
         await redis.publish('api:notification', payload);
-
+        
         console.log(`[Redis] Mensagem enviada para o utilizador ${userId}: "${message}"`);
     } catch (err) {
         console.error(`[Redis] Falha ao publicar mensagem para ID ${userId}:`, err);
-
+        
         throw Errors.Internal("Não foi possível comunicar com o servidor do jogo via Redis.");
     }
 }

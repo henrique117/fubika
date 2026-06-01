@@ -1,3 +1,4 @@
+// Embed Builders
 export * from './embedBuilders/auxiliarEmbeds'
 export {default as compareEmbedBuilder} from './embedBuilders/compareEmbedBuilder'
 export {default as embedPagination} from './embedBuilders/embedPagination'
@@ -9,6 +10,7 @@ export {default as topIndexEmbedBuilder} from './embedBuilders/topIndexEmbedBuil
 export {default as userEmbedBuilder} from './embedBuilders/userEmbedBuilder'
 export * from './embedBuilders/embedsDescriptionFormatting'
 
+// Help Command Embeds
 export {default as defaultHelpEmbed} from './helpCommandEmbeds/defaultHelpEmbed'
 export {default as helpCompareEmbed} from './helpCommandEmbeds/helpCompareEmbed'
 export {default as helpHelpEmbed} from './helpCommandEmbeds/helpHelpEmbed'

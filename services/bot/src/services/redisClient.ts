@@ -6,10 +6,10 @@ export async function startRedisListener(discordClient: Client) {
     const host = process.env.REDIS_HOST || 'redis'
     const port = process.env.REDIS_PORT || '6379'
     const pass = process.env.REDIS_PASS ? `:${process.env.REDIS_PASS}@` : ''
+    
+    const redisUrl = process.env.REDIS_URL || `redis://${pass}${host}:${port}`
 
-    const redisUrl = process.env.REDIS_URL || `redis:
-
-    const subscriber = createClient({
+    const subscriber = createClient({ 
         url: redisUrl,
         socket: {
             reconnectStrategy: (retries) => {

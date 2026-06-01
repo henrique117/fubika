@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const createUserInputSchema = z.object({
-    name: z.string({ error: "O nome de usuário deve ser um texto." })
+    name: z.string({ error: "O nome de usuário deve ser um texto." }) 
         .min(3, "O nome de usuário deve ter pelo menos 3 caracteres.")
         .max(15, "O nome de usuário deve ter no máximo 15 caracteres.")
         .regex(/^[a-zA-Z0-9_\[\] ]+$/, "O nome contém caracteres inválidos."),

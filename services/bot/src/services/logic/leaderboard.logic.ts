@@ -31,4 +31,3 @@ export async function executeLeaderboard(beatmapId: string | null): Promise<Lead
         }
     }
 }
-

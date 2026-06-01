@@ -5,7 +5,7 @@ import { searchBeatmapsSchema } from "./beatmap.schema";
 
 const beatmapRoutes = async (server: FastifyInstance) => {
     server.addHook('onRequest', authenticate);
-
+    
     server.get('/:id', {
         schema: { params: searchBeatmapsSchema }
     }, handleBeatmapReq);

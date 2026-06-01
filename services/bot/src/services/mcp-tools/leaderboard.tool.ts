@@ -44,7 +44,7 @@ export async function executeLeaderboardTool(
 
         return {
             success: true,
-            embeds: embeds.slice(0, 1)
+            embeds: embeds.slice(0, 1) // Retorna apenas a primeira embed (MCP não suporta paginação)
         }
     } catch (error) {
         return {
@@ -53,4 +53,3 @@ export async function executeLeaderboardTool(
         }
     }
 }
-

@@ -5,6 +5,7 @@ import { WrapperComponent, DiffIconComponent } from '../../components/components
 import SuccessRate from '../../components/ui/sucessrate';
 import { api } from '../../services/api';
 
+//img stuff
 import clock from '/clock.svg'
 import note from '/note.svg'
 import sliders from '/sliders.svg'
@@ -136,7 +137,7 @@ const Beatmap: React.FC = () => {
                                 <h2>{currentBeatmap.status === 'ranked' || currentBeatmap.status === 'loved' ? 'Ranqueado' : 'Cemitério'}</h2>
                             </div>
                             <div className={style.mapPreview}>
-                                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http:
+                                <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M5 3L19 12L5 21V3Z" fill="white" stroke="white" strokeWidth="3" strokeLinejoin="round" />
                                 </svg>
                             </div>
@@ -190,14 +191,14 @@ const Beatmap: React.FC = () => {
                         </div>
                         <div className={style.buttons}>
                             <button className={`${style.btn} ${style.btnSquare}`}>
-                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http:
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12.1 18.55L12 18.65L11.89 18.55C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5C9.04 5 10.54 6 11.07 7.36H12.93C13.46 6 14.96 5 16.5 5C18.5 5 20 6.5 20 8.5C20 11.39 16.86 14.24 12.1 18.55Z" stroke="white" strokeWidth="2" strokeLinejoin="round" />
                                 </svg>
                             </button>
-                            <button
+                            <button 
                                 className={`${style.btn} ${style.btnWide}`}
                                 onClick={() => {
-                                    window.location.href = `https:
+                                    window.location.href = `https://catboy.best/d/${currentBeatmap.beatmapset_id}`
                                 }}
                             >
                                 <span className={style.btnText}>Download</span>

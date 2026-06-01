@@ -31,7 +31,7 @@ const Home: React.FC = () => {
         const interval = setInterval(fetchUsersCount, 30000)
         return () => clearInterval(interval)
     }, []);
-
+    
     return (
         <WrapperComponent>
             <div className={style.pageWrapper}>
@@ -47,7 +47,7 @@ const Home: React.FC = () => {
                                         {loading && counts.total === 0 ? '...' : counts.total}
                                     </span>
                                     <span>jogadores registrados</span>
-
+                                    
                                     <span className={style.statsNumber} style={{ marginLeft: '15px' }}>
                                         {loading && counts.online === 0 ? '...' : counts.online}
                                     </span>

@@ -4,11 +4,17 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'node',
-        include: ['tests*.test.ts'],
+        include: ['tests/**/*.test.ts'],
         setupFiles: ['tests/setup.ts'],
         coverage: {
             provider: 'v8',
             reporter: ['text', 'html'],
-            include: ['src*.ts'],
+            include: ['src/**/*.ts'],
             exclude: [
                 'src/utils/prisma.ts',
+                'tests/**',
+                'dist/**',
+            ],
+        },
+    },
+})

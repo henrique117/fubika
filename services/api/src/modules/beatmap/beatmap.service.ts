@@ -13,7 +13,7 @@ const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
         beatmap_id: data.id,
         beatmapset_id: data.beatmapset_id,
         beatmap_md5: data.checksum,
-        title: data.beatmapset?.title || 'Sem título',
+        title: data.beatmapset?.title || 'Sem título', 
         mode: data.mode,
         mode_int: data.mode_int,
         status: data.status,
@@ -59,7 +59,7 @@ const mapOsuBeatmapsetToDomain = (data: any): IBeatmapset => {
 
 const mapDatabaseToScoreWithoutMap = (row: any): Omit<IScore, 'beatmap'> => {
     return {
-        id: Number(row.score_id),
+        id: Number(row.score_id), 
         score: Number(row.score_val),
         pp: row.score_pp || 0,
         acc: row.score_acc,
@@ -78,19 +78,19 @@ const mapDatabaseToScoreWithoutMap = (row: any): Omit<IScore, 'beatmap'> => {
             id: row.userid,
             name: row.name,
             safe_name: row.safe_name,
-            rank: 0,
+            rank: 0, 
             pp: row.user_pp || 0,
             acc: row.user_acc || 0,
-            pfp: `https:
-            banner: `https:
+            pfp: `https://a.${process.env.DOMAIN}/${row.userid}`,
+            banner: `https://assets.${process.env.DOMAIN}/user-profile-covers/${row.userid}.jpg`,
 
             a_count: row.a_count || 0,
             s_count: row.s_count || 0,
             ss_count: row.x_count || 0,
             sh_count: row.sh_count || 0,
             ssh_count: row.xh_count || 0,
-
-            level: 0,
+            
+            level: 0, 
 
             total_score: Number(row.user_tscore || 0),
             ranked_score: Number(row.user_rscore || 0),
@@ -108,7 +108,7 @@ export const ensureBeatmapsCache = async (mapIds: number[]): Promise<void> => {
         where: { id: { in: mapIds } },
         select: { id: true }
     });
-
+    
     const validMapIds = existingLocalMaps.map(m => m.id);
     if (validMapIds.length === 0) return;
 
@@ -128,7 +128,7 @@ export const ensureBeatmapsCache = async (mapIds: number[]): Promise<void> => {
     const chunkSize = 50;
     for (let i = 0; i < missingIds.length; i += chunkSize) {
         const chunk = missingIds.slice(i, i + chunkSize);
-
+        
         try {
             const queryParams = chunk.map(id => `ids[]=${id}`).join('&');
             const response = await osuApiClient.get(`/beatmaps?${queryParams}`);
@@ -156,7 +156,7 @@ export const ensureBeatmapsCache = async (mapIds: number[]): Promise<void> => {
 
 const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<IScore, 'beatmap'>[]> => {
     let bmap_md5 = knownMd5;
-
+    
     if (!bmap_md5) {
         const localMap = await prisma.maps.findFirst({
             where: { id: beatmapId },
@@ -181,7 +181,7 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<
 
     const mapLBRaw = await prisma.$queryRaw<any[]>`
         WITH RankedScores AS (
-            SELECT
+            SELECT 
                 s.id as score_id,
                 s.userid,
                 s.score as score_val,
@@ -193,21 +193,21 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<
                 s.grade,
                 s.perfect,
                 s.map_md5,
-                s.mode,
+                s.mode, 
                 s.play_time,
                 ROW_NUMBER() OVER (
-                    PARTITION BY s.userid
+                    PARTITION BY s.userid 
                     ORDER BY s.score DESC
                 ) as rn
             FROM scores s
             WHERE s.map_md5 = ${bmap_md5} AND (s.status = 2 OR s.status = 3) AND (s.mods & 536870912) > 0
         )
-        SELECT
+        SELECT 
             rs.*,
-            u.name,
+            u.name, 
             u.safe_name,
             u.latest_activity as last_activity,
-
+            
             st.pp as user_pp,
             st.acc as user_acc,
             st.tscore as user_tscore,
@@ -219,7 +219,7 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<
         FROM RankedScores rs
         JOIN users u ON rs.userid = u.id
         LEFT JOIN stats st ON u.id = st.id AND st.mode = rs.mode
-        WHERE rs.rn = 1
+        WHERE rs.rn = 1 
         ORDER BY rs.score_val DESC
         LIMIT 50;
     `;
@@ -239,7 +239,7 @@ const getBeatmapPlaycount = async (md5: string): Promise<number> => {
 
 const getBeatmapPasscount = async (md5: string): Promise<number> => {
     return await prisma.scores.count({
-        where: {
+        where: { 
             map_md5: md5,
             grade: { not: 'F' }
         }
@@ -254,7 +254,7 @@ export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
     }
 
     const bmap = mapOsuBeatmapToDomain(response.data);
-
+    
     const [map_lb, localPlaycount, localPasscount] = await Promise.all([
         getBeatmapLB(input.id, bmap.beatmap_md5),
         getBeatmapPlaycount(bmap.beatmap_md5),
@@ -263,11 +263,11 @@ export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
 
     ensureBeatmapsCache([input.id]).catch(() => {});
 
-    return {
+    return { 
         ...bmap,
         playcount: localPlaycount,
         passcount: localPasscount,
-        scores: map_lb
+        scores: map_lb 
     };
 }
 

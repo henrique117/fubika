@@ -1,23 +1,21 @@
 .pageWrapper {
     width: 100%;
-    min-height: calc(100vh - 60px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding-top: calc(var(--space-lg) + 6px);
-    animation: fadeIn 0.75s var(--easing-out) both;
+    padding-top: 100px;
 }
 
 .card {
-    width: min(100%, 720px);
+    width: 90%;
+    max-width: 720px;
     display: flex;
     flex-direction: column;
     position: relative;
     align-items: center;
     background-color: var(--color-background-dark);
     border-radius: 15px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
 }
 
 .cardHeader {
@@ -82,7 +80,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    
+    /* justify-content: space-evenly; */
     margin-bottom: 5px;
 }
 
@@ -131,7 +129,7 @@
     padding: 8.5px 10px;
     text-align: center;
     background-color: rgba(25, 23, 21, 0.85);
-    
+    /* Figma */
     font-size: 14px;
     font-weight: bold;
     border-radius: 10px;
@@ -146,7 +144,7 @@
 .mapSucess {
     width: 100%;
     background-color: rgba(25, 23, 21, 0.85);
-    
+    /* Figma */
     border-radius: 10px;
     margin-bottom: 3px;
 }
@@ -260,7 +258,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    
+    /* width: 17%; */
 }
 
 .mapNumbers div img {
@@ -625,7 +623,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-evenly;
-        
+        /* width: 17%; */
     }
 
     .mapNumbers div img {

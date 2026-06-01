@@ -23,4 +23,3 @@ export async function executeRanking(gamemode: number | null): Promise<RankingRe
         }
     }
 }
-

@@ -51,22 +51,22 @@ export default {
 
         const commandAliases: Record<string, string> = {
 
-            'c': 'compare', 'mog': 'compare', 'compare': 'compare',
+            'c': 'compare', 'mog': 'compare', 'compare': 'compare', // Compare
 
-            'h': 'help', 'help': 'help',
+            'h': 'help', 'help': 'help', // Help
 
-            'lb': 'leaderboard', 'leaderboard': 'leaderboard',
+            'lb': 'leaderboard', 'leaderboard': 'leaderboard', // Leaderboard
 
-            'ppr': 'ranking', 'ppranking': 'ranking',
+            'ppr': 'ranking', 'ppranking': 'ranking', // Ranking 
             'pplb': 'ranking', 'ppleaderboard': 'ranking', 'ranking': 'ranking',
 
-            'r': 'recent', 'rs': 'recent', 'recent': 'recent',
+            'r': 'recent', 'rs': 'recent', 'recent': 'recent', // Recent
 
-            'rl': 'recentlist', 'recentlist': 'recentlist',
+            'rl': 'recentlist', 'recentlist': 'recentlist', // Recent List
 
-            't': 'top', 'top': 'top',
+            't': 'top', 'top': 'top', // Top
 
-            'std': 'user', 'osu': 'user', 'u': 'user', 'user': 'user'
+            'std': 'user', 'osu': 'user', 'u': 'user', 'user': 'user' // User
         }
 
         const selectedCommand = commandAliases[args[0]?.toLowerCase() ?? ''] ?? null

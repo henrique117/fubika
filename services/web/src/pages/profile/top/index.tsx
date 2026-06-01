@@ -9,15 +9,15 @@ interface ITopPlay {
     pp: number;
     acc: number;
     max_combo: number;
-    grade: string;
-    mods: string;
+    grade: string; 
+    mods: string;  
     n300: number;
     n100: number;
     n50: number;
     nmiss: number;
     beatmap: {
         title: string;
-        diff: string;
+        diff: string; 
         artist: string;
     }
 }
@@ -58,7 +58,7 @@ return (
         <div className={style.pageWrapper}>
             <div className={style.rankingContainer}>
                 <div className={style.tableCard}>
-
+                    
                     <Link to={`/profile/${id}`}>
                         <button className={style.backButton}>
                             <img src="/arrow_icon.svg" alt="Voltar" />
@@ -85,7 +85,7 @@ return (
                             <div className={style.statusMsg}>Carregando...</div>
                         ) : top10Maps.map((play) => (
                             <div key={play.id} className={`${style.playerRow} ${style.gridStructure}`}>
-
+                                
                                 <div className={style.grade}>
                                     <span className={style['rank' + play.grade]}>
                                         {play.grade.replace('H', '')}

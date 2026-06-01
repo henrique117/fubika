@@ -1,11 +1,10 @@
 .pageWrapper {
     width: 100%;
-    min-height: calc(100vh - 60px);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding: calc(var(--space-lg) + 6px) 0 40px;
-    animation: fadeIn 0.7s var(--easing-out) both;
+    padding-top: 80px;
+    padding-bottom: 50px;
 }
 
 .backButton {
@@ -27,10 +26,9 @@
 .title {
     width: 100%;
     text-align: center;
-    margin: 0;
-    padding: 18px 0 6px;
-    font-size: 28px;
-    font-weight: 700;
+    margin-top: 3%;
+    font-size: 30px;
+    font-weight: bold;
 }
 
 .titleContainer {
@@ -43,31 +41,23 @@
 .arrows {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    gap: 12px;
-    width: auto;
-    margin-top: var(--space-md);
-    margin-bottom: calc(var(--space-sm));
+    justify-content: space-between;
+    width: 93%;
+    margin-top: 4%;
+    margin-bottom: 2%;
 }
 
 .arrow {
-    width: 40px;
-    height: 40px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     background-color: var(--color-background);
-    border-radius: 8px;
-    padding: 6px;
-    box-sizing: border-box;
-    transition: background 0.15s, transform 0.12s;
-    object-fit: contain;
+    width: 4%;
+    border-radius: 5px;
+    transition: background 0.2s;
 }
 
 .arrow:hover {
     cursor: pointer;
     background-color: var(--color-background-light);
-    transform: translateY(-2px);
+    transition: background 0.2s;
 }
 
 .rankingContainer {
@@ -117,13 +107,12 @@
 
 .tableHeader {
     display: flex;
-    padding: 12px 16px;
-    background-color: transparent;
+    padding: 15px 0px;
+    background-color: inherit;
     color: var(--color-branco);
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 8px;
+    font-weight: bold;
     align-items: center;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
 .colPlayer { 
@@ -158,30 +147,28 @@
 .playerRow {
     display: flex;
     align-items: center;
-    height: auto;
-    background-color: transparent;
+    height: 30px;
+    background-color: var(--color-background);
     text-decoration: none;
     color: inherit;
-    margin-bottom: 0;
-    border-radius: 8px;
-    padding: 12px 12px 12px 8px; 
-    border-bottom: 1px solid rgba(255,255,255,0.03);
+    margin-bottom: 10px;
+    border-radius: 15px;
+    margin-inline: 20px; 
 }
 
 .rankNumber, .ppValue, .statValue {
-    font-size: 13px;
+    font-size: 10px;
     color: var(--color-branco);
-    margin-right: 7px;
 }
 
 .rankNumber {
-    width: 48px;
-    flex-shrink: 0;
-    text-align: right;
+    width: 35px; 
+    flex-shrink: 0; 
+    text-align: right; 
     font-variant-numeric: tabular-nums;
-    font-size: 13px;
+    font-size: 10px;
     color: var(--color-branco);
-    margin-left: 0; 
+    margin-left: 20px; 
 }
 
 .nameInfo {
@@ -192,9 +179,8 @@
 
 .username {
     color: var(--color-azul-baitola);
-    font-size: 14px;
+    font-size: 10px;
     margin-left: 0px;
-    font-weight: 600;
 }
 
 .footerContainer {
@@ -220,93 +206,43 @@
     align-items: center;
     height: 100%;
     gap: 6px; 
-    margin-left: 6px; 
+    margin-left: 12px; 
 }
 
-
+/* O visual da bandeira */
 .flagIcon {
     width: 28px;
     height: 20px;
     border-radius: 4px;
     object-fit: cover;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    flex-shrink: 0; 
-    margin-top: -2px; 
+    flex-shrink: 0; /* Impede que a bandeira seja esmagada se o nome for grande */
+    margin-top: -2px; /* Ajuste fino para alinhar visualmente com a fonte */
 }
 
 .stateSelector {
-    background-color: #2a2a2a; 
-    color: #ffffff; 
-    border: 2px solid #444444; 
-    border-radius: 8px; 
-    padding: 6px 12px; 
-    font-family: inherit; 
+    background-color: #2a2a2a; /* Fundo escuro para combinar com o tema */
+    color: #ffffff; /* Texto branco */
+    border: 2px solid #444444; /* Bordinha sutil */
+    border-radius: 8px; /* Cantos arredondados */
+    padding: 6px 12px; /* Espaçamento */
+    font-family: inherit; /* Puxa a fonte do projeto */
     font-size: 1rem;
     cursor: pointer;
     outline: none;
-    margin-top: 10px; 
+    margin-top: 10px; /* Descola um pouco do título "Colocações" */
     transition: all 0.2s ease-in-out;
 }
 
-
+/* Efeito quando o usuário clica/passa o mouse */
 .stateSelector:hover, .stateSelector:focus {
     border-color: #888888;
     background-color: #333333;
 }
 
-
+/* Pinta a caixinha das opções por dentro também */
 .stateSelector option {
     background-color: #2a2a2a;
     color: #ffffff;
     font-family: inherit;
-}
-
-@media (max-width: 980px) {
-    .rankingContainer {
-        padding: 0 14px;
-    }
-
-    .arrows {
-        width: 100%;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .stateSelector {
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
-    }
-
-    .playerRow {
-        flex-direction: column;
-        align-items: flex-start;
-        height: auto;
-        padding: 14px;
-    }
-
-    .playerRow .colPlayer,
-    .playerRow .colAcc,
-    .playerRow .colPlays,
-    .playerRow .colPP {
-        width: 100%;
-        text-align: left;
-        padding: 6px 0;
-    }
-
-    .rankNumber {
-        margin-left: 20px;
-    }
-}
-
-@media (max-width: 680px) {
-    .tableHeader {
-        font-size: 9px;
-    }
-
-    .footerContainer {
-        height: auto;
-        padding-bottom: 30px;
-    }
 }

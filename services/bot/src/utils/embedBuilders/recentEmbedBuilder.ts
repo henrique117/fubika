@@ -14,7 +14,8 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
 
     const beatmap = score.beatmap
     const { bpm, length } = applyModsToStats(beatmap.bpm, beatmap.total_length, score.mods)
-
+    
+    // DEFINIR DEPOIS COMO VÃO SER CALCULADOS CS, AR, OD, HP DO SCORE
     const scoreRankPosition = player.top_200
         ? player.top_200.filter(s => Number(s.pp) > Number(score.pp)).length + 1
         : 0
@@ -24,18 +25,18 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
         : ''
     const displayMods = score.mods === '' ? '' : `+${score.mods}`
     const displayPP = score.grade === 'F'
-        ? `~~${score.pp.toLocaleString('en-US', options)}PP~~`
+        ? `~~${score.pp.toLocaleString('en-US', options)}PP~~` // Crossed
         : `${score.pp.toLocaleString('en-US', options)}PP`
 
-    const mapUrl = `https:
-    const hidden_link = `[\u2800](https:
+    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()
         .setAuthor({
             name: `${player.name}: ${player.pp.toLocaleString('en-US')}pp (#${player.rank})`,
             iconURL: URLS.fubikaIcon,
             url: player.url
-        })
+        }) //                                           Mudar --->  beatmap.star_rating.toLocaleString('en-US', options)}
         .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
         .setURL(mapUrl)
         .setColor(COLORS.blue)
@@ -45,7 +46,7 @@ ${displayPersonalBest}
 ${scoreGradeToEmoji(score.grade)} **${displayMods}${tab}${score.score.toLocaleString('en-US')}${tab}${score.acc.toLocaleString('en-US', options)}%**${tab}${time(new Date(score.play_time), TimestampStyles.RelativeTime)}
 **${displayPP}** • **${score.max_combo}x**/${beatmap.max_combo}x • ${score.nmiss}${EMOJIS.miss}
 \`${formatTime(length)}\` • \`${bpm}\` BPM • \`CS: ${beatmap.cs} AR: ${beatmap.ar} OD: ${beatmap.od} HP: ${beatmap.hp}\`${hidden_link}
-        `)
+        `) // Mudar o campo do PP para **${score.pp.toLocaleString('en-US', options)}**/${score.maxPP.toLocaleString('en-US', options)}PP quando tiver maxPP no objeto score
         .setFooter({
             text: `Mapset by ${beatmap.author_name} • ${capitalizeFirstLetter(beatmap.status)}`,
             iconURL: URLS.std

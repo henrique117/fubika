@@ -26,7 +26,7 @@ export default async function userEmbedBuilder(player: IPlayer): Promise<{ embed
             url: player.url
         })
         .setColor(COLORS.blue)
-        .setThumbnail('attachment:
+        .setThumbnail('attachment://profile.png')
         .setDescription(`
 • **Fubika Rank:** \`#${player.rank}\`
 • **PP:** \`${player.pp.toLocaleString('en-US')}\` • **Acc:** \`${player.acc.toLocaleString('en-US', options)}%\`

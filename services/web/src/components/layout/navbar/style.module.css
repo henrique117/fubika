@@ -24,7 +24,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 0 auto;
 }
 
 .leftSection {
@@ -92,22 +91,6 @@
     pointer-events: none;
 }
 
-.menuToggle {
-    display: none;
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 12px;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.menuToggle:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: scale(1.02);
-}
-
 .actionButtons {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 20px;
@@ -159,35 +142,28 @@
 
 .authLinks {
     display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-left: 0;
+    gap: 15px; 
+    align-items: center; 
+    margin-left: 10px;
 }
 
 .loginLink {
     color: white;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    opacity: 0.95;
-    display: inline-flex;
-    align-items: center;
-    height: 36px;
-    padding: 0 8px;
+    text-decoration: none; 
+    font-weight: 600; 
+    font-size: 14px; 
+    opacity: 0.9;
 }
 
 .registerLink {
     color: white;
-    background: transparent;
-    padding: 8px 14px;
+    background: transparent; 
+    padding: 8px 16px;
     border-radius: 20px;
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    display: inline-flex;
-    align-items: center;
-    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.4); 
 }
 
 @media (max-width: 768px) {
@@ -216,11 +192,11 @@
         gap: 0;
         box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 
-        
+        /* anim */
         opacity: 0;
         visibility: hidden;
-        transform: translateY(-12px); 
-        transition: transform var(--anim-medium) var(--easing-out), opacity var(--anim-medium) var(--easing-out), visibility var(--anim-medium) var(--easing-out);
+        transform: translateY(-30px); 
+        transition: transform 0.4s ease, opacity 0.4s ease, visibility 0.4s;
         pointer-events: none; 
         overflow: hidden;
     }
@@ -231,7 +207,6 @@
         transform: translateY(0); 
         padding: 20px 0;
         pointer-events: auto;
-        will-change: transform, opacity;
     }
 
     .navLinks a {
@@ -285,3 +260,4 @@
     }
     
 }
+

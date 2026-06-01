@@ -40,7 +40,7 @@ const mockOsuBeatmapResponse = {
         artist: 'Test Artist',
         title: 'Test Song',
         creator: 'Mapper',
-        covers: { cover: 'https:
+        covers: { cover: 'https://assets.ppy.sh/cover.jpg', 'list@2x': 'https://thumb.jpg' }
     },
     mode: 'osu', mode_int: 0, status: 'ranked',
     total_length: 180, user_id: 1,
@@ -194,7 +194,7 @@ describe('GET /beatmap/c/:id', () => {
     const mockBeatmapsetResponse = {
         id: 456, play_count: 5000, favourite_count: 200,
         artist: 'Set Artist', title: 'Set Title', user_id: 1,
-        covers: { cover: 'https:
+        covers: { cover: 'https://cover.jpg', 'list@2x': 'https://thumb.jpg' },
         beatmaps: [
             { ...mockOsuBeatmapResponse, id: 123, beatmapset_id: 456 },
             { ...mockOsuBeatmapResponse, id: 124, beatmapset_id: 456, version: 'Normal' }

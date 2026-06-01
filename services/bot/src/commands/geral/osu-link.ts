@@ -43,6 +43,7 @@ export default {
             const dmChannel = await interaction.user.createDM()
             await dmChannel.send('**Insira seu código:**')
 
+            // --- Loop coletor do postCheckLink ---
             let tries = 0
             const maxTries = 3
             let sucess = false
@@ -96,6 +97,7 @@ export default {
                 }
             }
 
+            // Lógica para dar cargo verificado e notificar #verificados
             if (sucess) {
                 const guild = await interaction.client.guilds.fetch(GUILD_CONFIG.guild_id)
                 const member = await guild.members.fetch(interaction.user.id) as GuildMember
@@ -126,4 +128,3 @@ export default {
         }
     }
 }
-

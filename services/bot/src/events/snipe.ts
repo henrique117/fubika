@@ -17,7 +17,7 @@ const getMention = (id: string | null, fallbackName: string) => {
 export async function sendSnipeEmbed(discordClient: Client, data: any) {
     const channelId = GUILD_CONFIG.channels.top_scores
     const channel = discordClient.channels.cache.get(channelId) as TextChannel
-
+    
     if (!channel) {
         console.error(`[Snipe] Canal de anúncios não encontrado: ${channelId}`)
         return
@@ -27,49 +27,49 @@ export async function sendSnipeEmbed(discordClient: Client, data: any) {
         const beatmap = await getBeatmap(data.beatmap_id)
 
         const options = { maximumFractionDigits: 2 }
-        const mapUrl = `https:
+        const mapUrl = `https://fubika.com.br/beatmap/${data.beatmap_id}`
         const weapon = "︻╦デ╤━╼"
-        const hiddenUrl = `[\u2800](https:
+        const hiddenUrl = `[\u2800](https://osu.ppy.sh/b/${data.beatmap_id})`
 
         const embed = new EmbedBuilder()
-            .setAuthor({
-                name: `novo #1! SNIPED`,
-                iconURL: URLS.fubikaIcon
+            .setAuthor({ 
+                name: `novo #1! SNIPED`, 
+                iconURL: URLS.fubikaIcon 
             })
             .setTitle(`${beatmap.title} [${beatmap.diff}] [${formatNum(beatmap.star_rating, options)}★]`)
             .setURL(mapUrl)
             .setThumbnail(beatmap.thumbnail)
             .setColor(COLORS.blue)
             .addFields(
-                {
-                    name: "👑 Atacante",
-                    value: getMention(data.player_discord_id, data.player_name),
-                    inline: true
+                { 
+                    name: "👑 Atacante", 
+                    value: getMention(data.player_discord_id, data.player_name), 
+                    inline: true 
                 },
                 { name: "\u200B", value: `**${weapon}**`, inline: true },
-                {
-                    name: "💀 Vítima",
-                    value: getMention(data.victim_discord_id, data.victim_name || 'Desconhecido'),
-                    inline: true
+                { 
+                    name: "💀 Vítima", 
+                    value: getMention(data.victim_discord_id, data.victim_name || 'Desconhecido'), 
+                    inline: true 
                 },
-
-                {
-                    name: "Estatísticas do Novo Rei",
-                    value: `**Score:** ${formatNum(data.new_score)}\n**PP:** ${formatNum(data.new_pp, options)}pp\n**Acc:** ${formatNum(data.new_acc, options)}%`,
-                    inline: true
+                
+                { 
+                    name: "Estatísticas do Novo Rei", 
+                    value: `**Score:** ${formatNum(data.new_score)}\n**PP:** ${formatNum(data.new_pp, options)}pp\n**Acc:** ${formatNum(data.new_acc, options)}%`, 
+                    inline: true 
                 },
                 { name: "\u200B", value: "\u200B", inline: true },
-                {
-                    name: "Estatísticas do Alvo",
+                { 
+                    name: "Estatísticas do Alvo", 
                     value: `**Score:** ${formatNum(data.victim_score)}\n**PP:** ${formatNum(data.victim_pp, options)}pp\n**Acc:** ${formatNum(data.victim_acc, options)}%`,
-                    inline: true
+                    inline: true 
                 }
             )
             .setFooter({ text: 'Snipe System • Fubika Online' })
             .setTimestamp()
 
-        await channel.send({
-            content: `🎯 **SNIPE!** ${getMention(data.player_discord_id, data.player_name)} derrubou o topo!${hiddenUrl}`,
+        await channel.send({ 
+            content: `🎯 **SNIPE!** ${getMention(data.player_discord_id, data.player_name)} derrubou o topo!${hiddenUrl}`, 
             embeds: [embed],
             allowedMentions: { parse: [] }
         })
@@ -82,19 +82,19 @@ export async function sendSnipeEmbed(discordClient: Client, data: any) {
 export async function sendTop1Embed(discordClient: Client, data: any) {
     const channelId = GUILD_CONFIG.channels.top_scores
     const channel = discordClient.channels.cache.get(channelId) as TextChannel
-
+    
     if (!channel) return
 
     try {
         const beatmap = await getBeatmap(data.beatmap_id)
         const options = { maximumFractionDigits: 2 }
-        const mapUrl = `https:
-        const hiddenUrl = `[\u2800](https:
+        const mapUrl = `https://fubika.com.br/beatmap/${data.beatmap_id}`
+        const hiddenUrl = `[\u2800](https://osu.ppy.sh/b/${data.beatmap_id})`
 
         const embed = new EmbedBuilder()
-            .setAuthor({
-                name: `novo #1!`,
-                iconURL: URLS.fubikaIcon
+            .setAuthor({ 
+                name: `novo #1!`, 
+                iconURL: URLS.fubikaIcon 
             })
             .setTitle(`${beatmap.title} [${beatmap.diff}] [${formatNum(beatmap.star_rating, options)}★]`)
             .setURL(mapUrl)
@@ -109,8 +109,8 @@ export async function sendTop1Embed(discordClient: Client, data: any) {
             .setFooter({ text: 'Global Record • Fubika Online' })
             .setTimestamp()
 
-        await channel.send({
-            content: `👑 **Novo Recorde!** ${getMention(data.player_discord_id, data.player_name)} é o novo #1!${hiddenUrl}`,
+        await channel.send({ 
+            content: `👑 **Novo Recorde!** ${getMention(data.player_discord_id, data.player_name)} é o novo #1!${hiddenUrl}`, 
             embeds: [embed],
             allowedMentions: { parse: [] }
         })

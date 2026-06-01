@@ -9,10 +9,8 @@ const Wrapper: React.FC<PageLayoutProps> = ({ children }) => {
     return (
         <div>
             <NavbarComponent />
-            <main style={{ minHeight: 'calc(100vh - 60px)', paddingTop: '60px' }}>
-                <div className="siteContainer">
-                    {children}
-                </div>
+            <main style={{ height: '100vh' }}>
+                {children}
             </main>
         </div>
     )

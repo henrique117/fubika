@@ -47,8 +47,8 @@ export const handleUserReq = async (req: FastifyRequest<{ Params: GetUserInput }
 
 export const handleUserRecentReq = async (req: FastifyRequest<{ Params: GetUserInput, Querystring: ScoreQueryInput }>, res: FastifyReply) => {
     const rawParam = req.params.id;
-
-    const identifier = /^\d+$/.test(rawParam)
+    
+    const identifier = /^\d+$/.test(rawParam) 
         ? (rawParam.length > 15 ? { discord_id: rawParam } : { id: Number(rawParam) })
         : { safe_name: toSafeName(rawParam) };
 
@@ -59,8 +59,8 @@ export const handleUserRecentReq = async (req: FastifyRequest<{ Params: GetUserI
 export const handleGetUserRankHistoryReq = async (req: FastifyRequest<{ Params: GetUserInput, Querystring: GetRankHistoryInput }>, res: FastifyReply) => {
     const rawParam = req.params.id;
     const { mode, days } = req.query;
-
-    const identifier = /^\d+$/.test(rawParam)
+    
+    const identifier = /^\d+$/.test(rawParam) 
         ? (rawParam.length > 15 ? { discord_id: rawParam } : { id: Number(rawParam) })
         : { safe_name: toSafeName(rawParam) };
 
@@ -72,7 +72,7 @@ export const handleUserBestOnMapReq = async (req: FastifyRequest<{ Params: GetUs
     const rawParam = req.params.id;
     const bmapId = Number(req.params.map);
 
-    const identifier = /^\d+$/.test(rawParam)
+    const identifier = /^\d+$/.test(rawParam) 
         ? (rawParam.length > 15 ? { discord_id: rawParam } : { id: Number(rawParam) })
         : { safe_name: toSafeName(rawParam) };
 
@@ -91,6 +91,7 @@ export const handleGetMe = async (req: FastifyRequest, res: FastifyReply) => {
     return res.send(userProfile);
 }
 
+
 export const handleDeleteMe = async (req: FastifyRequest<{ Body: DeleteUserInput }>, res: FastifyReply) => {
     const userFromToken = req.user as { id: number };
     await deleteUser(userFromToken.id, req.body);
@@ -99,7 +100,7 @@ export const handleDeleteMe = async (req: FastifyRequest<{ Body: DeleteUserInput
 
 export const handlePostPfp = async (req: FastifyRequest<{ Body: PostPfpInput }>, res: FastifyReply) => {
     const data = await req.file();
-
+    
     if (!data) {
         throw Errors.BadRequest("Nenhum arquivo enviado.");
     }
@@ -110,7 +111,7 @@ export const handlePostPfp = async (req: FastifyRequest<{ Body: PostPfpInput }>,
     };
 
     const validatedData = postPfpSchema.parse(payload);
-
+    
     const userPfp = await setUserPfp(validatedData);
 
     return res.status(200).send(userPfp);

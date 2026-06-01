@@ -54,4 +54,3 @@ export async function executeTopScores(username: string | null, userId: string, 
         }
     }
 }
-

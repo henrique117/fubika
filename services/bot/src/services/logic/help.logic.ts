@@ -17,4 +17,3 @@ export async function executeHelp(selectedCommand: string | null): Promise<HelpR
         }
     }
 }
-

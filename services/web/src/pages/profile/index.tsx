@@ -4,6 +4,7 @@ import { WrapperComponent } from '../../components/components.export'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../../services/api'
 
+//img stuff
 import catHead from '/cat_head.png'
 import follow from '/follow.svg'
 import following from '/following.svg'
@@ -59,11 +60,12 @@ const Profile: React.FC = () => {
         }
     }
 
+
     useEffect(() => {
         const fetchData = async () => {
             if (userId) {
                 await getUser(Number(userId));
-
+                // console.log("Usuário carregado!");
             }
         };
 
@@ -78,6 +80,7 @@ const Profile: React.FC = () => {
         if (rank >= 1 && rank <= 5) return style.rankPlatina;
         return "";
     };
+
 
     return (
         <WrapperComponent>
@@ -100,7 +103,7 @@ const Profile: React.FC = () => {
                                         </div>
                                         <div>
                                             <span style={{ paddingLeft: '5px', fontSize: '8px', color: '#FFFFFF' }}>Ranque Estadual</span><br />
-                                            {}
+                                            {/* <span style={{ paddingLeft: '26px' }} className={`${style.rankNumber} ${getRankClass(stateRank)} `}>­­­­­­­­#{stateRank}</span> */}
                                         </div>
                                     </div>
                                     <div className={style.profileButtons}>
@@ -202,6 +205,8 @@ const Profile: React.FC = () => {
                             </div>
 
                         </div>
+
+
 
                     </div>
                 </div>

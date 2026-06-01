@@ -15,7 +15,7 @@ export const handleBeatmapReq = async (
 ) => {
     const input = parseInput(req.params);
     const beatmap = await getBeatmap(input);
-
+    
     return res.status(200).send(beatmap);
 };
 
@@ -25,6 +25,6 @@ export const handleBeatmapsetReq = async (
 ) => {
     const input = parseInput(req.params);
     const beatmapset = await getBeatmapset(input);
-
+    
     return res.status(200).send(beatmapset);
 };

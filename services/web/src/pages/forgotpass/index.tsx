@@ -41,7 +41,7 @@ const ForgotPass: React.FC = () => {
                             Foi enviado um link para a recuperação da senha neste email.
                         </span>
                     )}
-
+                    
                 </div>
             </div>
         </WrapperComponent>

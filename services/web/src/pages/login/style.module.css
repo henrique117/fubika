@@ -1,25 +1,22 @@
 .pageWrapper {
     width: 100%;
-    min-height: calc(100vh - 60px);
+    height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center; 
-    padding: 0 12px; 
-    animation: fadeIn 0.7s var(--easing-out) both;
 }
 
 .loginCard {
     background-color: var(--color-background-dark);
-    width: min(100%, 720px);
-    padding: 32px 34px;
-    border-radius: 24px;
+    width: 100%;
+    min-height: 500px;
+    max-width: 720px;
+    padding: 17px 60px 40px 60px;
+    border-radius: 20px;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
-    animation: fadeIn 0.8s ease-out both;
+    margin-top: 10%;
 }
 
 .backButton {
@@ -30,45 +27,31 @@
     border: none;
     color: white;
     cursor: pointer;
-    opacity: 0.85;
-    transition: opacity 0.2s, transform 0.2s;
+    opacity: 0.8;
+    transition: opacity 0.2s;
 }
 
 .backButton:hover {
     opacity: 1;
-    transform: translateX(-2px);
 }
 
 .logoContainer {
-    margin-bottom: 10px;
+    margin-bottom: 30px;
     width: 100%;
     display: flex;
     justify-content: center;
 }
 
 .logoSvg {
+    height: auto;
     width: auto;
-    max-width: 220px;
-    max-height: 100px;
-    display: block;
-}
-
-.generalError {
-    width: 100%;
-    background-color: rgba(255, 102, 102, 0.1);
-    border: 1px solid #ff6666;
-    color: #ff6666;
-    padding: 12px 16px;
-    border-radius: 14px;
-    text-align: center;
-    font-size: 14px;
 }
 
 .formContainer {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
 }
 
 .inputGroup {
@@ -76,116 +59,236 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    gap: 8px;
 }
 
 .label {
-    font-size: 15px;
-    margin-bottom: 0;
-    font-weight: 500;
-    color: #f5f5f5;
-    align-self: flex-start;
+    font-size: 17.5px;
+    margin-bottom: 20px;
+    font-weight: 300;
 }
 
 .input {
     width: 100%;
-    max-width: 100%;
-    min-height: 48px;
+    max-width: 337px;
+    max-height: 28px;
     background-color: var(--color-background);
     border: none;
-    border-radius: 999px;
-    padding: 14px 18px;
+    border-radius: 50px;
+    padding: 12px 20px;
     color: #e0e0e0;
-    font-size: 15px;
-    text-align: left;
+    font-size: 14px;
+    text-align: center;
     outline: none;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s;
 }
 
 .input:focus {
     background-color: #333;
-    transform: translateY(-1px);
 }
 
 .input::placeholder {
-    color: #777;
+    color: #666;
+}
+
+.forgotPassword {
+    text-align: center;
+    font-size: 14px;
+    text-decoration: none;
+    margin-top: 10px;
+    transition: color 0.2s;
+}
+.pageWrapper {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+.loginCard {
+    background-color: var(--color-background-dark);
+    width: 100%;
+    min-height: 500px; 
+    max-width: 720px;
+    padding: 17px 60px 40px 60px;
+    border-radius: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
+}
+
+.backButton {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.backButton:hover {
+    opacity: 1;
+}
+
+.logoContainer {
+    margin-bottom: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.logoSvg {
+    height: auto;
+    width: auto;
+    max-height: 100px;
+}
+
+.generalError {
+    width: 100%;
+    background-color: rgba(255, 102, 102, 0.1);
+    border: 1px solid #ff6666;
+    color: #ff6666;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.formContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.label {
+    font-size: 17.5px;
+    margin-bottom: 10px;
+    font-weight: 300;
+    color: white;
+}
+
+.input {
+    width: 100%;
+    max-width: 337px;
+    height: 45px;
+    background-color: var(--color-background);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    color: #e0e0e0;
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+    transition: background 0.2s;
+}
+
+.input:focus {
+    background-color: #333;
+}
+
+.input::placeholder {
+    color: #666;
 }
 
 .passwordWrapper {
     position: relative;
     width: 100%;
+    max-width: 337px;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .passwordWrapper .input {
-    padding-right: 50px;
+    width: 100%;
+    max-width: 100%;
+    padding-right: 45px;
+    padding-left: 45px;
 }
 
 .eyeButton {
     position: absolute;
-    right: 14px;
+    right: 15px;
     background: none;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #aaa;
+    color: #888;
+    padding: 0;
+    outline: none;
     height: 100%;
     top: 0;
     z-index: 10;
-    transition: color 0.2s ease;
 }
 
 .eyeButton:hover {
-    color: #fff;
+    color: #ccc;
 }
 
 .forgotPassword {
-    color: #bbb;
+    text-align: center;
     font-size: 14px;
     text-decoration: none;
-    transition: color 0.2s ease;
+    margin-top: 20px;
+    color: #888;
+    transition: color 0.2s;
 }
 
 .forgotPassword:hover {
-    color: #fff;
+    color: #ccc;
     text-decoration: underline;
 }
 
 .entrarButton {
+    height: 100%;
+    max-height: 25px;
     width: 100%;
-    max-width: 320px;
-    margin: 20px auto 0 auto; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    max-width: 95px;
+    margin-top: 30px;
 }
 
-@media (max-width: 768px) {
-    .pageWrapper {
-        padding: calc(var(--space-md) + 12px) 12px 30px;
-    }
-
+@media (max-width: 600px) {
     .loginCard {
-        width: min(100%, 92vw);
-        padding: 26px 20px;
+        width: 90%;
+        padding: 30px 20px;
+        margin-top: 20px;
     }
-
-    .logoSvg {
-        max-width: 180px;
-    }
-
-    .label {
-        font-size: 14px;
-    }
-
-    .input {
-        font-size: 14px;
-    }
-
-    .entrarButton {
+    
+    .input, .passwordWrapper {
         max-width: 100%;
+    }
+}
+.forgotPassword:hover {
+    color: #bbb;
+    text-decoration: underline;
+}
+
+.entrarButton {
+    height: 100%;
+    max-height: 25px;
+    width: 100%;
+    max-width: 65px;
+    margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .loginCard {
+        width: 90%;
+        padding: 30px 20px;
     }
 }

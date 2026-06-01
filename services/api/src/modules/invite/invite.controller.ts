@@ -3,7 +3,7 @@ import { createInvite } from "./invite.service";
 import { CreateInviteInput } from "./invite.schema";
 
 export const handleInviteCreate = async (
-    req: FastifyRequest<{ Body: CreateInviteInput }>,
+    req: FastifyRequest<{ Body: CreateInviteInput }>, 
     res: FastifyReply
 ) => {
     const invite = await createInvite(req.body);

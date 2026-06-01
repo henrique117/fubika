@@ -33,11 +33,11 @@ const GlobalRanking: React.FC = () => {
     const [loading, setLoading] = useState(true)
     const [page, setPage] = useState(1)
 
-    const [selectedState, setSelectedState] = useState<string>('') // Define o estado inicial como vazio (Brasil Geral)
-    // Lista de UFs
+    const [selectedState, setSelectedState] = useState<string>('') 
+    
     const states = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
 
-    // Dicionário para traduzir a sigla para o nome completo
+    
     const stateNames: Record<string, string> = {
         "AC": "Acre", "AL": "Alagoas", "AP": "Amapá", "AM": "Amazonas",
         "BA": "Bahia", "CE": "Ceará", "DF": "Distrito Federal", "ES": "Espírito Santo",
@@ -64,7 +64,7 @@ const GlobalRanking: React.FC = () => {
                 params: {
                     mode: mode,
                     page: pageNum,
-                    country: countryCode || undefined // Envia para a API
+                    country: countryCode || undefined 
                 }
             });
             
@@ -81,12 +81,12 @@ const GlobalRanking: React.FC = () => {
     }
 
     useEffect(() => {
-        // Comando que envia o estado selecionado para a API
+        
         fetchRanking(activeMode, page, selectedState) 
-    // Comando que coloca o selectedState na lista de dependências para recarregar a tabela quando a opção mudar
+    
     }, [activeMode, page, selectedState])
 
-    // Nova função que impede o jogador de continuar passando as páginas infinitamente caso o número de jogadores exibidos na pág seja menor que 50.
+    
     const isLastPage = players.length < 50;
 
     return (

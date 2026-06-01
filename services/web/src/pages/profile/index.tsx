@@ -4,7 +4,7 @@ import { WrapperComponent } from '../../components/components.export'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../../services/api'
 
-//img stuff
+
 import catHead from '/cat_head.png'
 import follow from '/follow.svg'
 import following from '/following.svg'

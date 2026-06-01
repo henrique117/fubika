@@ -2,7 +2,7 @@ import prisma from "../../utils/prisma";
 import { sendIngameMessage } from "../../utils/redis";
 import { CheckDiscordLink, CreateDiscordLink } from "./discord.schema";
 import crypto from "crypto";
-import { Errors } from "../../utils/errorHandler"; // Importando o padrão novo
+import { Errors } from "../../utils/errorHandler"; 
 
 export const startLinkProcess = async (input: CreateDiscordLink) => {
     const user = await prisma.users.findFirst({

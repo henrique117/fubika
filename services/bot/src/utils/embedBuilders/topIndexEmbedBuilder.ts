@@ -15,11 +15,11 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
 
     const beatmap = score.beatmap
     const { bpm, length } = applyModsToStats(beatmap.bpm, beatmap.total_length, score.mods)
-    // DEFINIR DEPOIS COMO VÃO SER CALCULADOS CS, AR, OD, HP DO SCORE
-    // + OTHERS SCORES ON THE BEATMAP POSTERIORMENTE
+    
+    
     const displayMods = score.mods === '' ? '' : `+${score.mods}`
 
-    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const mapUrl = `https:
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()

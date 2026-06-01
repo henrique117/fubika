@@ -2,10 +2,10 @@ import axios from "axios"
 
 export default function getApiErrorMessage(error: unknown): string {
     
-    // Verifica se é axios error
+    
     if (axios.isAxiosError(error)) {
         
-        if (error.response) { // Com resposta do servidor
+        if (error.response) { 
             return error.response.data?.error || `Erro do servidor (Status ${error.response.status})`
         }
         

@@ -13,7 +13,7 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
     if (!beatmap.scores)
         throw new Error("Beatmap scores data are missing")
 
-    // Procura um score do player no mapa
+    
     const score = beatmap.scores.find(score => {
                 
         if (!score.player)
@@ -23,9 +23,9 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
     })
 
     const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
-    const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
+    const hidden_link = `[\u2800](https:
 
-    // Caso não haja scores do player no mapa
+    
     if (!score)        
         return new EmbedBuilder()
             .setAuthor({ 

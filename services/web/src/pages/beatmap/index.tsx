@@ -5,7 +5,7 @@ import { WrapperComponent, DiffIconComponent } from '../../components/components
 import SuccessRate from '../../components/ui/sucessrate';
 import { api } from '../../services/api';
 
-//img stuff
+
 import clock from '/clock.svg'
 import note from '/note.svg'
 import sliders from '/sliders.svg'
@@ -198,7 +198,7 @@ const Beatmap: React.FC = () => {
                             <button 
                                 className={`${style.btn} ${style.btnWide}`}
                                 onClick={() => {
-                                    window.location.href = `https://catboy.best/d/${currentBeatmap.beatmapset_id}`
+                                    window.location.href = `https:
                                 }}
                             >
                                 <span className={style.btnText}>Download</span>

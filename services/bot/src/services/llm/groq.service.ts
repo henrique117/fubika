@@ -25,10 +25,10 @@ export interface ProcessMessageResult {
     error?: string
 }
 
-/**
- * Serviço de integração com Groq via OpenAI SDK
- * Processa mensagens com tool calling para executar comandos
- */
+
+
+
+
 
 export class GroqService {
     private baseSystemPrompt: string
@@ -41,9 +41,9 @@ export class GroqService {
         }
     }
 
-    /**
-     * Processa uma mensagem com Groq e detecta tool calls
-     */
+    
+
+
     async processMessage(
         userMessage: string,
         tools: ToolDefinition[],
@@ -51,7 +51,7 @@ export class GroqService {
     ): Promise<ProcessMessageResult> {
         try {
             const systemPrompt = this.baseSystemPrompt.includes('📋')
-                ? this.baseSystemPrompt // já tem instruções customizadas
+                ? this.baseSystemPrompt 
                 : getSystemPrompt(userName)
 
             const messages: Message[] = [
@@ -76,7 +76,7 @@ export class GroqService {
 
             const choice = response.choices[0]
 
-            // Verifica se há tool call
+            
             if (choice?.message.tool_calls && choice.message.tool_calls.length > 0) {
                 const toolCall = choice.message.tool_calls[0]
 
@@ -101,7 +101,7 @@ export class GroqService {
                 }
             }
 
-            // Se não há tool call, retorna resposta direta
+            
             const responseText = choice?.message.content || ''
 
             return {
@@ -117,15 +117,15 @@ export class GroqService {
         }
     }
 
-    /**
-     * Define um system prompt customizado
-     */
+    
+
+
     setSystemPrompt(prompt: string): void {
         this.baseSystemPrompt = prompt
     }
 }
 
-// Singleton instance
+
 let groqServiceInstance: GroqService | null = null
 
 export function initializeGroqService(customSystemPrompt?: string): GroqService {

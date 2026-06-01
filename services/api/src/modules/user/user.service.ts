@@ -272,7 +272,7 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         id: user.id,
         name: user.name,
         safe_name: user.safe_name,
-        pfp: `https://a.${process.env.DOMAIN}/${user.id}`,
+        pfp: `https:
         banner: `https://assets.ppy.sh/user-profile-covers/${user.id}.jpg`,
         
         rank: rank,
@@ -446,7 +446,7 @@ export const getUserBestOnMap = async (filter: UserFilter, bmap_id: number, inpu
             id: user.id,
             name: user.name,
             safe_name: user.safe_name,
-            pfp: `https://a.${process.env.DOMAIN}/${user.id}`,
+            pfp: `https:
             rank: 0, pp: 0, acc: 0, a_count: 0, s_count: 0, ss_count: 0, sh_count: 0, ssh_count: 0,
             total_score: 0, ranked_score: 0, max_combo: 0, playtime: 0
         }
@@ -524,7 +524,7 @@ export const setUserPfp = async (data: PostPfpInput) => {
         return {
             id: user.id,
             name: user.name,
-            avatar_url: `https://a.${process.env.DOMAIN || 'bpy.local'}/${user.id}?v=${Date.now()}`
+            avatar_url: `https:
         };
 
     } catch (err) {

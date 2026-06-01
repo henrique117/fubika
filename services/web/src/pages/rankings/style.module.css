@@ -209,38 +209,38 @@
     margin-left: 12px; 
 }
 
-/* O visual da bandeira */
+
 .flagIcon {
     width: 28px;
     height: 20px;
     border-radius: 4px;
     object-fit: cover;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    flex-shrink: 0; /* Impede que a bandeira seja esmagada se o nome for grande */
-    margin-top: -2px; /* Ajuste fino para alinhar visualmente com a fonte */
+    flex-shrink: 0; 
+    margin-top: -2px; 
 }
 
 .stateSelector {
-    background-color: #2a2a2a; /* Fundo escuro para combinar com o tema */
-    color: #ffffff; /* Texto branco */
-    border: 2px solid #444444; /* Bordinha sutil */
-    border-radius: 8px; /* Cantos arredondados */
-    padding: 6px 12px; /* Espaçamento */
-    font-family: inherit; /* Puxa a fonte do projeto */
+    background-color: #2a2a2a; 
+    color: #ffffff; 
+    border: 2px solid #444444; 
+    border-radius: 8px; 
+    padding: 6px 12px; 
+    font-family: inherit; 
     font-size: 1rem;
     cursor: pointer;
     outline: none;
-    margin-top: 10px; /* Descola um pouco do título "Colocações" */
+    margin-top: 10px; 
     transition: all 0.2s ease-in-out;
 }
 
-/* Efeito quando o usuário clica/passa o mouse */
+
 .stateSelector:hover, .stateSelector:focus {
     border-color: #888888;
     background-color: #333333;
 }
 
-/* Pinta a caixinha das opções por dentro também */
+
 .stateSelector option {
     background-color: #2a2a2a;
     color: #ffffff;

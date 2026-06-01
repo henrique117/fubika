@@ -13,12 +13,12 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
     const scoresPerPage = 10
 
     const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
-    const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
+    const hidden_link = `[\u2800](https:
 
-    if (!beatmap.scores) { // Caso não haja o array de scores
+    if (!beatmap.scores) { 
         throw new Error("Scores data are missing")
 
-    }else if (beatmap.scores.length === 0) { // Caso o array de scores seja vazio
+    }else if (beatmap.scores.length === 0) { 
 
         const embed = new EmbedBuilder()
         .setAuthor({ 

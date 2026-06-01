@@ -46,7 +46,7 @@ export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<I
             safe_name: row.user.safe_name,
             country: row.user.country,
             pfp: `https://a.${process.env.DOMAIN}/${row.user.id}`,
-            banner: `https://assets.${process.env.DOMAIN}/user-profile-covers/${row.user.id}.jpg`,
+            banner: `https:
             
             rank: currentRank,
             

@@ -27,7 +27,7 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
     const embeds: EmbedBuilder[] = []
     const playersPerPage = 20
 
-    // Se não tiver jogadores
+    
     if (!players || players.length === 0) {
         const embed = new EmbedBuilder()
             .setAuthor({

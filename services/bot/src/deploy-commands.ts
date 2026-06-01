@@ -6,7 +6,7 @@ import path from 'path'
 dotenv.config()
 
 const commands = []
-// Caminho para a pasta commands
+
 const foldersPath = path.join(__dirname, 'commands')
 const commandFolders = fs.readdirSync(foldersPath)
 
@@ -19,7 +19,7 @@ for (const folder of commandFolders) {
         const command = require(filePath).default || require(filePath)
         
         if ('data' in command && 'execute' in command) {
-            // O Discord precisa do comando no formato JSON
+            
             commands.push(command.data.toJSON())
         } else {
             console.log(`[AVISO] O comando em ${filePath} está faltando "data" ou "execute".`)

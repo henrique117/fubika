@@ -1,4 +1,4 @@
-/// <reference types="node" />
+
 
 import { PrismaClient } from '@prisma/client'
 import { hashPassword } from '../src/utils/hash'

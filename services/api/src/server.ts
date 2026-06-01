@@ -79,7 +79,7 @@ async function main() {
         console.log(`
         🚀 Fubika API está online!
         📡 Porta: ${port}
-        🔗 Host: http://0.0.0.0:${port}
+        🔗 Host: http:
         `);
     } catch (err) {
         server.log.error(err);

@@ -18,7 +18,7 @@ export const getGlobalRankSchema = z.object({
 
     country: z.string()
     .length(2, "A sigla do estado deve ter 2 letras.")
-    .optional(), // Opcional para não quebrar o ranking global geral
+    .optional(), 
 });
 
 export type GetGlobalRankInput = z.infer<typeof getGlobalRankSchema>;

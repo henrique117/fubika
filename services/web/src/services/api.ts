@@ -2,10 +2,9 @@ import axios from 'axios'
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://api.fubika.com.br'
 
-console.log("API?:", apiUrl);
 
 export const api = axios.create({
-    baseURL: apiUrl + '/api',
+    baseURL: apiUrl + '/api/v1',
 })
 
 api.interceptors.request.use(config => {

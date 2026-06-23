@@ -246,3 +246,54 @@
     color: #ffffff;
     font-family: inherit;
 }
+
+.tableCard {
+    animation: fadeIn 0.4s ease-out both;
+}
+
+.rowsContainer {
+    animation: fadeIn 0.4s ease-out 0.15s both;
+}
+
+@media (max-width: 768px) {
+    .tableHeader {
+        font-size: 11px;
+        padding: 12px 10px;
+    }
+
+    .playerRow {
+        height: 44px;
+        margin-inline: 10px;
+    }
+
+    .rankNumber,
+    .ppValue,
+    .statValue,
+    .username {
+        font-size: 12px;
+    }
+
+    .colPlayer {
+        min-width: 100px;
+        gap: 8px;
+    }
+
+    .arrow {
+        width: 7%;
+    }
+}
+
+@media (max-width: 480px) {
+    .colPlays {
+        display: none;
+    }
+
+    .modeBtn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .rankingContainer {
+        padding: 0 8px;
+    }
+}

@@ -71,13 +71,13 @@ return (
                         <span></span>
                         <span></span>
                         <span className={style.statValue}>PP</span>
-                        <span className={style.hitValue}>300</span>
-                        <span className={style.hitValue}>100</span>
-                        <span className={style.hitValue}>50</span>
-                        <span className={style.hitValue}>X</span>
+                        <span className={`${style.hitValue} ${style.col300}`}>300</span>
+                        <span className={`${style.hitValue} ${style.col100}`}>100</span>
+                        <span className={`${style.hitValue} ${style.col50}`}>50</span>
+                        <span className={`${style.hitValue} ${style.colX}`}>X</span>
                         <span className={style.statValue}>Precisão</span>
-                        <span className={style.statValue}>Mods</span>
-                        <span className={style.statValue}>Combo máximo</span>
+                        <span className={`${style.statValue} ${style.colMods}`}>Mods</span>
+                        <span className={`${style.statValue} ${style.colCombo}`}>Combo máximo</span>
                     </div>
 
                     <div className={style.rowsContainer}>
@@ -99,20 +99,20 @@ return (
 
                                 <div className={style.ppValue}>{Math.round(play.pp)}pp</div>
 
-                                <div className={style.hitValue}>{play.n300}</div>
-                                <div className={style.hitValue}>{play.n100}</div>
-                                <div className={style.hitValue}>{play.n50}</div>
-                                <div className={`${style.hitValue} ${play.nmiss > 0 }`}>
+                                <div className={`${style.hitValue} ${style.col300}`}>{play.n300}</div>
+                                <div className={`${style.hitValue} ${style.col100}`}>{play.n100}</div>
+                                <div className={`${style.hitValue} ${style.col50}`}>{play.n50}</div>
+                                <div className={`${style.hitValue} ${style.colX}`}>
                                     {play.nmiss}
                                 </div>
 
                                 <div className={style.statValue}>{play.acc.toFixed(2)}%</div>
 
-                                <div className={style.statValue}>
+                                <div className={`${style.statValue} ${style.colMods}`}>
                                     {play.mods !== "NM" ? play.mods : "-"}
                                 </div>
 
-                                <div className={style.statValue}>{play.max_combo}x</div>
+                                <div className={`${style.statValue} ${style.colCombo}`}>{play.max_combo}x</div>
 
                             </div>
                         ))}

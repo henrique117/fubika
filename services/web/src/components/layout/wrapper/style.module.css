@@ -1,0 +1,5 @@
+.main {
+    min-height: var(--vh-full);
+    display: flex;
+    flex-direction: column;
+}

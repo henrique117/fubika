@@ -1,8 +1,8 @@
-import { FastifyRequest } from "fastify";
+import { FastifyReply, FastifyRequest } from "fastify";
 import { Errors } from "../utils/errorHandler";
 import prisma from "../utils/prisma";
 
-export async function authorizeAdmin(req: FastifyRequest, _: any) {
+export async function authorizeAdmin(req: FastifyRequest, _res: FastifyReply) {
     const userAuth = req.user as { id: number };
 
     const user = await prisma.users.findUnique({

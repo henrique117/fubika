@@ -4,9 +4,11 @@ import { GetGlobalRankInput } from "./ranking.schema";
 import { getPlayerPlaycount } from "../user/user.service";
 import { calculateLevel } from "../../utils/level";
 import { Errors } from "../../utils/errorHandler";
+import { env } from "../../config/env";
+import { LEADERBOARD_PAGE_SIZE } from "../../config/constants";
 
 export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<IPlayer[]> => {
-    const itemsPerPage = 50;
+    const itemsPerPage = LEADERBOARD_PAGE_SIZE;
     const { page, mode, country } = input;
     
     if (page < 1) {
@@ -45,9 +47,9 @@ export const getGlobalLeaderboard = async (input: GetGlobalRankInput): Promise<I
             name: row.user.name,
             safe_name: row.user.safe_name,
             country: row.user.country,
-            pfp: `https://a.${process.env.DOMAIN}/${row.user.id}`,
-            banner: `https:
-            
+            pfp: `https://a.${env.domain}/${row.user.id}`,
+            banner: `https://assets.${env.domain}/user-profile-covers/${row.user.id}.jpg`,
+
             rank: currentRank,
             
             pp: row.pp,

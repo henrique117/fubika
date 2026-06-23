@@ -1,6 +1,8 @@
 import prisma from "../../utils/prisma";
 import { Errors } from "../../utils/errorHandler";
 import { TargetUserInput } from "./admin.schema";
+import { env } from "../../config/env";
+import { PRIV } from "../../config/constants";
 
 export const banPlayer = async (input: TargetUserInput) => {
     const target = await prisma.users.findUnique({
@@ -17,7 +19,7 @@ export const banPlayer = async (input: TargetUserInput) => {
 
     await prisma.users.update({
         where: { id: target.id },
-        data: { priv: 0 }
+        data: { priv: PRIV.BANNED }
     });
 
     return { 
@@ -31,7 +33,7 @@ export const giveAdminPrivileges = async (requesterId: number, input: TargetUser
         where: { id: requesterId }
     });
 
-    const ownerDiscordId = process.env.OWNER_DISCORD_ID || "520994132458471438";
+    const ownerDiscordId = env.ownerDiscordId;
 
     if (!requester || requester.discord_id !== ownerDiscordId) {
         throw Errors.Forbidden("Acesso negado: Apenas o dono do servidor (via Discord) pode promover admins.");
@@ -48,7 +50,7 @@ export const giveAdminPrivileges = async (requesterId: number, input: TargetUser
     await prisma.users.update({
         where: { id: target.id },
         data: {
-            priv: 1048575,
+            priv: PRIV.ADMIN,
             is_admin: true,
             is_dev: true
         }

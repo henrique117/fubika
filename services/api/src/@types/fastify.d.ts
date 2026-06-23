@@ -12,6 +12,7 @@ declare module "@fastify/jwt" {
       id: number;
       name: string;
       priv: number;
+      isBot?: boolean;
     }
   }
 }

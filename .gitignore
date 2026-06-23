@@ -5,3 +5,4 @@ __pycache__/
 backups/
 .env
 volumes/
+.claude/

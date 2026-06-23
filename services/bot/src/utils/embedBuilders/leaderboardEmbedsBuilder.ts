@@ -13,7 +13,7 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
     const scoresPerPage = 10
 
     const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
-    const hidden_link = `[\u2800](https:
+    const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     if (!beatmap.scores) { 
         throw new Error("Scores data are missing")
@@ -53,7 +53,7 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
             const displayMods = score.mods === '' ? '' : `+${score.mods}`
             const displayMiss = score.nmiss > 0 ? `${score.nmiss}${EMOJIS.miss}` : ''
             // Linha 1: #Número Usuário: Score [Combo] Mods  VVV **[${score.player.name}](${score.player.url}):** <--- Mudar
-            const line1 = `**#${position}** **${score.player.name}:** ${score.score.toLocaleString('en-US')} [**${score.max_combo}x**/${beatmap.max_combo}x] **${displayMods} **`
+            const line1 = `**#${position}** **${score.player.name}:** ${score.score.toLocaleString('en-US')} [**${score.max_combo}x**/${beatmap.max_combo}x] **${displayMods}**`
             // Linha 2: Rank PP/maxPP • Acc • Miss Tempo 
             const line2 = `${scoreGradeToEmoji(score.grade)} **${score.pp.toLocaleString('en-US', options)}pp** • ${score.acc.toLocaleString('en-US', options)}% • ${displayMiss}${time(new Date(score.play_time), TimestampStyles.RelativeTime)}`
             // Junta as duas linhas

@@ -3,7 +3,7 @@ import axios from "axios"
 const apiUrl = process.env.VITE_API_URL || 'https://api.fubika.com.br'
 
 const osuApiClient = axios.create({
-    baseURL: apiUrl + '/api',
+    baseURL: apiUrl + '/api/v1',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',

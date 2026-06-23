@@ -19,15 +19,15 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
     
     const displayMods = score.mods === '' ? '' : `+${score.mods}`
 
-    const mapUrl = `https:
+    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()
         .setAuthor({ 
-            name: `${player.name}: ${player.pp}pp (#${player.rank})`, 
+            name: `${player.name}: ${player.pp.toLocaleString('en-US')}pp (#${player.rank})`,
             iconURL: URLS.fubikaIcon,
             url: player.url
-        }) //                                       Mudar --->  score.star_rating.toLocaleString('en-US', options)}
+        })
         .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
         .setURL(mapUrl)
         .setColor(COLORS.blue)

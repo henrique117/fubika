@@ -73,12 +73,12 @@ export default async function top200EmbedsBuilder(player: IPlayer): Promise<{ em
 
             const fullDisplay = `${tempTitle} [${tempDiff}]`
 
-            const mapUrl = `https:
+            const mapUrl = `https://fubika.com.br/beatmap/${score.beatmap.beatmap_id}`
 
             
             const line1 = `**#${position} [${fullDisplay}](${mapUrl})** [${score.beatmap.star_rating.toLocaleString('en-US', options)}★]`
             // Linha 2: Rank PP (Acc) [Combo] Miss Mods Tempo 
-            const line2 = `${scoreGradeToEmoji(score.grade)} **${score.pp.toLocaleString('en-US', options)}pp** (${score.acc.toLocaleString('en-US', options)}%) [**${score.max_combo}x**/${score.beatmap.max_combo}x] ${displayMiss}**${displayMods} **${time(new Date(score.play_time), TimestampStyles.RelativeTime)}`
+            const line2 = `${scoreGradeToEmoji(score.grade)} **${score.pp.toLocaleString('en-US', options)}pp** (${score.acc.toLocaleString('en-US', options)}%) [**${score.max_combo}x**/${score.beatmap.max_combo}x] ${displayMiss}**${displayMods}**${time(new Date(score.play_time), TimestampStyles.RelativeTime)}`
             // Junta as duas linhas
             return `${line1}\n${line2}`
         }).join('\n') // Junta todos os scores

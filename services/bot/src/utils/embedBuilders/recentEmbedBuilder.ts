@@ -28,7 +28,7 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
         ? `~~${score.pp.toLocaleString('en-US', options)}PP~~` // Crossed
         : `${score.pp.toLocaleString('en-US', options)}PP`
 
-    const mapUrl = `https:
+    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()

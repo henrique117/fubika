@@ -23,7 +23,7 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
     })
 
     const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
-    const hidden_link = `[\u2800](https:
+    const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     
     if (!score)        
@@ -61,10 +61,10 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
 
     return new EmbedBuilder()
         .setAuthor({ 
-            name: `${player.name}: ${player.pp}pp (#${player.rank})`, 
+            name: `${player.name}: ${player.pp.toLocaleString('en-US')}pp (#${player.rank})`,
             iconURL: URLS.fubikaIcon,
             url: player.url
-        }) //                                       Mudar --->  score.star_rating.toLocaleString('en-US', options)}
+        })
         .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
         .setURL(mapUrl)
         .setColor(COLORS.blue)

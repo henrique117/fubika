@@ -17,11 +17,24 @@
   right: 0;
   left: 0;
   height: 810px;
-  background: url("/assets/ad686.png") center top / cover no-repeat;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2563a8 0%, #1d4473 36%, #242b33 72%, #2c2825 100%);
+}
+
+.wallpaperImage {
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: 0.72;
 }
 
 .wallpaper::after {
   position: absolute;
+  z-index: 1;
   inset: 0;
   background:
     linear-gradient(to bottom, transparent 78%, #2c2825 100%),
@@ -286,6 +299,71 @@
   width: 66px;
   height: 71px;
   object-fit: contain;
+}
+
+.stateCard {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 360px;
+  padding: 40px 24px;
+  border-radius: 20px;
+  background: rgb(26 24 22 / 78%);
+  border: 1px solid rgb(255 255 255 / 8%);
+  text-align: center;
+}
+
+.stateCard h1 {
+  margin: 0;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stateCard p {
+  margin: 0;
+  max-width: 420px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 14px;
+  color: #c7c1bb;
+}
+
+.stateActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.statePrimaryBtn,
+.stateSecondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: filter 0.15s;
+}
+
+.statePrimaryBtn {
+  background: #39ad9b;
+  color: #fff;
+}
+
+.stateSecondaryBtn {
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
 }
 
 @media (max-width: 760px) {

@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import style from './style.module.css'
 import { ProfileRankChart, WrapperComponent } from '../../../components/components.export'
 import {
     type ApiPlayer,
+    DEFAULT_AVATAR_URL,
+    FALLBACK_AVATAR_URL,
     fetchActivePlayer,
     getCachedActivePlayerSnapshot,
+    hasApiAuth,
 } from '../../../services/profileData'
 
 const asset = (name: string) => `/assets/${name}`
@@ -107,8 +110,13 @@ const ProfileAchievements: React.FC = () => {
         player: ApiPlayer | null
         stateRank: number | null
     } | null>(null)
+    const isAuthenticated = hasApiAuth()
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            return
+        }
+
         let cancelled = false
 
         const loadPlayer = async () => {
@@ -137,10 +145,12 @@ const ProfileAchievements: React.FC = () => {
         return () => {
             cancelled = true
         }
-    }, [id, routeKey])
+    }, [id, routeKey, isAuthenticated])
 
     const cachedResolved =
-        asyncState?.key === routeKey ? null : getCachedActivePlayerSnapshot(id)
+        isAuthenticated && asyncState?.key !== routeKey
+            ? getCachedActivePlayerSnapshot(id)
+            : null
     const player =
         asyncState?.key === routeKey ? asyncState.player : (cachedResolved?.player ?? null)
     const stateRank =
@@ -148,27 +158,95 @@ const ProfileAchievements: React.FC = () => {
             ? asyncState.stateRank
             : (cachedResolved?.stateRank ?? null)
 
-    const displayName = player?.name || 'Arlecchino'
-    const avatarSrc = player?.pfp || asset('e464c.png')
-    const rawLevel = Number.isFinite(player?.level) ? player!.level : 0
-    const levelLabel = player ? `Nível ${Math.floor(rawLevel)}` : 'Nível -100'
+    const status: 'unauthenticated' | 'loading' | 'not-found' | 'ready' = !isAuthenticated
+        ? 'unauthenticated'
+        : asyncState?.key === routeKey
+          ? player
+              ? 'ready'
+              : 'not-found'
+          : cachedResolved
+            ? 'ready'
+            : 'loading'
+
+    const wallpaperNode = (
+        <div className={style.wallpaper} aria-hidden="true">
+            {player?.banner && (
+                <img
+                    key={player.banner}
+                    className={style.wallpaperImage}
+                    src={player.banner}
+                    alt=""
+                    onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                    }}
+                />
+            )}
+        </div>
+    )
+
+    if (status === 'unauthenticated' || status === 'not-found') {
+        return (
+            <WrapperComponent>
+                <div className={style.appShell}>
+                    {wallpaperNode}
+                    <section className={style.profileCard}>
+                        <div className={style.stateCard}>
+                            <h1>
+                                {status === 'unauthenticated'
+                                    ? 'Entre para visualizar conquistas'
+                                    : 'Jogador não encontrado'}
+                            </h1>
+                            <p>
+                                {status === 'unauthenticated'
+                                    ? 'Faça login na sua conta Fubika para acompanhar suas medalhas e conquistas.'
+                                    : 'Não foi possível localizar esse jogador no servidor.'}
+                            </p>
+                            <div className={style.stateActions}>
+                                {status === 'unauthenticated' && (
+                                    <Link to="/login" className={style.statePrimaryBtn}>
+                                        Entrar
+                                    </Link>
+                                )}
+                                <Link to="/ranking" className={style.stateSecondaryBtn}>
+                                    Ver colocações
+                                </Link>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </WrapperComponent>
+        )
+    }
+
+    if (status === 'loading' || !player) {
+        return (
+            <WrapperComponent>
+                <div className={style.appShell}>{wallpaperNode}</div>
+            </WrapperComponent>
+        )
+    }
+
+    const displayName = player.name
+    const avatarSrc = player.pfp || DEFAULT_AVATAR_URL
+    const rawLevel = Number.isFinite(player.level) ? player.level : 0
+    const levelLabel = `Nível ${Math.floor(rawLevel)}`
     const xpFraction = Math.max(0, Math.min(1, rawLevel % 1))
-    const xpPercent = player ? Math.round(xpFraction * 100) : 12
+    const xpPercent = Math.round(xpFraction * 100)
     const xpBarWidthPx = Math.max(6, Math.min(143, Math.round(xpFraction * 143)))
-    const globalRankLabel = player ? `#${player.rank || 0}` : '#1000'
-    const stateRankLabel = player ? (stateRank ? `#${stateRank}` : '-') : '#25'
-    const backPath = player ? `/profile/${player.id}` : '/profile'
+    const globalRankLabel = `#${player.rank || 0}`
+    const stateRankLabel = stateRank ? `#${stateRank}` : '-'
+    const backPath = `/profile/${player.id}`
 
     return (
         <WrapperComponent>
             <div className={style.appShell}>
-                <div className={style.wallpaper} aria-hidden="true" />
+                {wallpaperNode}
 
                 <section className={style.profileCard} aria-label={`Conquistas de ${displayName}`}>
                     <div className={style.profileHero}>
                         <ProfileRankChart
                             player={player}
-                            scores={player?.top_200 ?? []}
+                            scores={player.top_200 ?? []}
                             className={style.graph}
                         />
                         <div
@@ -190,7 +268,7 @@ const ProfileAchievements: React.FC = () => {
                                 alt={`Foto de perfil de ${displayName}`}
                                 onError={(e) => {
                                     e.currentTarget.onerror = null
-                                    e.currentTarget.src = asset('e464c.png')
+                                    e.currentTarget.src = FALLBACK_AVATAR_URL
                                 }}
                             />
                         </div>
@@ -205,7 +283,7 @@ const ProfileAchievements: React.FC = () => {
                             </h1>
                             <p className={style.level}>{levelLabel}</p>
                             <div className={style.xpTrack} aria-label={`${xpPercent}% de experiência`}>
-                                <span style={player ? { width: `${xpBarWidthPx}px` } : undefined} />
+                                <span style={{ width: `${xpBarWidthPx}px` }} />
                             </div>
                             <div className={style.ranks}>
                                 <div>

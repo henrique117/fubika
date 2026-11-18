@@ -169,6 +169,9 @@ const inFlightBeatmapSetRequests = new Map<
 >()
 const inFlightBatchBeatmapRequests = new Map<number, Promise<void>>()
 
+export const DEFAULT_AVATAR_URL = '/assets/default-avatar.svg'
+export const FALLBACK_AVATAR_URL = '/assets/default-avatar.svg'
+
 const GRADE_ASSETS: Record<string, string> = {
     XH: '/assets/8e9f0.png',
     SSH: '/assets/8e9f0.png',

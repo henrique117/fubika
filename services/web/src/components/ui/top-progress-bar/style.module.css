@@ -1,0 +1,46 @@
+.barContainer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 9999;
+  height: 3px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.barContainer.loading {
+  opacity: 1;
+  transition: opacity 90ms ease-in 60ms;
+}
+
+.barContainer.completing {
+  opacity: 0;
+  transition: opacity 240ms ease-out 130ms;
+}
+
+.barFill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #3278c4 0%, #4da6ff 60%, #8ed1ff 100%);
+  box-shadow:
+    0 0 10px rgb(77 166 255 / 75%),
+    0 0 4px rgb(142 209 255 / 90%);
+}
+
+.barContainer.loading .barFill {
+  width: 85%;
+  transition: width 6s cubic-bezier(0.12, 0.82, 0.25, 1) 60ms;
+}
+
+.barContainer.completing .barFill {
+  width: 100%;
+  transition: width 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barContainer.loading .barFill,
+  .barContainer.completing .barFill {
+    transition-duration: 0.01ms;
+  }
+}

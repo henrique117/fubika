@@ -152,27 +152,52 @@
   height: 23px;
 }
 
-.difficultyName {
+.difficultyMeta {
   position: absolute;
-  top: 74px;
+  top: 62px;
+  right: 268px;
   left: 20px;
-  max-width: 100px;
-  overflow: hidden;
-  font-family: 'Caviar Dreams', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .difficultyValue {
-  position: absolute;
-  top: 79px;
-  left: 124px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgb(25 23 21 / 72%);
   font-family: 'Caviar Dreams', sans-serif;
-  color: #fff600;
-  font-size: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  color: #ffbb00;
+  white-space: nowrap;
+}
+
+.difficultyValue svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
+}
+
+.difficultyName {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fff;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 75%);
 }
 
 .ranked {
@@ -218,7 +243,8 @@
   cursor: pointer;
 }
 
-.play img {
+.play img,
+.play svg {
   position: absolute;
   left: 104px;
   top: 5px;
@@ -704,12 +730,9 @@
     justify-content: center;
   }
 
-  .difficultyName {
-    left: 14px;
-  }
-
-  .difficultyValue {
-    left: 118px;
+  .difficultyMeta {
+    right: 120px;
+    left: 12px;
   }
 
   .ranked {

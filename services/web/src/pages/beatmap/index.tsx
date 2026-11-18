@@ -307,8 +307,15 @@ function MapCard({
                               </button>
                           ))}
                 </div>
-                <div className={style.difficultyName} title={diffName}>{diffName}</div>
-                <div className={style.difficultyValue}>Dificuldade {diffSrText}</div>
+                <div className={style.difficultyMeta}>
+                    <span className={style.difficultyValue}>
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2.4l2.92 6.08 6.68.92-4.87 4.68 1.2 6.64L12 17.52l-5.93 3.2 1.2-6.64L2.4 9.4l6.68-.92L12 2.4z" />
+                        </svg>
+                        <span>{diffSrText}</span>
+                    </span>
+                    <span className={style.difficultyName} title={diffName}>{diffName}</span>
+                </div>
                 <div className={style.ranked}>{statusText}</div>
                 <aside className={style.mapInfo}>
                     <button
@@ -318,7 +325,14 @@ function MapCard({
                         title={isPlayingPreview ? 'Pausar prévia' : 'Reproduzir prévia'}
                         onClick={handleTogglePreview}
                     >
-                        <img src={`${A}/1b679.png`} alt="" />
+                        {isPlayingPreview ? (
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <rect x="5.5" y="4" width="4.5" height="16" rx="1.5" />
+                                <rect x="14" y="4" width="4.5" height="16" rx="1.5" />
+                            </svg>
+                        ) : (
+                            <img src={`${A}/1b679.png`} alt="" />
+                        )}
                     </button>
                     <div className={style.quickStats}>
                         <StatIcon type="time" value={timeValue} />

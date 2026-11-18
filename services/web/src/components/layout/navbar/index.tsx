@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom'
 import style from './style.module.css'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useState, useEffect } from 'react'
+import { DEFAULT_AVATAR_URL, FALLBACK_AVATAR_URL } from '../../../services/profileData'
 
 const Navbar: React.FC = () => {
     const { signed, user, signOut } = useAuth()
     const [menuOpen, setMenuOpen] = useState(false)
 
-    const userAvatar = signed && user ? `https://a.fubika.com.br/${user.id}` : 'https://a.fubika.com.br/0'
+    const userAvatar = signed && user ? `https://a.fubika.com.br/${user.id}` : DEFAULT_AVATAR_URL
     useEffect(() => {
         let resizeTimer: number;
         
@@ -52,7 +53,7 @@ const Navbar: React.FC = () => {
                                         alt={user.name}
                                         onError={(e) => {
                                             e.currentTarget.onerror = null
-                                            e.currentTarget.src = '/assets/e464c.png'
+                                            e.currentTarget.src = FALLBACK_AVATAR_URL
                                         }}
                                     />
                                     <span>{user.name}</span>
@@ -114,7 +115,7 @@ const Navbar: React.FC = () => {
                                     className={style.avatarTrigger}
                                     onError={(e) => {
                                         e.currentTarget.onerror = null
-                                        e.currentTarget.src = '/assets/e464c.png'
+                                        e.currentTarget.src = FALLBACK_AVATAR_URL
                                     }}
                                 />
                             </Link>

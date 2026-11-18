@@ -16,7 +16,8 @@
   right: 0;
   left: 0;
   height: 810px;
-  background: url("/assets/ad686.png") center top / cover no-repeat;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2563a8 0%, #1d4473 36%, #242b33 72%, #2c2825 100%);
 }
 
 .heroArt::after {
@@ -189,6 +190,35 @@
   height: 120px;
   transform: translateX(-50%);
   object-fit: contain;
+}
+
+.emptyTableState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 220px;
+  padding: 32px 20px;
+  border-radius: 14px;
+  background: rgb(26 24 22 / 72%);
+  text-align: center;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 14px;
+  color: #c7c1bb;
+}
+
+.emptyTableState a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: #39ad9b;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 @media (max-width: 760px) {

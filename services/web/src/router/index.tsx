@@ -1,6 +1,15 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Outlet, RouterProvider, type LoaderFunctionArgs } from 'react-router-dom'
 import { BeatmapPage, ForgotPassPage, GlobalRankingPage, HomePage, HowToConnectPage, LoginPage, NotFoundPage, RedefinePassPage, RegisterPage, ProfilePage, ProfileTopPlaysPage, ProfileRecentPlaysPage, ProfileAchievementsPage, MpLinkPage } from '../pages/pages.export'
 import PrivateRoute from './private'
+import { TopProgressBar } from '../components/components.export'
+import {
+    fetchActivePlayer,
+    fetchBeatmapWithSetFromMirror,
+    fetchRankingPageCached,
+    fetchUserRecent,
+    hasApiAuth,
+    hydrateScoresBeatmaps,
+} from '../services/profileData'
 
 const ProtectedLayout = () => {
     return (
@@ -10,111 +19,207 @@ const ProtectedLayout = () => {
     )
 }
 
+const RootLayout = () => {
+    return (
+        <>
+            <TopProgressBar />
+            <Outlet />
+        </>
+    )
+}
+
+const RootHydrateFallback = () => {
+    return (
+        <div style={{ minHeight: '100vh', background: '#2c2825' }}>
+            <TopProgressBar forceActive />
+        </div>
+    )
+}
+
+const profileLoader = async ({ params }: LoaderFunctionArgs) => {
+    if (!hasApiAuth()) return null
+    const resolved = await fetchActivePlayer(params.id, { preferMe: !params.id })
+    if (resolved && (!resolved.player.top_200 || resolved.player.top_200.length === 0)) {
+        await fetchUserRecent(resolved.player.id, 10)
+    }
+    return null
+}
+
+const topPlaysLoader = async ({ params }: LoaderFunctionArgs) => {
+    if (!hasApiAuth()) return null
+    await fetchActivePlayer(params.id, { hydrateCount: 50 })
+    return null
+}
+
+const recentPlaysLoader = async ({ params }: LoaderFunctionArgs) => {
+    if (!hasApiAuth()) return null
+    const resolved = await fetchActivePlayer(params.id, { hydrateCount: 0 })
+    if (resolved) {
+        const recent = await fetchUserRecent(resolved.player.id, 50)
+        if (recent.length === 0 && resolved.player.top_200?.length) {
+            await hydrateScoresBeatmaps(resolved.player.top_200.slice(0, 50), 50)
+        }
+    }
+    return null
+}
+
+const achievementsLoader = async ({ params }: LoaderFunctionArgs) => {
+    if (!hasApiAuth()) return null
+    await fetchActivePlayer(params.id, { hydrateCount: 0 })
+    return null
+}
+
+const beatmapLoader = async ({ params }: LoaderFunctionArgs) => {
+    let targetId = params.id
+    if (!targetId && hasApiAuth()) {
+        const resolved = await fetchActivePlayer(undefined, { hydrateCount: 0 })
+        const topMapId = resolved?.player?.top_200?.[0]?.beatmap?.beatmap_id
+        if (topMapId && topMapId > 0) {
+            targetId = String(topMapId)
+        } else if (resolved?.player?.id) {
+            const recent = await fetchUserRecent(resolved.player.id, 1)
+            const recentMapId = recent[0]?.beatmap?.beatmap_id
+            if (recentMapId && recentMapId > 0) {
+                targetId = String(recentMapId)
+            }
+        }
+    }
+    if (targetId) {
+        await fetchBeatmapWithSetFromMirror(targetId)
+    }
+    return null
+}
+
+const rankingLoader = async () => {
+    await fetchRankingPageCached(0, 1, '')
+    return null
+}
+
 const router = createBrowserRouter([
     {
-        path: '/',
-        element: <HomePage />
-    },
-    {
-        path: '/login',
-        element: <LoginPage />
-    },
-    {
-        path: '/register',
-        element: <RegisterPage />
-    },
-    {
-        path: '/forgotpass',
-        element: <ForgotPassPage />
-    },
-    {
-        path: '/redefinepass',
-        element: <RedefinePassPage />
-    },
-    {
-        path: '/howtoconnect',
-        element: <HowToConnectPage />
-    },
-    {
-        path: '/profile',
-        element: <ProfilePage />
-    },
-    {
-        path: '/profile/:id',
-        element: <ProfilePage />
-    },
-    {
-        path: '/top-plays',
-        element: <ProfileTopPlaysPage />
-    },
-    {
-        path: '/profile/:id/top-plays',
-        element: <ProfileTopPlaysPage />
-    },
-    {
-        path: '/recent-plays',
-        element: <ProfileRecentPlaysPage />
-    },
-    {
-        path: '/profile/:id/recent-plays',
-        element: <ProfileRecentPlaysPage />
-    },
-    {
-        path: '/achievements',
-        element: <ProfileAchievementsPage />
-    },
-    {
-        path: '/conquistas',
-        element: <ProfileAchievementsPage />
-    },
-    {
-        path: '/profile/:id/achievements',
-        element: <ProfileAchievementsPage />
-    },
-    {
-        path: '/mplink',
-        element: <MpLinkPage />
-    },
-    {
-        path: '/mplink/:id',
-        element: <MpLinkPage />
-    },
-    {
-        path: '/mp-links',
-        element: <MpLinkPage />
-    },
-    {
-        path: '/matches',
-        element: <MpLinkPage />
-    },
-    {
-        path: '/beatmap',
-        element: <BeatmapPage />
-    },
-    {
-        path: '/mapas',
-        element: <BeatmapPage />
-    },
-    {
-        path: '/beatmaps',
-        element: <BeatmapPage />
-    },
-    {
-        path: '/beatmap/:id',
-        element: <BeatmapPage />
-    },
-    {
-        element: <ProtectedLayout />,
+        element: <RootLayout />,
+        HydrateFallback: RootHydrateFallback,
         children: [
             {
-                path: '/ranking',
-                element: <GlobalRankingPage />
+                path: '/',
+                element: <HomePage />
             },
+            {
+                path: '/login',
+                element: <LoginPage />
+            },
+            {
+                path: '/register',
+                element: <RegisterPage />
+            },
+            {
+                path: '/forgotpass',
+                element: <ForgotPassPage />
+            },
+            {
+                path: '/redefinepass',
+                element: <RedefinePassPage />
+            },
+            {
+                path: '/howtoconnect',
+                element: <HowToConnectPage />
+            },
+            {
+                path: '/profile',
+                element: <ProfilePage />,
+                loader: profileLoader,
+            },
+            {
+                path: '/profile/:id',
+                element: <ProfilePage />,
+                loader: profileLoader,
+            },
+            {
+                path: '/top-plays',
+                element: <ProfileTopPlaysPage />,
+                loader: topPlaysLoader,
+            },
+            {
+                path: '/profile/:id/top-plays',
+                element: <ProfileTopPlaysPage />,
+                loader: topPlaysLoader,
+            },
+            {
+                path: '/recent-plays',
+                element: <ProfileRecentPlaysPage />,
+                loader: recentPlaysLoader,
+            },
+            {
+                path: '/profile/:id/recent-plays',
+                element: <ProfileRecentPlaysPage />,
+                loader: recentPlaysLoader,
+            },
+            {
+                path: '/achievements',
+                element: <ProfileAchievementsPage />,
+                loader: achievementsLoader,
+            },
+            {
+                path: '/conquistas',
+                element: <ProfileAchievementsPage />,
+                loader: achievementsLoader,
+            },
+            {
+                path: '/profile/:id/achievements',
+                element: <ProfileAchievementsPage />,
+                loader: achievementsLoader,
+            },
+            {
+                path: '/mplink',
+                element: <MpLinkPage />
+            },
+            {
+                path: '/mplink/:id',
+                element: <MpLinkPage />
+            },
+            {
+                path: '/mp-links',
+                element: <MpLinkPage />
+            },
+            {
+                path: '/matches',
+                element: <MpLinkPage />
+            },
+            {
+                path: '/beatmap',
+                element: <BeatmapPage />,
+                loader: beatmapLoader,
+            },
+            {
+                path: '/mapas',
+                element: <BeatmapPage />,
+                loader: beatmapLoader,
+            },
+            {
+                path: '/beatmaps',
+                element: <BeatmapPage />,
+                loader: beatmapLoader,
+            },
+            {
+                path: '/beatmap/:id',
+                element: <BeatmapPage />,
+                loader: beatmapLoader,
+            },
+            {
+                element: <ProtectedLayout />,
+                children: [
+                    {
+                        path: '/ranking',
+                        element: <GlobalRankingPage />,
+                        loader: rankingLoader,
+                    },
+                ]
+            },
+            {
+                path: '*',
+                element: <NotFoundPage />
+            }
         ]
-    },
-    {
-        path: '*',
-        element: <NotFoundPage />
     }
 ])
 

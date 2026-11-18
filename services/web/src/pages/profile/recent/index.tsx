@@ -9,6 +9,7 @@ import {
     getCachedActivePlayerSnapshot,
     getCachedUserRecentSnapshot,
     getGradeAsset,
+    hasApiAuth,
     hydrateScoresBeatmaps,
 } from '../../../services/profileData'
 
@@ -28,90 +29,6 @@ type Play = {
     combo?: string
     rankSrc?: string
 }
-
-const featuredPlays: Play[] = [
-    {
-        title: 'Thrilling One Way by Aqours',
-        difficulty: 'Selfish Passion',
-        pp: '350pp',
-        count300: '685',
-        count100: '7',
-        count50: '0',
-        misses: '0',
-        accuracy: '98.95%',
-        mods: 'HD',
-        combo: '1601x',
-    },
-    {
-        title: 'Still Into You by Paramore',
-        difficulty: "_vanity's Insane",
-        pp: '120pp',
-        count300: '727',
-        count100: '7',
-        count50: '2',
-        misses: '7',
-        accuracy: '97.27%',
-        mods: 'HDDTHRFLRX',
-        combo: '950x',
-    },
-    {
-        title: 'Asu no Yozora Shoukaihan by Yuaru',
-        difficulty: 'Sky Arrow',
-        pp: '230pp',
-        count300: '891',
-        count100: '12',
-        count50: '4',
-        misses: '2',
-        accuracy: '97.63%',
-        mods: 'HD',
-        combo: '1000x',
-    },
-    {
-        title: 'Los! Los! Los!',
-        difficulty: "Kalibe's Extra",
-        pp: '180pp',
-        count300: '640',
-        count100: '23',
-        count50: '4',
-        misses: '2',
-        accuracy: '96.73%',
-        mods: 'HR',
-        combo: '1300x',
-    },
-]
-
-const rankByRow = [
-    '09e97.png',
-    'adaa3.png',
-    'adaa3.png',
-    'adaa3.png',
-    '7ae37.png',
-    '66a8d.png',
-    '66a8d.png',
-    'adaa3.png',
-    '7ae37.png',
-    'bac4b.png',
-    'bac4b.png',
-    '7ae37.png',
-    '7ae37.png',
-    '66a8d.png',
-    'adaa3.png',
-    '7ae37.png',
-    'bac4b.png',
-    '8e9f0.png',
-    'bac4b.png',
-    '66a8d.png',
-    '8e9f0.png',
-    '7ae37.png',
-    '66a8d.png',
-    '66a8d.png',
-    '66a8d.png',
-]
-
-const fallbackPlays: Play[] = Array.from({ length: 50 }, (_, index) => ({
-    ...(featuredPlays[index] ?? {}),
-    rankSrc: rankByRow[index] ? `${assets}/${rankByRow[index]}` : undefined,
-}))
 
 const scoreToRecentPlay = (score: ApiScore): Play => ({
     beatmapId: score.beatmap?.beatmap_id ?? 0,
@@ -139,8 +56,13 @@ const ProfileRecentPlays: React.FC = () => {
     const navigate = useNavigate()
     const routeKey = id ? `id:${id.trim().toLowerCase()}` : '__active__'
     const [asyncState, setAsyncState] = useState<RecentAsyncState | null>(null)
+    const isAuthenticated = hasApiAuth()
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            return
+        }
+
         let cancelled = false
 
         const loadRecentForPlayer = async (activePlayer: {
@@ -202,10 +124,12 @@ const ProfileRecentPlays: React.FC = () => {
         return () => {
             cancelled = true
         }
-    }, [id, routeKey])
+    }, [id, routeKey, isAuthenticated])
 
     const cachedResolved =
-        asyncState?.key === routeKey ? null : getCachedActivePlayerSnapshot(id)
+        isAuthenticated && asyncState?.key !== routeKey
+            ? getCachedActivePlayerSnapshot(id)
+            : null
     const cachedPlayerId = cachedResolved?.player?.id ?? null
     const cachedRecent = cachedPlayerId
         ? getCachedUserRecentSnapshot(cachedPlayerId, 50)
@@ -218,12 +142,19 @@ const ProfileRecentPlays: React.FC = () => {
     const targetId = asyncState?.key === routeKey ? asyncState.targetId : cachedPlayerId
     const scores = asyncState?.key === routeKey ? asyncState.scores : syncFallbackScores
 
-    const plays: Play[] =
-        targetId !== null
-            ? Array.from({ length: 50 }, (_, index) =>
-                  scores[index] ? scoreToRecentPlay(scores[index]) : {}
-              )
-            : fallbackPlays
+    const status: 'unauthenticated' | 'loading' | 'not-found' | 'ready' = !isAuthenticated
+        ? 'unauthenticated'
+        : asyncState?.key === routeKey
+          ? targetId !== null
+              ? 'ready'
+              : 'not-found'
+          : cachedPlayerId !== null
+            ? 'ready'
+            : 'loading'
+
+    const plays: Play[] = Array.from({ length: 50 }, (_, index) =>
+        scores[index] ? scoreToRecentPlay(scores[index]) : {}
+    )
 
     const backPath = targetId ? `/profile/${targetId}` : '/profile'
 
@@ -240,69 +171,82 @@ const ProfileRecentPlays: React.FC = () => {
                         <h1 id="recent-title">Jogadas Recentes</h1>
                     </div>
 
-                    <div className={style.playsTable}>
-                        <div className={style.tableHeader}>
-                            <span className={style.songColumn} aria-hidden="true" />
-                            <span>pp</span>
-                            <span>300</span>
-                            <span>100</span>
-                            <span>50</span>
-                            <span>X</span>
-                            <span>Precisão</span>
-                            <span>Mods</span>
-                            <span>Combo máximo</span>
+                    {status === 'unauthenticated' || status === 'not-found' ? (
+                        <div className={style.emptyTableState}>
+                            <span>
+                                {status === 'unauthenticated'
+                                    ? 'Entre na sua conta para visualizar as jogadas recentes.'
+                                    : 'Jogador não encontrado.'}
+                            </span>
+                            <Link to={status === 'unauthenticated' ? '/login' : '/ranking'}>
+                                {status === 'unauthenticated' ? 'Entrar' : 'Ver colocações'}
+                            </Link>
                         </div>
+                    ) : status === 'loading' ? null : (
+                        <div className={style.playsTable}>
+                            <div className={style.tableHeader}>
+                                <span className={style.songColumn} aria-hidden="true" />
+                                <span>pp</span>
+                                <span>300</span>
+                                <span>100</span>
+                                <span>50</span>
+                                <span>X</span>
+                                <span>Precisão</span>
+                                <span>Mods</span>
+                                <span>Combo máximo</span>
+                            </div>
 
-                        <div className={style.playList}>
-                            {plays.map((play, index) => {
-                                const clickable = Boolean(play.beatmapId && play.beatmapId > 0)
-                                return (
-                                    <div
-                                        className={style.playRow}
-                                        key={index}
-                                        style={clickable ? { cursor: 'pointer' } : undefined}
-                                        role={clickable ? 'link' : undefined}
-                                        tabIndex={clickable ? 0 : undefined}
-                                        onClick={
-                                            clickable
-                                                ? () => navigate(`/beatmap/${play.beatmapId}`)
-                                                : undefined
-                                        }
-                                        onKeyDown={
-                                            clickable
-                                                ? (e) => {
-                                                      if (e.key === 'Enter' || e.key === ' ') {
-                                                          e.preventDefault()
-                                                          navigate(`/beatmap/${play.beatmapId}`)
+                            <div className={style.playList}>
+                                {plays.map((play, index) => {
+                                    const clickable = Boolean(play.beatmapId && play.beatmapId > 0)
+                                    return (
+                                        <div
+                                            className={style.playRow}
+                                            key={index}
+                                            style={clickable ? { cursor: 'pointer' } : undefined}
+                                            role={clickable ? 'link' : undefined}
+                                            tabIndex={clickable ? 0 : undefined}
+                                            onClick={
+                                                clickable
+                                                    ? () => navigate(`/beatmap/${play.beatmapId}`)
+                                                    : undefined
+                                            }
+                                            onKeyDown={
+                                                clickable
+                                                    ? (e) => {
+                                                          if (e.key === 'Enter' || e.key === ' ') {
+                                                              e.preventDefault()
+                                                              navigate(`/beatmap/${play.beatmapId}`)
+                                                          }
                                                       }
-                                                  }
-                                                : undefined
-                                        }
-                                    >
-                                        <span className={style.songCell}>
-                                            {play.rankSrc && <img src={play.rankSrc} alt="" />}
-                                            {play.title ? (
-                                                <span className={style.songCopy}>
-                                                    <strong>{play.title}</strong>
-                                                    <small>{play.difficulty}</small>
-                                                </span>
-                                            ) : (
-                                                <span className={style.rankNumber}>#{index + 1}</span>
-                                            )}
-                                        </span>
-                                        <span>{play.pp}</span>
-                                        <span>{play.count300}</span>
-                                        <span>{play.count100}</span>
-                                        <span>{play.count50}</span>
-                                        <span>{play.misses}</span>
-                                        <span>{play.accuracy}</span>
-                                        <span>{play.mods}</span>
-                                        <span>{play.combo}</span>
-                                    </div>
-                                )
-                            })}
+                                                    : undefined
+                                            }
+                                        >
+                                            <span className={style.songCell}>
+                                                {play.rankSrc && <img src={play.rankSrc} alt="" />}
+                                                {play.title ? (
+                                                    <span className={style.songCopy}>
+                                                        <strong>{play.title}</strong>
+                                                        <small>{play.difficulty}</small>
+                                                    </span>
+                                                ) : (
+                                                    <span className={style.rankNumber}>#{index + 1}</span>
+                                                )}
+                                            </span>
+                                            <span>{play.pp}</span>
+                                            <span>{play.count300}</span>
+                                            <span>{play.count100}</span>
+                                            <span>{play.count50}</span>
+                                            <span>{play.misses}</span>
+                                            <span>{play.accuracy}</span>
+                                            <span>{play.mods}</span>
+                                            <span>{play.combo}</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </section>
 
                 <img className={style.mascot} src={`${assets}/17c9d.png`} alt="Mascote gato" />

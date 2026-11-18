@@ -5,6 +5,7 @@ import { WrapperComponent } from '../../../components/components.export'
 import {
     type ApiPlayer,
     fetchActivePlayer,
+    getCachedActivePlayerSnapshot,
     getGradeAsset,
 } from '../../../services/profileData'
 
@@ -131,15 +132,26 @@ const fallbackPlays: Play[] = Array.from({ length: 50 }, (_, index) => {
 const ProfileTopPlays: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [player, setPlayer] = useState<ApiPlayer | null>(null)
+    const routeKey = id ? `id:${id.trim().toLowerCase()}` : '__active__'
+    const [asyncState, setAsyncState] = useState<{
+        key: string
+        player: ApiPlayer | null
+    } | null>(null)
 
     useEffect(() => {
         let cancelled = false
 
         const loadTopPlays = async () => {
-            const resolved = await fetchActivePlayer(id, { hydrateCount: 50 })
+            const resolved = await fetchActivePlayer(id, {
+                hydrateCount: 50,
+                onUpdate: (fresh) => {
+                    if (!cancelled) {
+                        setAsyncState({ key: routeKey, player: fresh.player })
+                    }
+                },
+            })
             if (cancelled) return
-            setPlayer(resolved?.player ?? null)
+            setAsyncState({ key: routeKey, player: resolved?.player ?? null })
         }
 
         loadTopPlays()
@@ -147,7 +159,12 @@ const ProfileTopPlays: React.FC = () => {
         return () => {
             cancelled = true
         }
-    }, [id])
+    }, [id, routeKey])
+
+    const player =
+        asyncState?.key === routeKey
+            ? asyncState.player
+            : (getCachedActivePlayerSnapshot(id)?.player ?? null)
 
     const realTopScores = player?.top_200 ?? []
     const plays: Play[] =

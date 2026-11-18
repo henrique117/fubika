@@ -2,38 +2,21 @@ import React, { useState, useEffect } from 'react'
 import style from './style.module.css'
 import { WrapperComponent } from '../../components/components.export'
 import { Link } from 'react-router-dom'
-import { api } from '../../services/api'
-
-interface RankedUser {
-    id: number
-    name: string
-    safe_name: string
-    pfp: string
-    banner: string
-    rank: number
-    pp: number
-    acc: number
-    playtime: number
-    playcount: number
-    max_combo: number
-    total_score: number
-    ranked_score: number
-    level: number
-    ss_count: number
-    ssh_count: number
-    s_count: number
-    sh_count: number
-    a_count: number
-    country: string
-}
+import {
+    type ApiPlayer,
+    fetchRankingPageCached,
+    getCachedRankingPageSnapshot,
+} from '../../services/profileData'
 
 const GlobalRanking: React.FC = () => {
-    const [players, setPlayers] = useState<RankedUser[]>([])
     const [activeMode, setActiveMode] = useState(0)
-    const [loading, setLoading] = useState(true)
     const [page, setPage] = useState(1)
-
     const [selectedState, setSelectedState] = useState<string>('') // Define o estado inicial como vazio (Brasil Geral)
+    const rankingKey = `${activeMode}:${page}:${selectedState.trim().toUpperCase() || 'GLOBAL'}`
+    const [asyncRanking, setAsyncRanking] = useState<{
+        key: string
+        players: ApiPlayer[]
+    } | null>(null)
     // Lista de UFs
     const states = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"]
 
@@ -57,34 +40,36 @@ const GlobalRanking: React.FC = () => {
         { id: 3, label: 'Mania' }
     ]
 
-    const fetchRanking = async (mode: number, pageNum: number, countryCode: string) => {
-        setLoading(true)
-        try {
-            const response = await api.get('/ranking/global', {
-                params: {
-                    mode: mode,
-                    page: pageNum,
-                    country: countryCode || undefined // Envia para a API
-                }
-            });
-            
-            const data = response.data
-            
-            if (Array.isArray(data)) {
-                setPlayers(data)
-            }
-        } catch (error) {
-            console.error("Erro no ranking:", error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     useEffect(() => {
-        // Comando que envia o estado selecionado para a API
-        fetchRanking(activeMode, page, selectedState) 
-    // Comando que coloca o selectedState na lista de dependências para recarregar a tabela quando a opção mudar
-    }, [activeMode, page, selectedState])
+        let cancelled = false
+
+        const loadRanking = async () => {
+            const data = await fetchRankingPageCached(activeMode, page, selectedState, {
+                onUpdate: (fresh) => {
+                    if (!cancelled) {
+                        setAsyncRanking({ key: rankingKey, players: fresh })
+                    }
+                },
+            })
+            if (!cancelled) {
+                setAsyncRanking({ key: rankingKey, players: data })
+            }
+        }
+
+        loadRanking()
+
+        return () => {
+            cancelled = true
+        }
+    }, [activeMode, page, selectedState, rankingKey])
+
+    const syncPlayers =
+        asyncRanking?.key === rankingKey
+            ? null
+            : getCachedRankingPageSnapshot(activeMode, page, selectedState)
+    const players =
+        asyncRanking?.key === rankingKey ? asyncRanking.players : (syncPlayers ?? [])
+    const loading = asyncRanking?.key !== rankingKey && syncPlayers === null
 
     // Nova função que impede o jogador de continuar passando as páginas infinitamente caso o número de jogadores exibidos na pág seja menor que 50.
     const isLastPage = players.length < 50;
@@ -182,9 +167,9 @@ const GlobalRanking: React.FC = () => {
                                             <div className={style.nameInfo}>
                                                 {/* Renderiza a bandeira. Se der erro (ex: não achar a imagem), usa a do BR de fallback */}
                                                 <img 
-                                                    src={`/flags/${user.country}.svg`} 
-                                                    alt={stateNames[user.country] || user.country} 
-                                                    title={stateNames[user.country] || user.country} /* <-- O BALÃOZINHO MÁGICO AQUI */
+                                                    src={`/flags/${user.country || 'BR'}.svg`} 
+                                                    alt={stateNames[user.country || 'BR'] || user.country || 'Brasil'} 
+                                                    title={stateNames[user.country || 'BR'] || user.country || 'Brasil'} /* <-- O BALÃOZINHO MÁGICO AQUI */
                                                     className={style.flagIcon}
                                                     onError={(e) => { e.currentTarget.src = '/flags/BR.svg' }} 
                                                 />

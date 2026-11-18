@@ -5,8 +5,11 @@ import { ProfileRankChart, WrapperComponent } from '../../components/components.
 import {
     type ApiPlayer,
     type ApiScore,
+    type ResolvedPlayer,
     fetchActivePlayer,
     fetchUserRecent,
+    getCachedActivePlayerSnapshot,
+    getCachedUserRecentSnapshot,
 } from '../../services/profileData'
 
 const assets = '/assets'
@@ -75,37 +78,73 @@ const buildStats = (player: ApiPlayer | null, fallbackScores: ApiScore[]): [stri
     ]
 }
 
+interface ProfileAsyncState {
+    key: string
+    resolved: ResolvedPlayer | null
+    recentScores: ApiScore[]
+}
+
 const Profile: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [player, setPlayer] = useState<ApiPlayer | null>(null)
-    const [stateRank, setStateRank] = useState<number | null>(null)
-    const [recentScores, setRecentScores] = useState<ApiScore[]>([])
+    const routeKey = id ? `id:${id.trim().toLowerCase()}` : '__me__'
+    const [asyncState, setAsyncState] = useState<ProfileAsyncState | null>(null)
 
     useEffect(() => {
         let cancelled = false
 
+        const syncRecentFallback = async (resolved: ResolvedPlayer | null) => {
+            if (!resolved) return
+
+            if (!resolved.player.top_200 || resolved.player.top_200.length === 0) {
+                const recent = await fetchUserRecent(resolved.player.id, 10, 0, {
+                    onUpdate: (freshRecent) => {
+                        if (!cancelled) {
+                            setAsyncState((prev) =>
+                                prev && prev.key === routeKey
+                                    ? { ...prev, recentScores: freshRecent }
+                                    : { key: routeKey, resolved, recentScores: freshRecent }
+                            )
+                        }
+                    },
+                })
+                if (!cancelled) {
+                    setAsyncState({ key: routeKey, resolved, recentScores: recent })
+                }
+            }
+        }
+
         const loadProfile = async () => {
-            const resolved = await fetchActivePlayer(id, { preferMe: !id })
+            const resolved = await fetchActivePlayer(id, {
+                preferMe: !id,
+                onUpdate: (freshResolved) => {
+                    if (cancelled) return
+                    setAsyncState((prev) => ({
+                        key: routeKey,
+                        resolved: freshResolved,
+                        recentScores:
+                            freshResolved.player.top_200 && freshResolved.player.top_200.length > 0
+                                ? []
+                                : prev?.key === routeKey
+                                  ? prev.recentScores
+                                  : [],
+                    }))
+                    void syncRecentFallback(freshResolved)
+                },
+            })
             if (cancelled) return
 
             if (!resolved) {
-                setPlayer(null)
-                setStateRank(null)
-                setRecentScores([])
+                setAsyncState({ key: routeKey, resolved: null, recentScores: [] })
                 return
             }
 
-            setPlayer(resolved.player)
-            setStateRank(resolved.stateRank)
-
             if (!resolved.player.top_200 || resolved.player.top_200.length === 0) {
-                const recent = await fetchUserRecent(resolved.player.id, 10)
-                if (!cancelled) {
-                    setRecentScores(recent)
-                }
+                const cachedRecent = getCachedUserRecentSnapshot(resolved.player.id, 10) ?? []
+                setAsyncState({ key: routeKey, resolved, recentScores: cachedRecent })
+                await syncRecentFallback(resolved)
             } else {
-                setRecentScores([])
+                setAsyncState({ key: routeKey, resolved, recentScores: [] })
             }
         }
 
@@ -114,7 +153,19 @@ const Profile: React.FC = () => {
         return () => {
             cancelled = true
         }
-    }, [id])
+    }, [id, routeKey])
+
+    const cachedResolved =
+        asyncState?.key === routeKey ? null : getCachedActivePlayerSnapshot(id, { preferMe: !id })
+    const resolved = asyncState?.key === routeKey ? asyncState.resolved : cachedResolved
+    const player = resolved?.player ?? null
+    const stateRank = resolved?.stateRank ?? null
+    const recentScores =
+        asyncState?.key === routeKey
+            ? asyncState.recentScores
+            : player && (!player.top_200 || player.top_200.length === 0)
+              ? (getCachedUserRecentSnapshot(player.id, 10) ?? [])
+              : []
 
     const displayName = player?.name || 'Arlecchino'
     const avatarSrc = player?.pfp || `${assets}/e464c.png`

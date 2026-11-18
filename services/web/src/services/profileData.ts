@@ -1,4 +1,12 @@
 import { api } from './api'
+import {
+    deleteKey,
+    getEnvelopeSync,
+    setEnvelope,
+    subscribeKey,
+    swrFetch,
+    waitForIdbHydration,
+} from './swrCache'
 
 export interface ApiBeatmap {
     artist: string
@@ -136,18 +144,25 @@ interface CatboyBeatmapRaw {
 const ACTIVE_PROFILE_STORAGE_KEY = 'fubika_active_profile_id'
 const BEATMAP_STORAGE_KEY = 'fubika_beatmaps_v1'
 const BEATMAPSET_STORAGE_KEY = 'fubika_beatmapsets_v1'
-const MAX_CACHED_BEATMAPS = 500
-const MAX_CACHED_BEATMAPSETS = 60
-const CACHE_TTL_MS = 30_000
-const RANKING_CACHE_TTL_MS = 60_000
+const HOT_PLAYER_STORAGE_KEY = 'fubika_swr_hot_v1:player'
+const HOT_RECENT_STORAGE_KEY = 'fubika_swr_hot_v1:recent'
+const HOT_RANKING_STORAGE_KEY = 'fubika_swr_hot_v1:ranking'
+
+const MAX_CACHED_BEATMAPS = 300
+const MAX_CACHED_BEATMAPSETS = 40
+const MAX_HOT_PLAYERS = 5
+const MAX_HOT_RECENT = 5
+const MAX_HOT_RANKINGS = 8
+
+const PLAYER_STALE_TIME_MS = 2 * 60 * 1000
+const PLAYER_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+const RECENT_STALE_TIME_MS = 60 * 1000
+const RECENT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+const RANKING_STALE_TIME_MS = 2 * 60 * 1000
+const RANKING_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+const BEATMAP_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 const CATBOY_API_BASE = 'https://catboy.best/api/v2'
 
-const playerCache = new Map<string, { timestamp: number; data: ResolvedPlayer }>()
-const inFlightPlayerRequests = new Map<string, Promise<ResolvedPlayer | null>>()
-const recentCache = new Map<string, { timestamp: number; data: ApiScore[] }>()
-const inFlightRecentRequests = new Map<string, Promise<ApiScore[]>>()
-const rankingPageCache = new Map<string, { timestamp: number; data: ApiPlayer[] }>()
-const inFlightRankingRequests = new Map<string, Promise<ApiPlayer[]>>()
 const inFlightBeatmapSetRequests = new Map<
     string,
     Promise<{ beatmap: ApiBeatmap; beatmapSet: ApiBeatmapset } | null>
@@ -179,19 +194,39 @@ export const hasApiAuth = (): boolean => {
     return hasToken || Boolean(api.defaults.headers.common['Authorization'])
 }
 
+const readAuthUserId = (): number | null => {
+    try {
+        const raw = localStorage.getItem('osu_user')
+        if (!raw) return null
+        const parsed = JSON.parse(raw) as { id?: unknown }
+        return typeof parsed?.id === 'number' && parsed.id > 0 ? parsed.id : null
+    } catch {
+        return null
+    }
+}
+
 const readStoredProfileId = (): string | null => {
     try {
-        return sessionStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY)
+        return (
+            sessionStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY) ||
+            localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY)
+        )
     } catch {
         return null
     }
 }
 
 const writeStoredProfileId = (id: number): void => {
+    const value = String(id)
     try {
-        sessionStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, String(id))
+        sessionStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, value)
     } catch {
-        // Ignora indisponibilidade de storage
+        // Ignora indisponibilidade de sessionStorage
+    }
+    try {
+        localStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, value)
+    } catch {
+        // Ignora indisponibilidade de localStorage
     }
 }
 
@@ -233,7 +268,6 @@ const persistMapToStorage = <T,>(key: string, cache: Map<number, T>, maxEntries:
     try {
         localStorage.setItem(key, JSON.stringify(Array.from(cache.entries())))
     } catch {
-        // Libera espaço mantendo metade das entradas recentes em caso de quota excedida
         try {
             const entries = Array.from(cache.entries())
             const trimmed = entries.slice(Math.floor(entries.length / 2))
@@ -251,10 +285,40 @@ const persistMapToStorage = <T,>(key: string, cache: Map<number, T>, maxEntries:
 const beatmapMirrorCache = loadMapFromStorage<ApiBeatmap>(BEATMAP_STORAGE_KEY)
 const beatmapSetMirrorCache = loadMapFromStorage<ApiBeatmapset>(BEATMAPSET_STORAGE_KEY)
 
+const getMirrorBeatmap = (beatmapId: number): ApiBeatmap | undefined => {
+    const hot = beatmapMirrorCache.get(beatmapId)
+    if (hot) return hot
+
+    const l2Promoted = getEnvelopeSync<ApiBeatmap>(`beatmap:${beatmapId}`, BEATMAP_MAX_AGE_MS)?.data
+    if (l2Promoted) {
+        beatmapMirrorCache.set(beatmapId, l2Promoted)
+        return l2Promoted
+    }
+    return undefined
+}
+
+const getMirrorBeatmapSet = (beatmapsetId: number): ApiBeatmapset | undefined => {
+    const hot = beatmapSetMirrorCache.get(beatmapsetId)
+    if (hot) return hot
+
+    const l2Promoted = getEnvelopeSync<ApiBeatmapset>(
+        `beatmapset:${beatmapsetId}`,
+        BEATMAP_MAX_AGE_MS
+    )?.data
+    if (l2Promoted) {
+        beatmapSetMirrorCache.set(beatmapsetId, l2Promoted)
+        return l2Promoted
+    }
+    return undefined
+}
+
 const setCachedBeatmap = (beatmap: ApiBeatmap): void => {
     if (!beatmap.beatmap_id || beatmap.beatmap_id <= 0) return
     beatmapMirrorCache.delete(beatmap.beatmap_id)
     beatmapMirrorCache.set(beatmap.beatmap_id, beatmap)
+    setEnvelope(`beatmap:${beatmap.beatmap_id}`, beatmap, {
+        maxAgeMs: BEATMAP_MAX_AGE_MS,
+    })
 }
 
 const setCachedBeatmapSet = (beatmapSet: ApiBeatmapset): void => {
@@ -272,6 +336,9 @@ const setCachedBeatmapSet = (beatmapSet: ApiBeatmapset): void => {
     beatmapSetMirrorCache.delete(normalizedSet.beatmapset_id)
     beatmapSetMirrorCache.set(normalizedSet.beatmapset_id, normalizedSet)
     persistMapToStorage(BEATMAPSET_STORAGE_KEY, beatmapSetMirrorCache, MAX_CACHED_BEATMAPSETS)
+    setEnvelope(`beatmapset:${normalizedSet.beatmapset_id}`, normalizedSet, {
+        maxAgeMs: BEATMAP_MAX_AGE_MS,
+    })
 }
 
 const applyDeterministicCovers = (beatmap: ApiBeatmap): ApiBeatmap => {
@@ -347,6 +414,38 @@ const mapCatboyBeatmap = (raw: CatboyBeatmapRaw, parentSet?: CatboyBeatmapSetRaw
     })
 }
 
+const applyCachedBeatmapsSync = (
+    scores: ApiScore[]
+): { scores: ApiScore[]; changed: boolean } => {
+    if (!Array.isArray(scores) || scores.length === 0) {
+        return { scores, changed: false }
+    }
+
+    let anyChanged = false
+    const nextScores = scores.map((score) => {
+        if (!score.beatmap) {
+            return score
+        }
+
+        const cached = getMirrorBeatmap(score.beatmap.beatmap_id)
+        const target = cached ? applyDeterministicCovers(cached) : applyDeterministicCovers(score.beatmap)
+        if (
+            target !== score.beatmap &&
+            (target.title !== score.beatmap.title ||
+                target.diff !== score.beatmap.diff ||
+                target.cover !== score.beatmap.cover ||
+                target.thumbnail !== score.beatmap.thumbnail ||
+                target.artist !== score.beatmap.artist)
+        ) {
+            anyChanged = true
+            return { ...score, beatmap: target }
+        }
+        return score
+    })
+
+    return { scores: anyChanged ? nextScores : scores, changed: anyChanged }
+}
+
 export const hydrateScoresBeatmaps = async (
     scores: ApiScore[],
     maxCount = 50
@@ -356,17 +455,10 @@ export const hydrateScoresBeatmaps = async (
     }
 
     if (maxCount <= 0) {
-        return scores.map((score) =>
-            score.beatmap
-                ? {
-                      ...score,
-                      beatmap: applyDeterministicCovers(
-                          beatmapMirrorCache.get(score.beatmap.beatmap_id) ?? score.beatmap
-                      ),
-                  }
-                : score
-        )
+        return applyCachedBeatmapsSync(scores).scores
     }
+
+    await waitForIdbHydration()
 
     const limit = Math.min(scores.length, maxCount)
     const missingIdSet = new Set<number>()
@@ -375,7 +467,7 @@ export const hydrateScoresBeatmaps = async (
     for (let i = 0; i < limit; i++) {
         const beatmap = scores[i]?.beatmap
         if (beatmap && needsBeatmapHydration(beatmap)) {
-            if (beatmapMirrorCache.has(beatmap.beatmap_id)) {
+            if (getMirrorBeatmap(beatmap.beatmap_id)) {
                 continue
             }
             const existingInFlight = inFlightBatchBeatmapRequests.get(beatmap.beatmap_id)
@@ -434,24 +526,7 @@ export const hydrateScoresBeatmaps = async (
         persistMapToStorage(BEATMAP_STORAGE_KEY, beatmapMirrorCache, MAX_CACHED_BEATMAPS)
     }
 
-    return scores.map((score) => {
-        if (!score.beatmap) {
-            return score
-        }
-
-        const cached = beatmapMirrorCache.get(score.beatmap.beatmap_id)
-        if (cached) {
-            return {
-                ...score,
-                beatmap: applyDeterministicCovers(cached),
-            }
-        }
-
-        return {
-            ...score,
-            beatmap: applyDeterministicCovers(score.beatmap),
-        }
-    })
+    return applyCachedBeatmapsSync(scores).scores
 }
 
 export const getCachedBeatmapSetFromMirror = (
@@ -459,13 +534,11 @@ export const getCachedBeatmapSetFromMirror = (
     beatmapsetId?: number
 ): { beatmap: ApiBeatmap; beatmapSet: ApiBeatmapset } | null => {
     const numericId = Number(beatmapId)
-    const cachedMap = Number.isFinite(numericId)
-        ? beatmapMirrorCache.get(numericId)
-        : undefined
+    const cachedMap = Number.isFinite(numericId) ? getMirrorBeatmap(numericId) : undefined
     const targetSetId = beatmapsetId || cachedMap?.beatmapset_id || 0
     if (targetSetId <= 0) return null
 
-    const cachedSet = beatmapSetMirrorCache.get(targetSetId)
+    const cachedSet = getMirrorBeatmapSet(targetSetId)
     if (!cachedSet) return null
 
     const beatmapInSet =
@@ -481,6 +554,12 @@ export const fetchBeatmapWithSetFromMirror = async (
     const preCached = getCachedBeatmapSetFromMirror(beatmapId)
     if (preCached) {
         return preCached
+    }
+
+    await waitForIdbHydration()
+    const idbCached = getCachedBeatmapSetFromMirror(beatmapId)
+    if (idbCached) {
+        return idbCached
     }
 
     const requestKey = String(beatmapId)
@@ -536,86 +615,203 @@ export const fetchBeatmapWithSetFromMirror = async (
     return requestPromise
 }
 
-const fetchRankingPageCached = async (
+const getRankingSwrKey = (mode = 0, page = 1, country?: string): string => {
+    const normalizedCountry = country?.trim().toUpperCase() || 'GLOBAL'
+    return `ranking:${mode}:${page}:${normalizedCountry}`
+}
+
+export const getCachedRankingPageSnapshot = (
     mode = 0,
     page = 1,
     country?: string
+): ApiPlayer[] | null => {
+    const key = getRankingSwrKey(mode, page, country)
+    return (
+        getEnvelopeSync<ApiPlayer[]>(key, RANKING_MAX_AGE_MS, HOT_RANKING_STORAGE_KEY)?.data ??
+        null
+    )
+}
+
+export const fetchRankingPageCached = async (
+    mode = 0,
+    page = 1,
+    country?: string,
+    options?: { onUpdate?: (fresh: ApiPlayer[]) => void }
 ): Promise<ApiPlayer[]> => {
     const normalizedCountry = country?.trim().toUpperCase() || undefined
-    const cacheKey = `${mode}:${page}:${normalizedCountry || 'GLOBAL'}`
+    const key = getRankingSwrKey(mode, page, normalizedCountry)
 
-    const cached = rankingPageCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < RANKING_CACHE_TTL_MS) {
-        return cached.data
+    const result = await swrFetch<ApiPlayer[]>({
+        key,
+        staleTimeMs: RANKING_STALE_TIME_MS,
+        maxAgeMs: RANKING_MAX_AGE_MS,
+        hotStorageKey: HOT_RANKING_STORAGE_KEY,
+        maxHotEntries: MAX_HOT_RANKINGS,
+        fetcher: async () => {
+            try {
+                const res = await api.get<ApiPlayer[]>('/ranking/global', {
+                    params: {
+                        mode,
+                        page,
+                        country: normalizedCountry,
+                    },
+                })
+                return Array.isArray(res.data) ? res.data : []
+            } catch {
+                return null
+            }
+        },
+        onUpdate: options?.onUpdate,
+    })
+
+    return result ?? []
+}
+
+const getRecentSwrKey = (userId: number | string, mode = 0, limit = 50): string =>
+    `recent:${userId}:${mode}:${limit}`
+
+export const getCachedUserRecentSnapshot = (
+    userId: number | string,
+    limit = 50,
+    mode = 0
+): ApiScore[] | null => {
+    if (!hasApiAuth()) {
+        return null
     }
 
-    const inFlight = inFlightRankingRequests.get(cacheKey)
-    if (inFlight) {
-        return inFlight
+    const directKey = getRecentSwrKey(userId, mode, limit)
+    const direct = getEnvelopeSync<ApiScore[]>(
+        directKey,
+        RECENT_MAX_AGE_MS,
+        HOT_RECENT_STORAGE_KEY
+    )
+    if (direct) {
+        return applyCachedBeatmapsSync(direct.data).scores
     }
 
-    const requestPromise = (async () => {
-        try {
-            const res = await api.get<ApiPlayer[]>('/ranking/global', {
-                params: {
-                    mode,
-                    page,
-                    country: normalizedCountry,
-                },
-            })
-            const data = Array.isArray(res.data) ? res.data : []
-            rankingPageCache.set(cacheKey, { timestamp: Date.now(), data })
-            return data
-        } catch {
-            return []
-        } finally {
-            inFlightRankingRequests.delete(cacheKey)
+    if (limit < 50) {
+        const fullRecent = getEnvelopeSync<ApiScore[]>(
+            getRecentSwrKey(userId, mode, 50),
+            RECENT_MAX_AGE_MS,
+            HOT_RECENT_STORAGE_KEY
+        )
+        if (fullRecent) {
+            return applyCachedBeatmapsSync(fullRecent.data.slice(0, limit)).scores
         }
-    })()
+    }
 
-    inFlightRankingRequests.set(cacheKey, requestPromise)
-    return requestPromise
+    return null
 }
 
 export const fetchUserRecent = async (
     userId: number | string,
     limit = 50,
-    mode = 0
+    mode = 0,
+    options?: { onUpdate?: (fresh: ApiScore[]) => void }
 ): Promise<ApiScore[]> => {
     if (!hasApiAuth()) {
         return []
     }
 
-    const cacheKey = `${userId}:${mode}:${limit}`
-    const cached = recentCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-        return cached.data
+    const key = getRecentSwrKey(userId, mode, limit)
+    const result = await swrFetch<ApiScore[]>({
+        key,
+        staleTimeMs: RECENT_STALE_TIME_MS,
+        maxAgeMs: RECENT_MAX_AGE_MS,
+        hotStorageKey: HOT_RECENT_STORAGE_KEY,
+        maxHotEntries: MAX_HOT_RECENT,
+        fetcher: async () => {
+            try {
+                const res = await api.get<ApiScore[]>(
+                    `/user/${encodeURIComponent(String(userId))}/recent`,
+                    { params: { mode, limit } }
+                )
+                const rawData = Array.isArray(res.data) ? res.data : []
+                return await hydrateScoresBeatmaps(rawData, limit)
+            } catch {
+                return null
+            }
+        },
+        onUpdate: options?.onUpdate,
+    })
+
+    return result ?? []
+}
+
+const getEffectivePlayerKey = (routeId?: string, preferMe?: boolean): string => {
+    if (routeId) {
+        return routeId.trim().toLowerCase()
+    }
+    if (!preferMe) {
+        const storedId = readStoredProfileId()
+        if (storedId) return storedId
+    }
+    return '__me__'
+}
+
+const getPlayerSwrKey = (effectiveKey: string): string => `player:${effectiveKey}`
+
+const syncPlayerAliases = (
+    resolved: ResolvedPlayer,
+    excludeKey: string,
+    isMe = false
+): void => {
+    const idKey = getPlayerSwrKey(String(resolved.player.id))
+    const keysToSync = [idKey]
+
+    if (resolved.player.safe_name) {
+        keysToSync.push(getPlayerSwrKey(resolved.player.safe_name.toLowerCase()))
     }
 
-    const inFlight = inFlightRecentRequests.get(cacheKey)
-    if (inFlight) {
-        return inFlight
+    const cachedMe = getEnvelopeSync<ResolvedPlayer>(
+        getPlayerSwrKey('__me__'),
+        PLAYER_MAX_AGE_MS,
+        HOT_PLAYER_STORAGE_KEY,
+        true
+    )
+    if (isMe || cachedMe?.data.player.id === resolved.player.id) {
+        keysToSync.push(getPlayerSwrKey('__me__'))
     }
 
-    const requestPromise = (async () => {
-        try {
-            const res = await api.get<ApiScore[]>(
-                `/user/${encodeURIComponent(String(userId))}/recent`,
-                { params: { mode, limit } }
-            )
-            const rawData = Array.isArray(res.data) ? res.data : []
-            const data = await hydrateScoresBeatmaps(rawData, limit)
-            recentCache.set(cacheKey, { timestamp: Date.now(), data })
-            return data
-        } catch {
-            return []
-        } finally {
-            inFlightRecentRequests.delete(cacheKey)
-        }
-    })()
+    for (const targetKey of keysToSync) {
+        if (targetKey === excludeKey) continue
+        setEnvelope(targetKey, resolved, {
+            hotStorageKey: HOT_PLAYER_STORAGE_KEY,
+            maxHotEntries: MAX_HOT_PLAYERS,
+            maxAgeMs: PLAYER_MAX_AGE_MS,
+        })
+    }
+}
 
-    inFlightRecentRequests.set(cacheKey, requestPromise)
-    return requestPromise
+const ensurePlayerTopHydrated = async (
+    resolved: ResolvedPlayer,
+    hydrateCount: number
+): Promise<ResolvedPlayer> => {
+    if (
+        hydrateCount <= 0 ||
+        !Array.isArray(resolved.player.top_200) ||
+        resolved.player.top_200.length === 0
+    ) {
+        return resolved
+    }
+
+    const needsHydration = resolved.player.top_200
+        .slice(0, hydrateCount)
+        .some((score) => needsBeatmapHydration(score.beatmap))
+
+    const syncCheck = applyCachedBeatmapsSync(resolved.player.top_200)
+    if (!needsHydration && !syncCheck.changed) {
+        return resolved
+    }
+
+    const hydratedTop = needsHydration
+        ? await hydrateScoresBeatmaps(resolved.player.top_200, hydrateCount)
+        : syncCheck.scores
+
+    return {
+        ...resolved,
+        player: { ...resolved.player, top_200: hydratedTop },
+    }
 }
 
 const resolvePlayerAndStateRank = async (
@@ -708,88 +904,176 @@ const resolvePlayerAndStateRank = async (
         }
     }
 
-    const result: ResolvedPlayer = { player, stateRank }
-    playerCache.set(String(player.id), { timestamp: Date.now(), data: result })
-    if (player.safe_name) {
-        playerCache.set(player.safe_name.toLowerCase(), { timestamp: Date.now(), data: result })
+    return { player, stateRank }
+}
+
+export const getCachedActivePlayerSnapshot = (
+    routeId?: string,
+    options?: { preferMe?: boolean }
+): ResolvedPlayer | null => {
+    if (!hasApiAuth()) {
+        return null
     }
-    return result
+
+    const effectiveKey = getEffectivePlayerKey(routeId, options?.preferMe)
+    let envelope = getEnvelopeSync<ResolvedPlayer>(
+        getPlayerSwrKey(effectiveKey),
+        PLAYER_MAX_AGE_MS,
+        HOT_PLAYER_STORAGE_KEY
+    )
+
+    if (!envelope && effectiveKey === '__me__') {
+        const storedId = readStoredProfileId()
+        if (storedId) {
+            envelope = getEnvelopeSync<ResolvedPlayer>(
+                getPlayerSwrKey(storedId),
+                PLAYER_MAX_AGE_MS,
+                HOT_PLAYER_STORAGE_KEY
+            )
+        }
+    }
+
+    if (!envelope) {
+        return null
+    }
+
+    if (effectiveKey === '__me__') {
+        const authUserId = readAuthUserId()
+        if (authUserId !== null && envelope.data.player.id !== authUserId) {
+            return null
+        }
+    }
+
+    const topScores = envelope.data.player.top_200
+    if (!Array.isArray(topScores) || topScores.length === 0) {
+        return envelope.data
+    }
+
+    const hydrated = applyCachedBeatmapsSync(topScores)
+    if (!hydrated.changed) {
+        return envelope.data
+    }
+
+    return {
+        ...envelope.data,
+        player: {
+            ...envelope.data.player,
+            top_200: hydrated.scores,
+        },
+    }
+}
+
+export const getDefaultCachedBeatmapSetSnapshot = (): {
+    beatmap: ApiBeatmap
+    beatmapSet: ApiBeatmapset
+} | null => {
+    if (!hasApiAuth()) {
+        return null
+    }
+
+    const cachedPlayer = getCachedActivePlayerSnapshot(undefined, { preferMe: false })
+    if (!cachedPlayer) {
+        return null
+    }
+
+    let targetBeatmapId = cachedPlayer.player.top_200?.[0]?.beatmap?.beatmap_id ?? 0
+    if (!targetBeatmapId && cachedPlayer.player.id) {
+        const recent = getCachedUserRecentSnapshot(cachedPlayer.player.id, 1)
+        targetBeatmapId = recent?.[0]?.beatmap?.beatmap_id ?? 0
+    }
+
+    if (!targetBeatmapId || targetBeatmapId <= 0) {
+        return null
+    }
+
+    return getCachedBeatmapSetFromMirror(targetBeatmapId)
 }
 
 export const fetchActivePlayer = async (
     routeId?: string,
-    options?: { preferMe?: boolean; hydrateCount?: number }
+    options?: {
+        preferMe?: boolean
+        hydrateCount?: number
+        onUpdate?: (fresh: ResolvedPlayer) => void
+    }
 ): Promise<ResolvedPlayer | null> => {
     if (!hasApiAuth()) {
         return null
     }
 
     const hydrateCount = options?.hydrateCount ?? 10
-    const effectiveKey = routeId
-        ? routeId.trim().toLowerCase()
-        : !options?.preferMe && readStoredProfileId()
-          ? readStoredProfileId()!
-          : '__me__'
+    const effectiveKey = getEffectivePlayerKey(routeId, options?.preferMe)
+    const swrKey = getPlayerSwrKey(effectiveKey)
 
-    const cached = playerCache.get(effectiveKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-        writeStoredProfileId(cached.data.player.id)
-
+    if (effectiveKey === '__me__') {
+        const authUserId = readAuthUserId()
+        const existingMe = getEnvelopeSync<ResolvedPlayer>(
+            swrKey,
+            PLAYER_MAX_AGE_MS,
+            HOT_PLAYER_STORAGE_KEY,
+            true
+        )
         if (
-            hydrateCount > 0 &&
-            Array.isArray(cached.data.player.top_200) &&
-            cached.data.player.top_200.slice(0, hydrateCount).some((s) => needsBeatmapHydration(s.beatmap))
+            authUserId !== null &&
+            existingMe &&
+            existingMe.data.player.id !== authUserId
         ) {
-            const hydratedTop = await hydrateScoresBeatmaps(
-                cached.data.player.top_200,
-                hydrateCount
-            )
-            const updated: ResolvedPlayer = {
-                ...cached.data,
-                player: { ...cached.data.player, top_200: hydratedTop },
-            }
-            playerCache.set(effectiveKey, { timestamp: Date.now(), data: updated })
-            playerCache.set(String(updated.player.id), { timestamp: Date.now(), data: updated })
-            return updated
+            deleteKey(swrKey, HOT_PLAYER_STORAGE_KEY)
         }
-
-        return cached.data
     }
 
-    const existingPromise = inFlightPlayerRequests.get(effectiveKey)
-    if (existingPromise) {
-        const existingResult = await existingPromise
-        if (
-            existingResult &&
-            hydrateCount > 0 &&
-            Array.isArray(existingResult.player.top_200) &&
-            existingResult.player.top_200
-                .slice(0, hydrateCount)
-                .some((s) => needsBeatmapHydration(s.beatmap))
-        ) {
-            const hydratedTop = await hydrateScoresBeatmaps(
-                existingResult.player.top_200,
-                hydrateCount
-            )
-            return {
-                ...existingResult,
-                player: { ...existingResult.player, top_200: hydratedTop },
+    const result = await swrFetch<ResolvedPlayer>({
+        key: swrKey,
+        staleTimeMs: PLAYER_STALE_TIME_MS,
+        maxAgeMs: PLAYER_MAX_AGE_MS,
+        hotStorageKey: HOT_PLAYER_STORAGE_KEY,
+        maxHotEntries: MAX_HOT_PLAYERS,
+        fetcher: async () => {
+            const resolved = await resolvePlayerAndStateRank(routeId, options)
+            if (resolved) {
+                syncPlayerAliases(resolved, swrKey, effectiveKey === '__me__')
             }
-        }
-        return existingResult
+            return resolved
+        },
+        onUpdate: options?.onUpdate
+            ? async (fresh) => {
+                  const upgraded = await ensurePlayerTopHydrated(fresh, hydrateCount)
+                  if (upgraded !== fresh) {
+                      setEnvelope(swrKey, upgraded, {
+                          hotStorageKey: HOT_PLAYER_STORAGE_KEY,
+                          maxHotEntries: MAX_HOT_PLAYERS,
+                          maxAgeMs: PLAYER_MAX_AGE_MS,
+                      })
+                      syncPlayerAliases(upgraded, swrKey, effectiveKey === '__me__')
+                  } else {
+                      syncPlayerAliases(fresh, swrKey, effectiveKey === '__me__')
+                  }
+                  options.onUpdate?.(upgraded)
+              }
+            : undefined,
+    })
+
+    if (!result) {
+        return null
     }
 
-    const requestPromise = resolvePlayerAndStateRank(routeId, options)
-        .then((res) => {
-            if (res && effectiveKey === '__me__') {
-                playerCache.set('__me__', { timestamp: Date.now(), data: res })
-            }
-            return res
-        })
-        .finally(() => {
-            inFlightPlayerRequests.delete(effectiveKey)
-        })
+    writeStoredProfileId(result.player.id)
 
-    inFlightPlayerRequests.set(effectiveKey, requestPromise)
-    return requestPromise
+    const upgraded = await ensurePlayerTopHydrated(result, hydrateCount)
+    if (upgraded !== result) {
+        setEnvelope(swrKey, upgraded, {
+            hotStorageKey: HOT_PLAYER_STORAGE_KEY,
+            maxHotEntries: MAX_HOT_PLAYERS,
+            maxAgeMs: PLAYER_MAX_AGE_MS,
+        })
+        syncPlayerAliases(upgraded, swrKey, effectiveKey === '__me__')
+    }
+
+    return upgraded
 }
+
+export const subscribeToPlayerKey = (
+    routeId: string | undefined,
+    preferMe: boolean,
+    listener: (fresh: ResolvedPlayer) => void
+): (() => void) => subscribeKey(getPlayerSwrKey(getEffectivePlayerKey(routeId, preferMe)), listener)

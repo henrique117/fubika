@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import style from './style.module.css'
 import { ProfileRankChart, WrapperComponent } from '../../../components/components.export'
-import { type ApiPlayer, fetchActivePlayer } from '../../../services/profileData'
+import {
+    type ApiPlayer,
+    fetchActivePlayer,
+    getCachedActivePlayerSnapshot,
+} from '../../../services/profileData'
 
 const asset = (name: string) => `/assets/${name}`
 
@@ -97,17 +101,35 @@ const panels = [
 const ProfileAchievements: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [player, setPlayer] = useState<ApiPlayer | null>(null)
-    const [stateRank, setStateRank] = useState<number | null>(null)
+    const routeKey = id ? `id:${id.trim().toLowerCase()}` : '__active__'
+    const [asyncState, setAsyncState] = useState<{
+        key: string
+        player: ApiPlayer | null
+        stateRank: number | null
+    } | null>(null)
 
     useEffect(() => {
         let cancelled = false
 
         const loadPlayer = async () => {
-            const resolved = await fetchActivePlayer(id, { hydrateCount: 0 })
+            const resolved = await fetchActivePlayer(id, {
+                hydrateCount: 0,
+                onUpdate: (fresh) => {
+                    if (!cancelled) {
+                        setAsyncState({
+                            key: routeKey,
+                            player: fresh.player,
+                            stateRank: fresh.stateRank,
+                        })
+                    }
+                },
+            })
             if (cancelled) return
-            setPlayer(resolved?.player ?? null)
-            setStateRank(resolved?.stateRank ?? null)
+            setAsyncState({
+                key: routeKey,
+                player: resolved?.player ?? null,
+                stateRank: resolved?.stateRank ?? null,
+            })
         }
 
         loadPlayer()
@@ -115,7 +137,16 @@ const ProfileAchievements: React.FC = () => {
         return () => {
             cancelled = true
         }
-    }, [id])
+    }, [id, routeKey])
+
+    const cachedResolved =
+        asyncState?.key === routeKey ? null : getCachedActivePlayerSnapshot(id)
+    const player =
+        asyncState?.key === routeKey ? asyncState.player : (cachedResolved?.player ?? null)
+    const stateRank =
+        asyncState?.key === routeKey
+            ? asyncState.stateRank
+            : (cachedResolved?.stateRank ?? null)
 
     const displayName = player?.name || 'Arlecchino'
     const avatarSrc = player?.pfp || asset('e464c.png')

@@ -6,6 +6,8 @@ import {
     type ApiScore,
     fetchActivePlayer,
     fetchUserRecent,
+    getCachedActivePlayerSnapshot,
+    getCachedUserRecentSnapshot,
     getGradeAsset,
     hydrateScoresBeatmaps,
 } from '../../../services/profileData'
@@ -126,42 +128,73 @@ const scoreToRecentPlay = (score: ApiScore): Play => ({
     rankSrc: getGradeAsset(score.grade),
 })
 
+interface RecentAsyncState {
+    key: string
+    targetId: number | null
+    scores: ApiScore[]
+}
+
 const ProfileRecentPlays: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [targetId, setTargetId] = useState<number | null>(null)
-    const [scores, setScores] = useState<ApiScore[]>([])
+    const routeKey = id ? `id:${id.trim().toLowerCase()}` : '__active__'
+    const [asyncState, setAsyncState] = useState<RecentAsyncState | null>(null)
 
     useEffect(() => {
         let cancelled = false
 
-        const loadRecentPlays = async () => {
-            const resolved = await fetchActivePlayer(id, { hydrateCount: 0 })
-            if (cancelled) return
-
-            if (!resolved) {
-                setTargetId(null)
-                setScores([])
-                return
-            }
-
-            const activePlayer = resolved.player
-            const recent = await fetchUserRecent(activePlayer.id, 50)
+        const loadRecentForPlayer = async (activePlayer: {
+            id: number
+            top_200?: ApiScore[]
+        }) => {
+            const recent = await fetchUserRecent(activePlayer.id, 50, 0, {
+                onUpdate: (freshRecent) => {
+                    if (cancelled) return
+                    if (freshRecent.length > 0) {
+                        setAsyncState({
+                            key: routeKey,
+                            targetId: activePlayer.id,
+                            scores: freshRecent,
+                        })
+                    }
+                },
+            })
             if (cancelled) return
 
             if (recent.length > 0) {
-                setTargetId(activePlayer.id)
-                setScores(recent)
+                setAsyncState({ key: routeKey, targetId: activePlayer.id, scores: recent })
             } else {
                 const hydratedTop = await hydrateScoresBeatmaps(
                     (activePlayer.top_200 ?? []).slice(0, 50),
                     50
                 )
                 if (!cancelled) {
-                    setTargetId(activePlayer.id)
-                    setScores(hydratedTop)
+                    setAsyncState({
+                        key: routeKey,
+                        targetId: activePlayer.id,
+                        scores: hydratedTop,
+                    })
                 }
             }
+        }
+
+        const loadRecentPlays = async () => {
+            const resolved = await fetchActivePlayer(id, {
+                hydrateCount: 0,
+                onUpdate: (fresh) => {
+                    if (!cancelled) {
+                        void loadRecentForPlayer(fresh.player)
+                    }
+                },
+            })
+            if (cancelled) return
+
+            if (!resolved) {
+                setAsyncState({ key: routeKey, targetId: null, scores: [] })
+                return
+            }
+
+            await loadRecentForPlayer(resolved.player)
         }
 
         loadRecentPlays()
@@ -169,7 +202,21 @@ const ProfileRecentPlays: React.FC = () => {
         return () => {
             cancelled = true
         }
-    }, [id])
+    }, [id, routeKey])
+
+    const cachedResolved =
+        asyncState?.key === routeKey ? null : getCachedActivePlayerSnapshot(id)
+    const cachedPlayerId = cachedResolved?.player?.id ?? null
+    const cachedRecent = cachedPlayerId
+        ? getCachedUserRecentSnapshot(cachedPlayerId, 50)
+        : null
+    const syncFallbackScores =
+        cachedRecent && cachedRecent.length > 0
+            ? cachedRecent
+            : (cachedResolved?.player?.top_200 ?? []).slice(0, 50)
+
+    const targetId = asyncState?.key === routeKey ? asyncState.targetId : cachedPlayerId
+    const scores = asyncState?.key === routeKey ? asyncState.scores : syncFallbackScores
 
     const plays: Play[] =
         targetId !== null

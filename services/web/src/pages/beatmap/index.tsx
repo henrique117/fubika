@@ -9,6 +9,7 @@ import {
     fetchBeatmapWithSetFromMirror,
     fetchUserRecent,
     getCachedBeatmapSetFromMirror,
+    getDefaultCachedBeatmapSetSnapshot,
     hasApiAuth,
 } from '../../services/profileData'
 
@@ -496,8 +497,12 @@ function Leaderboard() {
 
 const Beatmap: React.FC = () => {
     const { id } = useParams<{ id: string }>()
-    const [currentBeatmap, setCurrentBeatmap] = useState<ApiBeatmap | null>(null)
-    const [beatmapSet, setBeatmapSet] = useState<ApiBeatmapset | null>(null)
+    const routeKey = id ? `id:${id.trim()}` : '__default__'
+    const [asyncBundle, setAsyncBundle] = useState<{
+        key: string
+        beatmap: ApiBeatmap | null
+        beatmapSet: ApiBeatmapset | null
+    } | null>(null)
 
     useEffect(() => {
         let cancelled = false
@@ -523,15 +528,17 @@ const Beatmap: React.FC = () => {
             }
 
             if (!targetBeatmapId) {
-                setCurrentBeatmap(null)
-                setBeatmapSet(null)
+                setAsyncBundle({ key: routeKey, beatmap: null, beatmapSet: null })
                 return
             }
 
             const cachedMirror = getCachedBeatmapSetFromMirror(targetBeatmapId)
             if (cachedMirror) {
-                setCurrentBeatmap(cachedMirror.beatmap)
-                setBeatmapSet(cachedMirror.beatmapSet)
+                setAsyncBundle({
+                    key: routeKey,
+                    beatmap: cachedMirror.beatmap,
+                    beatmapSet: cachedMirror.beatmapSet,
+                })
                 return
             }
 
@@ -539,11 +546,13 @@ const Beatmap: React.FC = () => {
             if (cancelled) return
 
             if (mirror) {
-                setCurrentBeatmap(mirror.beatmap)
-                setBeatmapSet(mirror.beatmapSet)
+                setAsyncBundle({
+                    key: routeKey,
+                    beatmap: mirror.beatmap,
+                    beatmapSet: mirror.beatmapSet,
+                })
             } else {
-                setCurrentBeatmap(null)
-                setBeatmapSet(null)
+                setAsyncBundle({ key: routeKey, beatmap: null, beatmapSet: null })
             }
         }
 
@@ -552,7 +561,18 @@ const Beatmap: React.FC = () => {
         return () => {
             cancelled = true
         }
-    }, [id])
+    }, [id, routeKey])
+
+    const syncBundle =
+        asyncBundle?.key === routeKey
+            ? null
+            : id
+              ? getCachedBeatmapSetFromMirror(id)
+              : getDefaultCachedBeatmapSetSnapshot()
+    const currentBeatmap =
+        asyncBundle?.key === routeKey ? asyncBundle.beatmap : (syncBundle?.beatmap ?? null)
+    const beatmapSet =
+        asyncBundle?.key === routeKey ? asyncBundle.beatmapSet : (syncBundle?.beatmapSet ?? null)
 
     return (
         <WrapperComponent>

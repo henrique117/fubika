@@ -41,10 +41,22 @@ const Navbar: React.FC = () => {
 
                         {signed && user && (
                             <div className={style.mobileOnly}>
-                                <div className={style.profileInside}>
-                                    <img src={userAvatar} alt={user.name} />
+                                <Link
+                                    to={`/profile/${user.id}`}
+                                    className={style.profileInside}
+                                    style={{ display: 'flex' }}
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <img
+                                        src={userAvatar}
+                                        alt={user.name}
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null
+                                            e.currentTarget.src = '/assets/e464c.png'
+                                        }}
+                                    />
                                     <span>{user.name}</span>
-                                </div>
+                                </Link>
                             </div>
                         )}
 
@@ -91,13 +103,21 @@ const Navbar: React.FC = () => {
                                 </button>
                             </div>
 
-                            <img
-                                src={userAvatar}
-                                alt={user.name}
-                                className={style.avatarTrigger}
-                                onClick={() => setMenuOpen(!menuOpen)}
-                                onError={(e) => e.currentTarget.src = 'https://a.bpy.local/0'}
-                            />
+                            <Link
+                                to={`/profile/${user.id}`}
+                                aria-label={`Perfil de ${user.name}`}
+                                style={{ display: 'contents' }}
+                            >
+                                <img
+                                    src={userAvatar}
+                                    alt={user.name}
+                                    className={style.avatarTrigger}
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null
+                                        e.currentTarget.src = '/assets/e464c.png'
+                                    }}
+                                />
+                            </Link>
 
 
                         </div>

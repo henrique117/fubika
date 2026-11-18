@@ -1,12 +1,18 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import style from './style.module.css'
 import { WrapperComponent } from '../../../components/components.export'
+import {
+    type ApiPlayer,
+    fetchActivePlayer,
+    getGradeAsset,
+} from '../../../services/profileData'
 
 const assets = '/assets'
 
 type Play = {
     rank: number
+    beatmapId?: number
     title?: string
     difficulty?: string
     pp?: number
@@ -18,6 +24,7 @@ type Play = {
     mods?: string
     combo?: string
     grade?: string
+    gradeSrc?: string
 }
 
 const featured: Play[] = [
@@ -112,12 +119,66 @@ const gradeImages: Record<string, string> = {
     hasan: 'bac4b.png',
 }
 
-const plays: Play[] = Array.from({ length: 50 }, (_, index) => {
+const fallbackPlays: Play[] = Array.from({ length: 50 }, (_, index) => {
     const rank = index + 1
-    return featured[index] ?? { rank, grade: rankGrades[rank] }
+    const base = featured[index] ?? { rank, grade: rankGrades[rank] }
+    return {
+        ...base,
+        gradeSrc: base.grade ? `${assets}/${gradeImages[base.grade]}` : undefined,
+    }
 })
 
 const ProfileTopPlays: React.FC = () => {
+    const { id } = useParams<{ id: string }>()
+    const navigate = useNavigate()
+    const [player, setPlayer] = useState<ApiPlayer | null>(null)
+
+    useEffect(() => {
+        let cancelled = false
+
+        const loadTopPlays = async () => {
+            const resolved = await fetchActivePlayer(id, { hydrateCount: 50 })
+            if (cancelled) return
+            setPlayer(resolved?.player ?? null)
+        }
+
+        loadTopPlays()
+
+        return () => {
+            cancelled = true
+        }
+    }, [id])
+
+    const realTopScores = player?.top_200 ?? []
+    const plays: Play[] =
+        realTopScores.length > 0
+            ? Array.from({ length: 50 }, (_, index) => {
+                  const rank = index + 1
+                  const score = realTopScores[index]
+                  if (!score) {
+                      return { rank }
+                  }
+
+                  return {
+                      rank,
+                      beatmapId: score.beatmap?.beatmap_id ?? 0,
+                      title: score.beatmap?.title || 'Mapa desconhecido',
+                      difficulty: score.beatmap?.diff || '',
+                      pp: Math.round(score.pp || 0),
+                      hit300: score.n300,
+                      hit100: score.n100,
+                      hit50: score.n50,
+                      misses: score.nmiss,
+                      accuracy: Number(score.acc || 0),
+                      mods: score.mods || 'NM',
+                      combo: `${score.max_combo || 0}x`,
+                      gradeSrc: getGradeAsset(score.grade),
+                  }
+              })
+            : fallbackPlays
+
+    const backPath = player ? `/profile/${player.id}` : '/profile'
+
     return (
         <WrapperComponent>
             <div className={style.appShell}>
@@ -125,7 +186,7 @@ const ProfileTopPlays: React.FC = () => {
 
                 <section className={style.leaderboard} aria-labelledby="page-title">
                     <div className={style.leaderboardHeading}>
-                        <Link to="/profile" className={style.backButton} aria-label="Voltar">
+                        <Link to={backPath} className={style.backButton} aria-label="Voltar">
                             <img src={`${assets}/d3056.png`} alt="" />
                         </Link>
                         <h1 id="page-title">Melhores Jogadas</h1>
@@ -147,35 +208,62 @@ const ProfileTopPlays: React.FC = () => {
                             </div>
 
                             <div className={style.rows} role="rowgroup">
-                                {plays.map((play) => (
-                                    <div
-                                        className={style.playRow}
-                                        key={play.rank}
-                                        aria-label={
-                                            play.title ? `#${play.rank}, ${play.title}` : `Colocação ${play.rank}`
-                                        }
-                                    >
-                                        <span className={style.rankCell}>
-                                            {play.grade ? (
-                                                <img src={`${assets}/${gradeImages[play.grade]}`} alt="" />
-                                            ) : (
-                                                `#${play.rank}`
-                                            )}
-                                        </span>
-                                        <span className={style.songCell}>
-                                            {play.title && <strong>{play.title}</strong>}
-                                            {play.difficulty && <small>{play.difficulty}</small>}
-                                        </span>
-                                        <span>{play.pp ? `${play.pp}pp` : ''}</span>
-                                        <span>{play.hit300 ?? ''}</span>
-                                        <span>{play.hit100 ?? ''}</span>
-                                        <span>{play.hit50 ?? ''}</span>
-                                        <span>{play.misses ?? ''}</span>
-                                        <span>{play.accuracy ? `${play.accuracy.toFixed(2)}%` : ''}</span>
-                                        <span>{play.mods ?? ''}</span>
-                                        <span>{play.combo ?? ''}</span>
-                                    </div>
-                                ))}
+                                {plays.map((play) => {
+                                    const clickable = Boolean(play.beatmapId && play.beatmapId > 0)
+                                    return (
+                                        <div
+                                            className={style.playRow}
+                                            key={play.rank}
+                                            style={clickable ? { cursor: 'pointer' } : undefined}
+                                            role={clickable ? 'link' : undefined}
+                                            tabIndex={clickable ? 0 : undefined}
+                                            onClick={
+                                                clickable
+                                                    ? () => navigate(`/beatmap/${play.beatmapId}`)
+                                                    : undefined
+                                            }
+                                            onKeyDown={
+                                                clickable
+                                                    ? (e) => {
+                                                          if (e.key === 'Enter' || e.key === ' ') {
+                                                              e.preventDefault()
+                                                              navigate(`/beatmap/${play.beatmapId}`)
+                                                          }
+                                                      }
+                                                    : undefined
+                                            }
+                                            aria-label={
+                                                play.title
+                                                    ? `#${play.rank}, ${play.title}`
+                                                    : `Colocação ${play.rank}`
+                                            }
+                                        >
+                                            <span className={style.rankCell}>
+                                                {play.gradeSrc ? (
+                                                    <img src={play.gradeSrc} alt="" />
+                                                ) : (
+                                                    `#${play.rank}`
+                                                )}
+                                            </span>
+                                            <span className={style.songCell}>
+                                                {play.title && <strong>{play.title}</strong>}
+                                                {play.difficulty && <small>{play.difficulty}</small>}
+                                            </span>
+                                            <span>{play.pp !== undefined ? `${play.pp}pp` : ''}</span>
+                                            <span>{play.hit300 ?? ''}</span>
+                                            <span>{play.hit100 ?? ''}</span>
+                                            <span>{play.hit50 ?? ''}</span>
+                                            <span>{play.misses ?? ''}</span>
+                                            <span>
+                                                {play.accuracy !== undefined
+                                                    ? `${play.accuracy.toFixed(2)}%`
+                                                    : ''}
+                                            </span>
+                                            <span>{play.mods ?? ''}</span>
+                                            <span>{play.combo ?? ''}</span>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                     </div>

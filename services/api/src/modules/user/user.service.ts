@@ -65,45 +65,74 @@ const mapOsuApiDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
     };
 };
 
+const mapStatusIntToString = (status: number): string => {
+    switch (status) {
+        case 2:
+            return 'ranked';
+        case 3:
+            return 'approved';
+        case 4:
+            return 'qualified';
+        case 5:
+            return 'loved';
+        case 0:
+            return 'pending';
+        case -1:
+        case -2:
+            return 'graveyard';
+        default:
+            return 'ranked';
+    }
+};
+
+const mapLocalRowToBeatmap = (row: any): Omit<IBeatmap, 'scores'> => {
+    const fallbackSetId = Number(row.map_set_id || 0);
+    return {
+        artist: row.map_artist || row.artist || 'Artista Desconhecido',
+        beatmap_id: Number(row.map_id || 0),
+        beatmapset_id: fallbackSetId,
+        beatmap_md5: row.map_md5,
+        title: row.map_title || 'Mapa não encontrado',
+        mode: 'osu',
+        mode_int: Number(row.mode || 0),
+        status: mapStatusIntToString(Number(row.map_status ?? 2)),
+        total_length: Number(row.map_total_length || 0),
+        author_id: 0,
+        author_name: row.map_creator || 'Desconhecido',
+        cover: fallbackSetId > 0 ? `https://assets.ppy.sh/beatmaps/${fallbackSetId}/covers/cover.jpg` : '',
+        thumbnail: fallbackSetId > 0 ? `https://assets.ppy.sh/beatmaps/${fallbackSetId}/covers/list@2x.jpg` : '',
+        diff: row.map_version || 'Unknown',
+        star_rating: Number(row.map_diff || 0),
+        bpm: Number(row.map_bpm || 0),
+        od: Number(row.map_od || 0),
+        ar: Number(row.map_ar || 0),
+        cs: Number(row.map_cs || 0),
+        hp: Number(row.map_hp || 0),
+        max_combo: Number(row.map_max_combo || 0),
+        count_circles: 0,
+        count_sliders: 0,
+        passcount: 0,
+        playcount: 0
+    };
+};
+
 const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player'>> => {
     let beatmapData: Omit<IBeatmap, 'scores'>;
 
-    try {
-        const response = await osuApiClient.get(`/beatmaps/${row.map_id}`);
-        
-        if (response.data) {
-            beatmapData = mapOsuApiDataToBeatmap(response.data);
-        } else {
-            throw new Error("Dados vazios");
+    if (row.map_title) {
+        beatmapData = mapLocalRowToBeatmap(row);
+    } else {
+        try {
+            const response = await osuApiClient.get(`/beatmaps/${row.map_id}`);
+            
+            if (response.data) {
+                beatmapData = mapOsuApiDataToBeatmap(response.data);
+            } else {
+                throw new Error("Dados vazios");
+            }
+        } catch {
+            beatmapData = mapLocalRowToBeatmap(row);
         }
-    } catch (error) {
-        beatmapData = {
-            artist: row.artist || 'Artista Desconhecido',
-            beatmap_id: row.map_id || 0,
-            beatmapset_id: row.map_set_id || 0,
-            beatmap_md5: row.map_md5,
-            title: 'Mapa não encontrado',
-            mode: 'osu',
-            mode_int: 0,
-            status: 'unknown',
-            total_length: 0,
-            author_id: 0,
-            author_name: 'Desconhecido',
-            cover: '',
-            thumbnail: '',
-            diff: 'Unknown',
-            star_rating: 0,
-            bpm: 0,
-            od: 0,
-            ar: 0,
-            cs: 0,
-            hp: 0,
-            max_combo: 0,
-            count_circles: 0,
-            count_sliders: 0,
-            passcount: 0,
-            playcount: 0
-        };
     }
 
     return {
@@ -226,6 +255,7 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
     const userStats = stats || {
         pp: 0, acc: 0, tscore: 0n, rscore: 0n, 
         max_combo: 0, playtime: 0, 
+        total_hits: 0, replay_views: 0,
         x_count: 0, xh_count: 0, s_count: 0, sh_count: 0, a_count: 0
     };
 
@@ -248,7 +278,16 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
             
             m.id as map_id,
             m.set_id as map_set_id,
-            m.status
+            m.artist as map_artist,
+            m.title as map_title,
+            m.version as map_version,
+            m.creator as map_creator,
+            m.diff as map_diff,
+            m.status as map_status,
+            m.total_length as map_total_length,
+            m.bpm as map_bpm,
+            m.cs as map_cs, m.ar as map_ar, m.od as map_od, m.hp as map_hp,
+            m.max_combo as map_max_combo
 
         FROM scores s
         INNER JOIN maps m ON s.map_md5 = m.md5
@@ -268,10 +307,30 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         topScoresRaw.map(row => mapProfileScoreWithApiMap(row))
     );
 
+    const rankHistoryRaw = prisma.user_rank_history?.findMany
+        ? await prisma.user_rank_history.findMany({
+              where: { user_id: playerId, mode },
+              orderBy: { date: 'desc' },
+              take: 60
+          })
+        : [];
+
+    const rankHistory = rankHistoryRaw
+        .slice()
+        .reverse()
+        .map(entry => ({
+            date: entry.date instanceof Date
+                ? entry.date.toISOString().slice(0, 10)
+                : String(entry.date),
+            rank: entry.rank,
+            pp: entry.pp
+        }));
+
     return {
         id: user.id,
         name: user.name,
         safe_name: user.safe_name,
+        country: user.country,
         pfp: `https://a.${process.env.DOMAIN}/${user.id}`,
         banner: `https://assets.ppy.sh/user-profile-covers/${user.id}.jpg`,
         
@@ -284,6 +343,8 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         max_combo: userStats.max_combo,
         total_score: totalScoreNumber,
         ranked_score: Number(userStats.rscore),
+        total_hits: userStats.total_hits ?? 0,
+        replay_views: userStats.replay_views ?? 0,
 
         level: calculateLevel(totalScoreNumber),
 
@@ -295,6 +356,7 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
 
         last_activity: getLastActivity(user.latest_activity),
 
+        rank_history: rankHistory,
         top_200: populatedScores
     };
 }
@@ -319,11 +381,16 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
             
             m.id as map_id,
             m.set_id as map_set_id,
+            m.artist as map_artist,
             m.title as map_title,
             m.version as map_version,
             m.creator as map_creator,
             m.diff as map_diff,
-            m.status as map_status
+            m.status as map_status,
+            m.total_length as map_total_length,
+            m.bpm as map_bpm,
+            m.cs as map_cs, m.ar as map_ar, m.od as map_od, m.hp as map_hp,
+            m.max_combo as map_max_combo
 
         FROM scores s
         INNER JOIN maps m ON s.map_md5 = m.md5

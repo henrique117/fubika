@@ -92,6 +92,10 @@ const router = createBrowserRouter([
         element: <BeatmapPage />
     },
     {
+        path: '/mapas',
+        element: <BeatmapPage />
+    },
+    {
         path: '/beatmaps',
         element: <BeatmapPage />
     },

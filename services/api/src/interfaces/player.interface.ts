@@ -4,6 +4,7 @@ export default interface IPlayer {
     id: number;
     name: string;
     safe_name: string;
+    country?: string;
     rank: number;
     pp: number;
     acc: number;
@@ -23,8 +24,11 @@ export default interface IPlayer {
     max_combo: number;
     playtime: number;
     playcount: number;
+    total_hits?: number;
+    replay_views?: number;
 
     last_activity?: string;
 
+    rank_history?: { date: string; rank: number; pp: number }[];
     top_200?: Omit<IScore, 'player'>[];
 }

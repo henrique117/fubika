@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import style from './style.module.css'
-import { WrapperComponent } from '../../../components/components.export'
+import { ProfileRankChart, WrapperComponent } from '../../../components/components.export'
+import { type ApiPlayer, fetchActivePlayer } from '../../../services/profileData'
 
 const asset = (name: string) => `/assets/${name}`
 
@@ -93,32 +95,95 @@ const panels = [
 ]
 
 const ProfileAchievements: React.FC = () => {
+    const { id } = useParams<{ id: string }>()
+    const navigate = useNavigate()
+    const [player, setPlayer] = useState<ApiPlayer | null>(null)
+    const [stateRank, setStateRank] = useState<number | null>(null)
+
+    useEffect(() => {
+        let cancelled = false
+
+        const loadPlayer = async () => {
+            const resolved = await fetchActivePlayer(id, { hydrateCount: 0 })
+            if (cancelled) return
+            setPlayer(resolved?.player ?? null)
+            setStateRank(resolved?.stateRank ?? null)
+        }
+
+        loadPlayer()
+
+        return () => {
+            cancelled = true
+        }
+    }, [id])
+
+    const displayName = player?.name || 'Arlecchino'
+    const avatarSrc = player?.pfp || asset('e464c.png')
+    const rawLevel = Number.isFinite(player?.level) ? player!.level : 0
+    const levelLabel = player ? `Nível ${Math.floor(rawLevel)}` : 'Nível -100'
+    const xpFraction = Math.max(0, Math.min(1, rawLevel % 1))
+    const xpPercent = player ? Math.round(xpFraction * 100) : 12
+    const xpBarWidthPx = Math.max(6, Math.min(143, Math.round(xpFraction * 143)))
+    const globalRankLabel = player ? `#${player.rank || 0}` : '#1000'
+    const stateRankLabel = player ? (stateRank ? `#${stateRank}` : '-') : '#25'
+    const backPath = player ? `/profile/${player.id}` : '/profile'
+
     return (
         <WrapperComponent>
             <div className={style.appShell}>
                 <div className={style.wallpaper} aria-hidden="true" />
 
-                <section className={style.profileCard} aria-label="Conquistas de Arlecchino">
+                <section className={style.profileCard} aria-label={`Conquistas de ${displayName}`}>
                     <div className={style.profileHero}>
-                        <img className={style.graph} src={asset('133bb.svg')} alt="" width="720" height="165" />
-                        <div className={style.profilePicture}>
-                            <img src={asset('e464c.png')} alt="Foto de perfil de Arlecchino" />
+                        <ProfileRankChart
+                            player={player}
+                            scores={player?.top_200 ?? []}
+                            className={style.graph}
+                        />
+                        <div
+                            className={style.profilePicture}
+                            style={{ cursor: 'pointer' }}
+                            role="link"
+                            tabIndex={0}
+                            onClick={() => navigate(backPath)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    navigate(backPath)
+                                }
+                            }}
+                        >
+                            <img
+                                key={avatarSrc}
+                                src={avatarSrc}
+                                alt={`Foto de perfil de ${displayName}`}
+                                onError={(e) => {
+                                    e.currentTarget.onerror = null
+                                    e.currentTarget.src = asset('e464c.png')
+                                }}
+                            />
                         </div>
 
                         <div className={style.profileCopy}>
-                            <h1>Arlecchino</h1>
-                            <p className={style.level}>Nível -100</p>
-                            <div className={style.xpTrack}>
-                                <span />
+                            <h1
+                                title={displayName}
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => navigate(backPath)}
+                            >
+                                {displayName}
+                            </h1>
+                            <p className={style.level}>{levelLabel}</p>
+                            <div className={style.xpTrack} aria-label={`${xpPercent}% de experiência`}>
+                                <span style={player ? { width: `${xpBarWidthPx}px` } : undefined} />
                             </div>
                             <div className={style.ranks}>
                                 <div>
                                     <small>Ranque Global</small>
-                                    <strong className={style.rankGlobal}>#1000</strong>
+                                    <strong className={style.rankGlobal}>{globalRankLabel}</strong>
                                 </div>
                                 <div>
                                     <small>Ranque Estadual</small>
-                                    <strong className={style.rankState}>#25</strong>
+                                    <strong className={style.rankState}>{stateRankLabel}</strong>
                                 </div>
                             </div>
                             <div className={style.relationshipActions}>

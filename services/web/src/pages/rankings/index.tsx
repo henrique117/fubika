@@ -172,7 +172,7 @@ const GlobalRanking: React.FC = () => {
                                 </div>
                             ) : players.length > 0 ? (
                                 players.map((user) => (
-                                    <div key={user.id} className={style.playerRow}>
+                                    <Link key={user.id} to={`/profile/${user.id}`} className={style.playerRow}>
                                         
                                         <div className={`${style.colRank} ${style.rankNumber}`}>
                                             #{user.rank}
@@ -204,7 +204,7 @@ const GlobalRanking: React.FC = () => {
                                             {user.playcount.toLocaleString()}
                                         </div>
 
-                                    </div>
+                                    </Link>
                                 ))
                             ) : (
                                 <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>

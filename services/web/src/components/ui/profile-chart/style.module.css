@@ -1,0 +1,96 @@
+.chartRoot {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 720px;
+  height: 165px;
+  pointer-events: none;
+}
+
+.chartSvg {
+  display: block;
+  width: 720px;
+  height: 165px;
+}
+
+.chartHitbox {
+  position: absolute;
+  top: 33px;
+  left: 400px;
+  width: 300px;
+  height: 100px;
+  border-radius: 20px;
+  pointer-events: auto;
+  cursor: crosshair;
+  outline: none;
+}
+
+.restBadge {
+  position: absolute;
+  right: 10px;
+  bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgb(25 23 21 / 72%);
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgb(255 255 255 / 88%);
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+
+.restBadge strong {
+  color: #ffc400;
+}
+
+.tooltip {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid rgb(232 158 0 / 55%);
+  border-radius: 8px;
+  background: rgb(20 18 16 / 92%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 35%);
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 9.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: #fff;
+  pointer-events: none;
+}
+
+.tooltipTop {
+  top: 6px;
+}
+
+.tooltipBottom {
+  bottom: 6px;
+}
+
+.tooltipRank {
+  font-weight: 700;
+  color: #ffc400;
+}
+
+.tooltipPp {
+  font-weight: 700;
+  color: #88c0e8;
+}
+
+.tooltipDate {
+  color: rgb(255 255 255 / 72%);
+}
+
+@media (max-width: 760px) {
+  .chartRoot {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

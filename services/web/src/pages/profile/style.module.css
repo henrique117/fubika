@@ -73,6 +73,7 @@
 
 .avatarFrame {
   position: absolute;
+  z-index: 2;
   top: 20px;
   left: 20px;
   width: 125px;
@@ -95,17 +96,21 @@
 
 .identity {
   position: absolute;
+  z-index: 2;
   top: 22px;
   left: 162px;
   width: 145px;
 }
 
 .identity h1 {
+  overflow: hidden;
   font-family: 'Caviar Dreams', sans-serif;
   font-size: 22px;
   font-weight: 700;
   line-height: 1.1;
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #fff;
 }
 
@@ -185,6 +190,7 @@
 
 .relationshipActions {
   position: absolute;
+  z-index: 2;
   top: 118px;
   left: 162px;
   width: 145px;

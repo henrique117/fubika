@@ -25,75 +25,7 @@ const difficulties = [
     { icon: '886d5.svg', label: '9.3', title: 'Extremo' },
 ]
 
-const names = [
-    '-Iccy',
-    'GAS MASK',
-    'Kim Da-Hyun',
-    'Loopyng',
-    'Jumbatambo',
-    'Mozard',
-    'Red Velvet',
-    'Serasona',
-    'Hb20monstro',
-    'Joingui',
-    'Simabuco',
-    'KitBengala',
-    'Bolleta',
-    'Viqbarros',
-    'Oregue',
-    'Alemão',
-    'Sporinho',
-    'Dumal77',
-    'Hasanchez',
-    '47w47',
-    'ShisuiHaru',
-    'Relix',
-    'Mestre',
-    'Neko',
-    'Yuki',
-]
-
-const rankIcons = [
-    '09e97.png',
-    'adaa3.png',
-    'adaa3.png',
-    'adaa3.png',
-    '7ae37.png',
-    '66a8d.png',
-    '66a8d.png',
-    'adaa3.png',
-    '7ae37.png',
-    'bac4b.png',
-    'bac4b.png',
-    '7ae37.png',
-    '7ae37.png',
-    '66a8d.png',
-    'adaa3.png',
-    '7ae37.png',
-    'bac4b.png',
-    '8e9f0.png',
-    'bac4b.png',
-    '66a8d.png',
-    '8e9f0.png',
-    '7ae37.png',
-    '66a8d.png',
-    '66a8d.png',
-    '66a8d.png',
-]
-
-const scores = [
-    ['350pp', '685', '7', '0', '0', '98.95%', 'HD', '1601x'],
-    ['120pp', '727', '7', '2', '7', '97.27%', 'HDDTHRFLRX', '950x'],
-    ['230pp', '891', '12', '4', '2', '97.63%', 'HD', '1000x'],
-    ['180pp', '640', '23', '4', '2', '96.73%', 'HR', '1300x'],
-]
-
-const rows = Array.from({ length: 50 }, (_, i) => ({
-    position: i + 1,
-    name: names[i] ?? '',
-    rank: rankIcons[i],
-    score: scores[i],
-}))
+const rows = Array.from({ length: 50 }, (_, i) => i + 1)
 
 const getDifficultyIcon = (starRating: number): string => {
     if (starRating < 2.0) return '072f7.svg'
@@ -472,22 +404,9 @@ function Leaderboard() {
                 <span>Combo máximo</span>
             </div>
             <div className={style.scoreList}>
-                {rows.map((row) => (
-                    <article className={style.scoreRow} key={row.position}>
-                        <span className={style.position}>#{row.position}</span>
-                        <span className={style.player}>
-                            {row.rank && <img src={`${A}/${row.rank}`} alt="" />}
-                            <b>{row.name}</b>
-                        </span>
-                        {row.score &&
-                            row.score.map((value, i) => (
-                                <span
-                                    className={`${style.score} ${style[`s${i}` as keyof typeof style]}`}
-                                    key={`${row.position}-${i}`}
-                                >
-                                    {value}
-                                </span>
-                            ))}
+                {rows.map((position) => (
+                    <article className={style.scoreRow} key={position}>
+                        <span className={style.position}>#{position}</span>
                     </article>
                 ))}
             </div>

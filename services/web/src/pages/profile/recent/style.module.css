@@ -1,7 +1,8 @@
 .appShell {
   position: relative;
   min-height: 2430px;
-  padding-top: 60px;
+  padding-top: 48px;
+  zoom: 1.25;
   overflow: hidden;
   background: #2c2825;
   color: #fff;
@@ -12,31 +13,20 @@
 .wallpaper {
   position: absolute;
   z-index: 0;
-  top: 60px;
+  top: 48px;
+  right: 0;
   left: 0;
-  width: 100%;
   height: 810px;
-  overflow: hidden;
-  -webkit-mask-image: url("/assets/e1a1a.svg");
-  -webkit-mask-size: 100% 958px;
-  mask-image: url("/assets/e1a1a.svg");
-  mask-size: 100% 958px;
+  background: url("/assets/ad686.png") center top / cover no-repeat;
 }
 
 .wallpaper::after {
   position: absolute;
-  inset: auto 0 0;
-  height: 100px;
-  background: linear-gradient(to bottom, transparent, #2c2825);
+  inset: 0;
+  background:
+    linear-gradient(to bottom, transparent 78%, #2c2825 100%),
+    linear-gradient(to right, rgb(0 0 0 / 22%), transparent 50%, rgb(0 0 0 / 8%));
   content: "";
-}
-
-.wallpaper img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
 }
 
 .recentPanel {

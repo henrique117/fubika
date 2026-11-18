@@ -1,6 +1,7 @@
 .appShell {
-  min-height: 100vh;
-  padding: 131px 0 56px;
+  min-height: 80vh;
+  padding: 119px 0 56px;
+  zoom: 1.25;
   background: #2c2825;
   color: #fff;
   font-family: 'Caviar Dreams', sans-serif;

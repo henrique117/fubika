@@ -1,6 +1,7 @@
 .appShell {
-  min-height: 100dvh;
-  padding-top: 60px;
+  min-height: 80dvh;
+  padding-top: 48px;
+  zoom: 1.25;
   overflow: hidden;
   background: #2c2825;
   color: #ffffff;

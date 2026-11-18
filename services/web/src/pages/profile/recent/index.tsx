@@ -111,9 +111,7 @@ const ProfileRecentPlays: React.FC = () => {
     return (
         <WrapperComponent>
             <div className={style.appShell}>
-                <div className={style.wallpaper} aria-hidden="true">
-                    <img src={`${assets}/ad686.png`} alt="" />
-                </div>
+                <div className={style.wallpaper} aria-hidden="true" />
 
                 <section className={style.recentPanel} aria-labelledby="recent-title">
                     <div className={style.panelHeading}>

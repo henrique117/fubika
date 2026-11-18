@@ -1,7 +1,8 @@
 .appShell {
   position: relative;
   min-height: 2415px;
-  padding-top: 60px;
+  padding-top: 48px;
+  zoom: 1.25;
   overflow: clip;
   background: #2c2825;
   color: #fff;
@@ -11,14 +12,20 @@
 
 .heroArt {
   position: absolute;
-  inset: 60px 0 auto;
+  top: 48px;
+  right: 0;
+  left: 0;
   height: 810px;
-  background-image:
-    linear-gradient(to bottom, transparent 82%, #2c2825 100%),
-    url("/assets/ad686.png");
-  background-position: center top;
-  background-size: auto 810px;
-  background-repeat: no-repeat;
+  background: url("/assets/ad686.png") center top / cover no-repeat;
+}
+
+.heroArt::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, transparent 78%, #2c2825 100%),
+    linear-gradient(to right, rgb(0 0 0 / 22%), transparent 50%, rgb(0 0 0 / 8%));
+  content: "";
 }
 
 .leaderboard {

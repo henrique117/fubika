@@ -1,0 +1,275 @@
+.appShell {
+  position: relative;
+  min-height: 2430px;
+  padding-top: 60px;
+  overflow: hidden;
+  background: #2c2825;
+  color: #fff;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-synthesis: none;
+}
+
+.wallpaper {
+  position: absolute;
+  z-index: 0;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  height: 810px;
+  overflow: hidden;
+  -webkit-mask-image: url("/assets/e1a1a.svg");
+  -webkit-mask-size: 100% 958px;
+  mask-image: url("/assets/e1a1a.svg");
+  mask-size: 100% 958px;
+}
+
+.wallpaper::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, #2c2825);
+  content: "";
+}
+
+.wallpaper img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.recentPanel {
+  position: relative;
+  z-index: 2;
+  width: min(calc(100% - 32px), 720px);
+  min-height: 2218px;
+  margin: 71px auto 0;
+  padding: 18px 20px 78px;
+  border-radius: 20px;
+  background: rgb(25 23 21 / 86%);
+}
+
+.panelHeading {
+  position: relative;
+  height: 106px;
+}
+
+.panelHeading h1 {
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 30px;
+  text-align: center;
+  color: #fff;
+}
+
+.backButton {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.backButton:hover {
+  background: rgb(255 255 255 / 8%);
+  transform: translateX(-2px);
+}
+
+.backButton img {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.playsTable {
+  width: 100%;
+}
+
+.tableHeader,
+.playRow {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 48px 28px 28px 24px 20px 63px 70px 103px;
+  align-items: center;
+}
+
+.tableHeader {
+  height: 17px;
+  color: #dcdcdc;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tableHeader span:not(.songColumn) {
+  justify-self: center;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgb(44 40 37 / 75%);
+  white-space: nowrap;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-weight: 700;
+  color: #dcdcdc;
+}
+
+.songColumn {
+  justify-self: stretch;
+  height: 100%;
+  background: transparent;
+}
+
+.playList {
+  display: grid;
+  gap: 5px;
+}
+
+.playRow {
+  position: relative;
+  width: 100%;
+  height: 35px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 12.5px;
+  color: white;
+  background: rgb(44 40 37 / 75%);
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 10px;
+  text-align: center;
+  transition:
+    background 150ms ease,
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.playRow > span {
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+}
+
+.playRow:hover {
+  z-index: 1;
+  background: rgb(65 58 54 / 94%);
+  box-shadow: 0 5px 16px rgb(0 0 0 / 18%);
+  transform: scale(1.006);
+}
+
+.songCell {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+.songCell > img {
+  display: block;
+  flex: none;
+  width: 15px;
+  height: 13px;
+  object-fit: contain;
+}
+
+.songCopy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.songCopy strong,
+.songCopy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+}
+
+.songCopy strong {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 11px;
+}
+
+.songCopy small {
+  font-size: 8px;
+  line-height: 11px;
+}
+
+.rankNumber {
+  font-size: 10px;
+}
+
+.mascot {
+  position: absolute;
+  z-index: 4;
+  top: 2282px;
+  left: 50%;
+  display: block;
+  width: 166px;
+  height: 120px;
+  object-fit: contain;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 620px) {
+  .appShell {
+    min-height: 2400px;
+  }
+
+  .recentPanel {
+    width: calc(100% - 16px);
+    min-height: 2190px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .tableHeader,
+  .playRow {
+    grid-template-columns: minmax(145px, 1fr) 40px 54px 55px;
+  }
+
+  .tableHeader span:nth-child(3),
+  .tableHeader span:nth-child(4),
+  .tableHeader span:nth-child(5),
+  .tableHeader span:nth-child(6),
+  .tableHeader span:nth-child(8),
+  .playRow > span:nth-child(3),
+  .playRow > span:nth-child(4),
+  .playRow > span:nth-child(5),
+  .playRow > span:nth-child(6),
+  .playRow > span:nth-child(8) {
+    display: none;
+  }
+
+  .mascot {
+    top: 2250px;
+  }
+}
+
+@media (max-width: 430px) {
+  .panelHeading h1 {
+    padding-top: 5px;
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appShell *,
+  .appShell *::before,
+  .appShell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,332 @@
+.appShell {
+  position: relative;
+  min-height: 1260px;
+  padding-top: 60px;
+  overflow: hidden;
+  background: #2c2825;
+  color: #fff;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-synthesis: none;
+}
+
+.wallpaper {
+  position: absolute;
+  z-index: 0;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  height: 810px;
+  background:
+    linear-gradient(to bottom, transparent 72%, #2c2825 100%),
+    url("/assets/ad686.png") center 44% / cover no-repeat;
+}
+
+.profileCard {
+  position: relative;
+  z-index: 2;
+  width: 720px;
+  min-height: 991px;
+  margin: 71px auto 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(25, 23, 21, 0.87);
+}
+
+.profileHero {
+  position: relative;
+  height: 165px;
+}
+
+.graph {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 720px;
+  height: 165px;
+}
+
+.profilePicture {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 125px;
+  height: 125px;
+  overflow: hidden;
+  border: 1px solid #992727;
+  border-radius: 20px;
+  box-shadow: 0 0 4px rgba(153, 39, 39, 0.75);
+}
+
+.profilePicture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: rotate(12.79deg) scale(1.18);
+}
+
+.profileCopy {
+  position: absolute;
+  top: 61px;
+  left: 154px;
+  width: 100px;
+}
+
+.profileCopy h1 {
+  margin: 0;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: normal;
+  color: #fff;
+}
+
+.level {
+  margin: 3px 0 1px;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #88c0e8;
+  font-size: 10px;
+  line-height: normal;
+  text-align: center;
+}
+
+.xpTrack {
+  position: relative;
+  height: 5px;
+  padding: 1px;
+  border-radius: 4px;
+  background: #d9d9d9;
+}
+
+.xpTrack::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: #2c2825;
+}
+
+.xpTrack span {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: #e89e00;
+}
+
+.ranks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1px;
+}
+
+.ranks div {
+  display: grid;
+}
+
+.ranks small {
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+  font-size: 5px;
+  line-height: normal;
+}
+
+.ranks strong {
+  margin-top: -1px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.ranks div:last-child {
+  text-align: right;
+}
+
+.rankGlobal {
+  color: #ffd400;
+}
+
+.rankState {
+  color: #20e9b3;
+}
+
+.relationshipActions {
+  display: flex;
+  gap: 10px;
+  margin: 4px 0 0 10px;
+}
+
+.relationshipActions button {
+  display: grid;
+  width: 25px;
+  height: 17px;
+  place-items: center;
+  border: 0;
+  border-radius: 35px;
+  cursor: pointer;
+  opacity: 1;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.relationshipActions button:hover {
+  transform: translateY(-1px);
+}
+
+.relationshipActions .mutual {
+  background: rgba(245, 54, 255, 0.75);
+}
+
+.relationshipActions .bell {
+  background: rgba(42, 156, 0, 0.75);
+}
+
+.relationshipActions .mutual img {
+  display: block;
+  width: 13px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.relationshipActions .bell img {
+  display: block;
+  width: 11px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.achievementGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 330px);
+  gap: 10px 20px;
+  padding: 32px 20px 20px;
+}
+
+.achievementPanel {
+  position: relative;
+  width: 330px;
+  height: 382px;
+}
+
+.panelFrame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 330px;
+  height: 382px;
+  pointer-events: none;
+}
+
+.achievementPanel h2 {
+  position: absolute;
+  z-index: 1;
+  top: 4px;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: normal;
+  text-align: center;
+}
+
+.badges {
+  position: absolute;
+  z-index: 2;
+  top: 20px;
+  left: 19px;
+  display: grid;
+  grid-template-columns: repeat(4, 66px);
+  grid-auto-rows: 71px;
+  gap: 20px 9px;
+}
+
+.badge {
+  width: 66px;
+  height: 71px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    filter 150ms ease,
+    transform 150ms ease,
+    opacity 150ms ease;
+}
+
+.badge:hover {
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+  transform: translateY(-3px) scale(1.04);
+}
+
+.badge img {
+  display: block;
+  width: 66px;
+  height: 71px;
+  object-fit: contain;
+}
+
+@media (max-width: 760px) {
+  .appShell {
+    min-height: 1800px;
+  }
+
+  .wallpaper {
+    top: 60px;
+  }
+
+  .profileCard {
+    width: calc(100% - 24px);
+    min-height: 1700px;
+    margin-top: 24px;
+  }
+
+  .profileHero {
+    height: 165px;
+    overflow: hidden;
+  }
+
+  .graph {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .achievementGrid {
+    grid-template-columns: 330px;
+    justify-content: center;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .profilePicture {
+    left: 14px;
+    width: 112px;
+    height: 112px;
+  }
+
+  .profileCopy {
+    left: 140px;
+  }
+
+  .achievementGrid {
+    transform-origin: top center;
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appShell *,
+  .appShell *::before,
+  .appShell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle id="Fundo" cx="6" cy="6" r="6" fill="url(#paint0_linear_0_14)" style="mix-blend-mode:color"/>
+<defs>
+<linearGradient id="paint0_linear_0_14" x1="6" y1="0" x2="6" y2="12" gradientUnits="userSpaceOnUse">
+<stop stop-color="#914B9E"/>
+<stop offset="1" stop-color="#436990"/>
+</linearGradient>
+</defs>
+</svg>

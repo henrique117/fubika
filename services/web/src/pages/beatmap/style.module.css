@@ -1,716 +1,809 @@
-.pageWrapper {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-top: 100px;
+.appShell {
+  min-height: 100vh;
+  padding: 131px 0 56px;
+  background: #2c2825;
+  color: #fff;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-synthesis: none;
 }
 
-.card {
-    width: 90%;
-    max-width: 720px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    align-items: center;
-    background-color: var(--color-background-dark);
-    border-radius: 15px;
+.appShell button,
+.appShell a {
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Caviar Dreams', sans-serif;
 }
 
-.cardHeader {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    background-color: var(--color-verde-baitola);
-    width: 100%;
-    border-radius: 15px 15px 0px 0px;
-    height: 70px;
-    padding-inline: 20px;
-    gap: 20px;
+.pageShell {
+  position: relative;
+  width: min(720px, calc(100% - 28px));
+  min-height: 2853px;
+  margin: auto;
+  border-radius: 20px;
+  background: #191715;
 }
 
-.headerImg {
-    max-height: 40px;
-    width: auto;
-    opacity: 0.5;
-}
-
-.headerTitle {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.cardBody {
-    width: 100%;
-    height: 380px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-}
-
-.cardBody::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(19, 17, 15, 0.65);
-    z-index: 1;
-}
-
-.collection,
-.mapStats,
-.buttons {
-    position: absolute;
-    z-index: 2;
-}
-
-.collection {
-    left: 20px;
-    top: 20px;
-}
-
-.mapdiffs {
-    width: fit-content;
-    height: 40px;
-    border-radius: 10px;
-    background-color: rgba(19, 17, 15, 0.5);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    /* justify-content: space-evenly; */
-    margin-bottom: 5px;
-}
-
-.otherMap {
-    width: 23px;
-    height: 23px;
-
-}
-
-.diffSR {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-}
-
-.diffSR h2 {
-    font-size: 15px;
-    font-weight: bold;
-}
-
-.diffSR span {
-    font-size: 10px;
-    color: #FFF600;
-}
-
-.mapStats {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    right: 20px;
-    top: 20px;
-    max-width: 231px;
-    width: 40%;
-    height: 280px;
-}
-
-.mapStatus {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    width: 100%;
-}
-
-.mapStatus h2 {
-    padding: 8.5px 10px;
-    text-align: center;
-    background-color: rgba(25, 23, 21, 0.85);
-    /* Figma */
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 10px;
-    letter-spacing: 1px;
-    text-transform: capitalize;
-    margin-bottom: 10px;
-}
-
-.mapPreview,
-.mapNumbers,
-.mapGraphs,
-.mapSucess {
-    width: 100%;
-    background-color: rgba(25, 23, 21, 0.85);
-    /* Figma */
-    border-radius: 10px;
-    margin-bottom: 3px;
-}
-
-.mapPreview,
-.mapNumbers {
-    height: 50px;
-}
-
-.mapNumbers img {
-    width: 18px;
-    height: 18px;
-}
-
-.mapGraphs {
-    height: 120px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 10px 20px;
-    box-sizing: border-box;
-}
-
-.mapHeaderInfo {
-    position: absolute;
-    z-index: 2;
-    margin-top: 250px;
-    margin-bottom: 20px;
-    margin-left: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+.mapCard {
+  position: relative;
+  border-radius: 18px 18px 0 0;
+  background: rgba(65, 211, 189, 0.8);
 }
 
 .mapTitle {
-    font-size: 28px;
-    font-weight: bold;
-    color: white;
-    margin: 0;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 20px;
 }
 
-.mapArtist {
-    font-size: 18px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.9);
-    margin: 0;
+.mapTitle img {
+  display: block;
+  width: 42px;
+  height: 30px;
+  object-fit: cover;
+  opacity: 0.5;
 }
 
-.statRow {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 15px;
-    color: var(--color-branco);
+.mapTitle h1 {
+  margin: 0;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
 }
 
-.statLabel {
-    width: 50%;
-    white-space: nowrap;
-    font-family: 'Caviar Dreams', sans-serif;
-    font-weight: bold;
-    font-size: 10px;
+.mapHero {
+  position: relative;
+  height: 376px;
+  overflow: hidden;
 }
 
-.progressBarBase {
+.mapCover,
+.mapShade {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mapCover {
+  object-fit: cover;
+}
+
+.mapCover,
+.mapShade {
+  -webkit-mask-image: url("/assets/7abc9.svg");
+  -webkit-mask-position: 0 -23px;
+  -webkit-mask-size: 100% 749px;
+  -webkit-mask-repeat: no-repeat;
+  mask-image: url("/assets/7abc9.svg");
+  mask-position: 0 -23px;
+  mask-size: 100% 749px;
+  mask-repeat: no-repeat;
+}
+
+.mapShade {
+  background: rgba(25, 23, 21, 0.65);
+}
+
+.difficultyPicker {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  width: 231px;
+  height: 33px;
+  padding: 5px;
+  gap: 10px;
+  border-radius: 10px;
+  background: #191715;
+  opacity: 0.75;
+  box-sizing: border-box;
+}
+
+.difficultyPicker button {
+  position: relative;
+  width: 23px;
+  height: 23px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  opacity: 1;
+  transform: none;
+  cursor: pointer;
+}
+
+.difficultyPicker button.selected::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 33px;
+  height: 33px;
+  background-image: url("data:image/svg+xml,%3Csvg width='33' height='33' viewBox='0 0 33 33' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='32' height='32' rx='7.5' stroke='white' stroke-opacity='0.48'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
+.difficultyPicker button:hover:not(.selected)::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 33px;
+  height: 33px;
+  background-image: url("data:image/svg+xml,%3Csvg width='33' height='33' viewBox='0 0 33 33' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='32' height='32' rx='7.5' stroke='white' stroke-opacity='0.48'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.difficultyPicker img {
+  display: block;
+  width: 23px;
+  height: 23px;
+}
+
+.difficultyName {
+  position: absolute;
+  top: 74px;
+  left: 20px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.difficultyValue {
+  position: absolute;
+  top: 79px;
+  left: 124px;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff600;
+  font-size: 5px;
+}
+
+.ranked {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 99px;
+  height: 33px;
+  padding: 8px 10.5px 7px 8.5px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  text-align: right;
+  background: rgba(25, 23, 21, 0.75);
+  font-family: 'Caviar Dreams', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  color: #ffffff;
+}
+
+.mapInfo {
+  position: absolute;
+  top: 56px;
+  right: 20px;
+  width: 231px;
+  display: grid;
+  gap: 3px;
+}
+
+.mapInfo > * {
+  background: rgba(25, 23, 21, 0.75);
+  border-radius: 10px;
+}
+
+.play {
+  position: relative;
+  width: 231px;
+  height: 33px;
+  padding: 0;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+}
+
+.play img {
+  position: absolute;
+  left: 104px;
+  top: 5px;
+  display: block;
+  width: 23px;
+  height: 23px;
+}
+
+.quickStats {
+  position: relative;
+  width: 231px;
+  height: 33px;
+}
+
+.microStat {
+  position: absolute;
+  top: 10px;
+  height: 12px;
+}
+
+.time {
+  left: 11px;
+  width: 33px;
+}
+
+.bpm {
+  left: 72px;
+  width: 28px;
+}
+
+.circle {
+  left: 131px;
+  width: 30px;
+}
+
+.slider {
+  left: 191px;
+  width: 30px;
+}
+
+.statCircle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #914b9e 0%, #436990 100%), #191715;
+  background-blend-mode: color;
+}
+
+.statMaskIcon,
+.statCircle img {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+
+.statMaskIcon {
+  background-color: #ffbb00;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: 10px 10px;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: 10px 10px;
+}
+
+.bpm .statMaskIcon {
+  left: 0;
+}
+
+.microStat b {
+  position: absolute;
+  left: 14px;
+  top: 1px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 8px;
+  line-height: 10px;
+  color: #ffbb00;
+  white-space: nowrap;
+}
+
+.bpm b {
+  left: 12px;
+}
+
+.detailStats {
+  position: relative;
+  width: 231px;
+  height: 120px;
+  padding: 18px 0 22px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.detailRow {
+  position: relative;
+  height: 8px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 8px;
+  line-height: 10px;
+  color: #ffffff;
+}
+
+.detailRow label {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-weight: 700;
+  font-size: 8px;
+  line-height: 10px;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.detailRow i {
+  position: absolute;
+  left: 116px;
+  top: 4px;
+  width: 75px;
+  height: 4px;
+}
+
+.detailRow i::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 0;
+  width: 74px;
+  height: 4px;
+  background: #585858;
+  border-radius: 2px;
+}
+
+.detailRow i b {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  height: 4px;
+  background: #d9d9d9;
+  border-radius: 2px;
+}
+
+.detailRow em {
+  position: absolute;
+  left: 201px;
+  top: 0;
+  min-width: 6px;
+  font-style: normal;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-weight: 700;
+  font-size: 8px;
+  line-height: 10px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.success {
+  position: relative;
+  width: 231px;
+  height: 49px;
+}
+
+.success strong {
+  position: absolute;
+  left: 62px;
+  top: 8px;
+  width: 107px;
+  height: 16px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 16px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.success div {
+  position: absolute;
+  left: 11px;
+  top: 26px;
+  width: 209px;
+  height: 5px;
+  border-radius: 2.5px;
+  background: #d9d9d9;
+}
+
+.success div::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  width: 207px;
+  height: 3px;
+  border-radius: 2.5px;
+  background: #191715;
+}
+
+.success i {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  display: block;
+  width: 21px;
+  height: 3px;
+  border-radius: 2.5px;
+  background: #119200;
+}
+
+.success small {
+  position: absolute;
+  left: 104px;
+  top: 31px;
+  width: 23px;
+  height: 10px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 8px;
+  line-height: 10px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.mapButtons {
+  position: absolute;
+  left: 20px;
+  bottom: 21px;
+  width: 316px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mapButtons button {
+  position: relative;
+  width: 125px;
+  height: 36px;
+  padding: 0 12px 0 8px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 7px;
+  color: #ffffff;
+  background: #4189d3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: filter 0.15s;
+}
+
+.mapButtons button span {
+  flex: 1;
+  text-align: center;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+  color: #ffffff;
+}
+
+.mapButtons button:hover {
+  filter: brightness(1.08);
+}
+
+.mapButtons button img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  pointer-events: none;
+}
+
+.mapButtons .favorite {
+  width: 46px;
+  height: 44px;
+  padding: 8px 9.5px 9px 9px;
+  justify-content: center;
+}
+
+.mapButtons .favorite img {
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+}
+
+.mapFooter {
+  height: 39px;
+  border-radius: 0 0 19px 19px;
+  background: rgba(57, 173, 155, 0.65);
+}
+
+.leaderboard {
+  position: relative;
+  padding: 288px 20px 20px;
+}
+
+.cats {
+  position: absolute;
+  inset: 30px 0 auto;
+  height: 235px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.catLeft {
+  position: absolute;
+  left: 16px;
+  bottom: -36px;
+  display: block;
+  width: 221px;
+  height: 290px;
+  object-fit: cover;
+  opacity: 0.5;
+  transform: rotate(8deg);
+}
+
+.catRight {
+  position: absolute;
+  right: 24px;
+  bottom: 31px;
+  display: block;
+  width: 194px;
+  height: 140px;
+  object-fit: cover;
+  opacity: 0.5;
+  transform: rotate(12deg);
+}
+
+.boardHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.boardHeading h2 {
+  margin: 0 auto;
+  padding: 9px 15px;
+  border-radius: 6px;
+  background: #39ad9b;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.tableHead {
+  height: 18px;
+  padding: 0 15px 0 42px;
+  display: grid;
+  grid-template-columns: 2.1fr 0.6fr 0.45fr 0.45fr 0.4fr 0.35fr 0.8fr 1fr 1.25fr;
+  gap: 4px;
+  color: #dcdcdc;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tableHead span {
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #dcdcdc;
+  font-weight: 700;
+}
+
+.scoreList {
+  display: grid;
+  gap: 5px;
+}
+
+.scoreRow {
+  position: relative;
+  min-height: 35px;
+  padding: 0 15px 0 7px;
+  border-radius: 12.5px;
+  display: grid;
+  grid-template-columns: 35px 2.1fr 0.6fr 0.45fr 0.45fr 0.4fr 0.35fr 0.8fr 1fr 1.25fr;
+  align-items: center;
+  gap: 4px;
+  background: #2c2825;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 7.5px;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+
+.scoreRow > span {
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+}
+
+.scoreRow:hover {
+  background: #36312d;
+  transform: translateX(2px);
+}
+
+.position {
+  font-size: 10px;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 10px;
+}
+
+.player img {
+  display: block;
+  width: 15px;
+  height: 13px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.player b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-weight: 700;
+  color: #fff;
+}
+
+.score {
+  text-align: center;
+}
+
+.s0,
+.s1,
+.s2,
+.s3,
+.s4,
+.s5 {
+  font-size: 7.5px;
+}
+
+.s6,
+.s7 {
+  font-size: 10px;
+}
+
+@media (max-width: 760px) {
+  .appShell {
+    padding-top: 96px;
+  }
+
+  .pageShell {
+    width: min(100% - 18px, 720px);
+  }
+
+  .mapHero {
+    height: 500px;
+  }
+
+  .difficultyPicker {
+    right: 12px;
+    left: 12px;
+    justify-content: center;
+  }
+
+  .difficultyName {
+    left: 14px;
+  }
+
+  .difficultyValue {
+    left: 118px;
+  }
+
+  .ranked {
+    top: 67px;
+    right: 12px;
+  }
+
+  .mapInfo {
+    top: 107px;
+    right: 12px;
+    width: min(231px, calc(100% - 24px));
+  }
+
+  .mapButtons {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    gap: 7px;
+  }
+
+  .mapButtons button {
+    min-width: 0;
     flex: 1;
-    height: 4px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.progressBarFill {
-    height: 100%;
-    background-color: #dddddd;
-    border-radius: 10px;
-    transition: width 0.5s ease-out;
-}
-
-.statValue {
-    width: 8px;
-    text-align: right;
-    font-size: 10px !important;
-    font-weight: bold;
-}
-
-.mapSucess {
-    height: 49px;
-    margin-bottom: 0 !important;
-}
-
-.mapPreview {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.mapNumbers {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.mapNumbers div {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-evenly;
-    /* width: 17%; */
-}
-
-.mapNumbers div img {
-    background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
-    ;
-    padding: 2px;
-    border-radius: 50%;
-}
-
-.mapNumbers div span {
-    font-size: 10px;
-    padding-left: 5px;
-    font-weight: bold;
-    color: #FFBB00;
-}
-
-.buttons {
-    left: 20px;
-    bottom: 20px;
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    width: 45%;
-    margin-top: 15px;
-}
-
-.btn {
-    height: 45px;
-    background-color: #3685CF;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.btn:hover {
-    background-color: #4da0e9;
-    transform: translateY(-2px);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-.btnSquare {
-    width: 45px;
-    flex-shrink: 0;
-}
-
-.btnWide {
-    flex: 1;
-    padding: 0 15px;
-    justify-content: space-between;
-}
-
-.btnText {
-    color: white;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.cardFooter {
-    width: 100%;
-    height: 40px;
-    background-color: var(--color-verde-baitola);
-    border-radius: 0px 0px 15px 15px;
-    opacity: 0.65;
-}
-
-.cardLB {
-    width: 100%;
-}
-
-.lbHeader {
-    width: 100%;
-    height: 290px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    margin-bottom: 7px;
-}
-
-.lbTitle {
-    background-color: #39AD9B;
-    padding: 10px 20px;
-    border-radius: 6px;
-}
-
-.lbTitle h2 {
-    font-size: 16px;
-    font-weight: bold;
-    width: 100%;
-}
-
-.catBody,
-.catHead {
-    position: absolute;
-    opacity: 0.5;
-    width: auto;
-}
-
-.catBody {
-    max-height: 291px;
-    left: 5%;
-    bottom: -2%;
-    transform: scaleX(-1);
-}
-
-.catHead {
-    max-height: 140px;
-    right: 5%;
-    bottom: 20%;
-    transform: rotate(12deg);
-}
-
-.leaderboardContainer {
-    width: 100%;
-}
-
-.tableHeader {
-    display: flex;
-    padding: 5px 0px;
-    background-color: inherit;
-    color: var(--color-branco);
-    font-size: 8px;
-    font-weight: bold;
-    align-items: center;
-    gap: 15px;
-    padding-inline: 20px;
-}
-
-.colRank {
-    width: 15px;
-    text-align: center;
-}
-
-.colPlayer {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    min-width: 100px;
-    padding-left: 10px;
-    overflow: hidden;
-}
-
-.colPP {
-    width: 80px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.colAcc {
-    width: 40px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.colMods {
-    width: 60px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.colMaxCombo {
-    width: 59px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.col300,
-.col100,
-.col50,
-.colX {
-    width: 20px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.rowsContainer {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-    padding-inline: 20px;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.playerRow {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: 30px;
-    background-color: var(--color-background);
-    text-decoration: none;
-    color: inherit;
-    margin-bottom: 10px;
-    border-radius: 15px;
-    gap: 15px;
-}
-
-.ppValue,
-.statValue {
-    font-size: 12px;
-    color: var(--color-branco);
-}
-
-.nameInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.username {
-    font-size: 15px;
-}
-
-.grade {
-    max-width: 15px;
-    height: auto;
-    width: 100%;
-    margin-left: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.emptyState {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 0;
-    color: var(--color-branco);
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.tooltipContainer {
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-evenly;
-    cursor: help;
-}
-
-.tooltipText {
-    visibility: hidden;
-    background-color: #191715;
-    color: #FFFFFF;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 10px;
-    position: absolute;
-    z-index: 10;
-    bottom: 140%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Caviar Dreams', sans-serif;
     font-size: 11px;
-    font-weight: bold;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.2s;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    gap: 5px;
+  }
+
+  .mapButtons .favorite {
+    flex: 0 0 46px;
+  }
+
+  .leaderboard {
+    padding: 245px 8px 14px;
+  }
+
+  .cats {
+    height: 210px;
+  }
+
+  .catLeft {
+    left: -18px;
+    width: 175px;
+    height: 230px;
+  }
+
+  .catRight {
+    right: 0;
+    width: 145px;
+    height: 105px;
+  }
+
+  .boardHeading {
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+
+  .boardHeading h2 {
+    font-size: 14px;
+  }
+
+  .tableHead {
+    display: none;
+  }
+
+  .scoreRow {
+    grid-template-columns: 31px minmax(84px, 1fr) repeat(4, 24px) 42px 38px 43px;
+    padding-right: 7px;
+    gap: 2px;
+  }
+
+  .scoreRow .s0 {
+    display: none;
+  }
+
+  .player {
+    gap: 4px;
+    font-size: 8px;
+  }
+
+  .s1,
+  .s2,
+  .s3,
+  .s4 {
+    font-size: 6.5px;
+  }
+
+  .s5,
+  .s6,
+  .s7 {
+    font-size: 7px;
+  }
 }
 
-.tooltipText::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #191715 transparent transparent transparent;
-}
+@media (max-width: 390px) {
+  .scoreRow {
+    grid-template-columns: 28px minmax(76px, 1fr) 28px 32px 36px 39px;
+  }
 
-.tooltipContainer:hover .tooltipText {
-    visibility: visible;
-    opacity: 1;
-}
-
-@media (max-width: 768px) {
-    .pageWrapper {
-        padding-top: 80px;
-    }
-
-    .card {
-        width: 95%;
-    }
-
-    .cardBody {
-        height: 580px;
-    }
-
-    .mapHeaderInfo {
-        position: absolute;
-        z-index: 2;
-        margin-top: 250px;
-        margin-bottom: 0px;
-        margin-left: 10px;
-        display: flex;
-        flex-direction: column;
-        text-align: center;
-        gap: 4px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    }
-
-    .mapStats {
-        width: 90%;
-        max-width: none;
-        right: 5%;
-        top: 80px;
-        height: auto;
-        gap: 10px;
-    }
-
-    .lbHeader {
-        width: 100%;
-        height: 200px;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-end;
-        margin-bottom: 7px;
-    }
-
-    .mapHeaderInfo {
-        margin-top: 0;
-        bottom: 90px;
-        left: 15px;
-        width: 90%;
-    }
-
-    .mapTitle {
-        font-size: 20px;
-    }
-
-    .mapArtist {
-        font-size: 14px;
-    }
-
-    .mapNumbers {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .mapNumbers div {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-evenly;
-        /* width: 17%; */
-    }
-
-    .mapNumbers div img {
-        background: linear-gradient(var(--color-azul-menos-baitola) 0%, var(--color-roxo-baitola) 100%);
-        padding: 1px;
-        border-radius: 50%;
-    }
-
-    .mapNumbers div span {
-        font-size: 17px;
-        padding-left: 8px;
-        font-weight: bold;
-        color: #FFBB00;
-    }
-
-    .buttons {
-        width: 92%;
-        left: 4%;
-        bottom: 15px;
-        gap: 5px;
-    }
-
-    .statLabel {
-        font-family: 'Caviar Dreams', sans-serif;
-        width: 50%;
-        white-space: nowrap;
-        font-weight: normal;
-        font-size: 16px;
-    }
-
-    .progressBarBase {
-        flex: 1;
-        height: 6px;
-        background-color: rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .btnText {
-        display: none;
-    }
-
-    .btnWide {
-        justify-content: center;
-    }
-
-    .col300,
-    .col100,
-    .col50,
-    .colX {
-        display: none;
-    }
-
-    .playerRow {
-        gap: 8px;
-        padding-inline: 0px !important;
-    }
-
-    .tableHeader {
-        gap: 8px;
-        padding-inline: 20px !important;
-    }
-
-    .colPlayer {
-        min-width: 80px;
-    }
-
-    .username {
-        font-size: 12px;
-    }
-
-    .colPP {
-        width: 60px;
-    }
-
-    .colMaxCombo {
-        width: 50px;
-        text-align: left;
-    }
-
-    .catBody {
-        max-height: 180px;
-        left: 2%;
-    }
-
-    .catHead {
-        max-height: 80px;
-        right: 2%;
-    }
+  .scoreRow .s1,
+  .scoreRow .s2,
+  .scoreRow .s3,
+  .scoreRow .s4 {
+    display: none;
+  }
 }

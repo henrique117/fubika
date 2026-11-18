@@ -1,0 +1,287 @@
+.appShell {
+  min-height: 100dvh;
+  padding-top: 60px;
+  overflow: hidden;
+  background: #2c2825;
+  color: #ffffff;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-synthesis: none;
+}
+
+.matchesPanel {
+  width: min(720px, calc(100% - 32px));
+  min-height: 728px;
+  margin: 71px auto 120px;
+  border-radius: 20px;
+  background: #191715;
+  padding: 17px 20px 60px;
+}
+
+.panelHeading {
+  position: relative;
+  display: flex;
+  height: 43px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.panelHeading h1 {
+  margin-top: -1px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 30px;
+  color: #ffffff;
+}
+
+.backButton {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  display: block;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  transition: transform 160ms ease;
+}
+
+.backButton:hover {
+  transform: translateX(-3px);
+}
+
+.backButton img {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.matchList {
+  display: flex;
+  flex-direction: column;
+  gap: 41px;
+  margin-top: 61px;
+}
+
+.matchCard {
+  overflow: hidden;
+  border-radius: 12px;
+  background: #2c2825;
+}
+
+.beatmapImage {
+  width: 100%;
+  height: 138px;
+  overflow: hidden;
+  border-radius: 12px 12px 9px 9px;
+  -webkit-mask-image: url("/assets/dd32a.svg");
+  mask-image: url("/assets/dd32a.svg");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+.beatmapImage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.placements {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px;
+}
+
+.placementRow {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 50px;
+  grid-template-columns: 292px 1fr;
+  align-items: center;
+  overflow: hidden;
+  border: 0;
+  border-radius: 12.5px;
+  background: #3c3733;
+  padding: 0 11px;
+  text-align: left;
+  transition: background 140ms ease;
+}
+
+.placementRow:hover {
+  background: #45403b;
+}
+
+.player {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.crown {
+  display: block;
+  width: 17px;
+  height: 17px;
+  margin-right: 3px;
+  object-fit: contain;
+}
+
+.place {
+  flex: none;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-weight: 700;
+}
+
+.place.first {
+  color: #f8c676;
+  font-size: 18px;
+}
+
+.place.second {
+  width: 36px;
+  color: #a7a7a7;
+  font-size: 15px;
+}
+
+.playerName {
+  margin-left: 9px;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #e8dad0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.placementRow + .placementRow .playerName {
+  margin-left: 0;
+  font-size: 15px;
+}
+
+.rank {
+  display: block;
+  width: 25px;
+  height: 23px;
+  margin-left: 20px;
+  object-fit: contain;
+}
+
+.placementRow + .placementRow .rank {
+  width: 25px;
+  height: 23px;
+  margin-left: 20px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 126px 110px 1fr;
+  align-items: center;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #e8dad0;
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #e8dad0;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.stat .label {
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #e8dad0;
+  font-weight: 400;
+}
+
+.stat strong {
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #e8dad0;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.comboStat img {
+  display: block;
+  width: 26px;
+  height: 19px;
+  align-self: center;
+  margin-right: 1px;
+  object-fit: contain;
+}
+
+.scoreStat {
+  position: relative;
+  justify-content: flex-end;
+}
+
+.scoreStat small {
+  position: absolute;
+  top: 15px;
+  right: 0;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+  font-size: 7px;
+  font-weight: 400;
+}
+
+.appShell a:focus-visible {
+  outline: 2px solid #a9fff7;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .matchesPanel {
+    margin-top: 32px;
+  }
+
+  .placementRow {
+    grid-template-columns: minmax(170px, 1fr) auto;
+  }
+
+  .stats {
+    grid-template-columns: auto auto;
+    gap: 16px;
+  }
+
+  .scoreStat {
+    display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .matchesPanel {
+    width: calc(100% - 20px);
+    min-height: calc(100dvh - 120px);
+    border-radius: 16px;
+    padding: 16px 10px 36px;
+  }
+
+  .matchList {
+    gap: 24px;
+    margin-top: 42px;
+  }
+
+  .beatmapImage {
+    height: clamp(100px, 30vw, 138px);
+  }
+
+  .placementRow {
+    grid-template-columns: 1fr;
+    padding: 0 9px;
+  }
+
+  .stats {
+    display: none;
+  }
+
+  .rank {
+    margin-left: auto;
+  }
+}

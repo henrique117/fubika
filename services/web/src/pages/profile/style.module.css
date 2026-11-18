@@ -1,388 +1,436 @@
-.pageWrapper {
+.profilePage {
+  position: relative;
+  min-height: 1080px;
+  padding-top: 60px;
+  overflow: hidden;
+  background: #2c2825;
+  color: #fff;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-synthesis: none;
+}
+
+.profilePage button,
+.profilePage a {
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.profilePage button:focus-visible,
+.profilePage a:focus-visible {
+  outline: 2px solid #f29aff;
+  outline-offset: 3px;
+}
+
+.wallpaper {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  left: 0;
+  height: 810px;
+  background: url("/assets/ad686.png") center top / cover no-repeat;
+}
+
+.wallpaper::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, transparent 78%, #2c2825 100%),
+    linear-gradient(to right, rgb(0 0 0 / 22%), transparent 50%, rgb(0 0 0 / 8%));
+  content: "";
+}
+
+.profilePanel {
+  position: relative;
+  z-index: 2;
+  width: min(720px, calc(100% - 32px));
+  min-height: 798px;
+  margin: 81px auto 141px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgb(25 23 21 / 76%);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 18%);
+  backdrop-filter: blur(0.4px);
+}
+
+.profileHero {
+  position: relative;
+  height: 165px;
+}
+
+.chartBackground {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 720px;
+  height: 165px;
+  pointer-events: none;
+}
+
+.avatarFrame {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 125px;
+  height: 125px;
+  overflow: hidden;
+  border: 1px solid #992727;
+  border-radius: 20px;
+  background: #000;
+  box-shadow: 0 0 7px rgb(153 39 39 / 45%);
+}
+
+.avatarFrame img {
+  display: block;
+  width: 146px;
+  height: 146px;
+  max-width: none;
+  transform: translate(-10px, -10px) rotate(12.79deg);
+  object-fit: cover;
+}
+
+.identity {
+  position: absolute;
+  top: 62px;
+  left: 154px;
+  width: 100px;
+}
+
+.identity h1 {
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
+.identity > p {
+  margin-top: 7px;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #88c0e8;
+  font-size: 10px;
+  line-height: 1;
+  text-align: center;
+}
+
+.experience {
+  width: 100px;
+  height: 5px;
+  margin-top: 3px;
+  padding: 1px;
+  border-radius: 4px;
+  background: #d9d9d9;
+}
+
+.experience span {
+  display: block;
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: #e89e00;
+}
+
+.ranks {
+  display: flex;
+  width: 100px;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.ranks div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ranks small {
+  font-family: 'Caviar Dreams', sans-serif;
+  color: white;
+  font-size: 5px;
+  line-height: 1.2;
+}
+
+.ranks strong {
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ranks div:first-child strong {
+  color: #ffc400;
+}
+
+.ranks div:last-child strong {
+  color: #00e7d8;
+}
+
+.relationshipActions {
+  position: absolute;
+  top: 124px;
+  left: 164px;
+  display: flex;
+  gap: 10px;
+}
+
+.relationshipActions button {
+  display: grid;
+  width: 25px;
+  height: 17px;
+  border: 0;
+  cursor: pointer;
+  place-items: center;
+  border-radius: 999px;
+  opacity: 1;
+}
+
+.relationshipActions button:hover {
+  transform: scale(1.08);
+}
+
+.mutualButton {
+  background: rgb(245 54 255 / 75%);
+}
+
+.bellButton {
+  background: rgb(42 156 0 / 75%);
+}
+
+.mutualButton img {
+  display: block;
+  width: 13px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.bellButton img {
+  display: block;
+  width: 11px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.showcase {
+  position: relative;
+  display: grid;
+  width: 680px;
+  min-height: 435px;
+  margin: 32px auto 0;
+  grid-template-columns: 290px 1fr;
+  gap: 60px;
+  padding: 20px;
+  background: url("/assets/9d29a.svg") top left / 680px 435px no-repeat;
+}
+
+.mapList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mapPill {
+  position: relative;
+  width: 290px;
+  height: 35px;
+  flex: 0 0 35px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid rgb(242 154 255 / 52%);
+  border-radius: 40px;
+  background: rgb(25 23 21 / 50%);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.mapPill img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0.78;
+  object-fit: cover;
+}
+
+.mapPill::after {
+  position: absolute;
+  inset: 0;
+  background: rgb(25 23 21 / 35%);
+  content: "";
+  transition: background-color 160ms ease;
+}
+
+.mapPill span {
+  position: relative;
+  z-index: 2;
+  display: block;
+  overflow: hidden;
+  padding: 0 25px;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: transparent;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 31px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.mapPill:hover {
+  border-color: #f7c3ff;
+  background: rgb(25 23 21 / 90%);
+  box-shadow: 0 0 13px rgb(242 154 255 / 18%);
+  transform: translateX(3px);
+}
+
+.mapPill:hover::after {
+  background: rgb(25 23 21 / 64%);
+}
+
+.mapPill:hover span {
+  color: #fff;
+}
+
+.statusPanel {
+  position: relative;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.statusPanel dl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statusPanel dl div {
+  display: grid;
+  grid-template-columns: 145px auto;
+  align-items: baseline;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.statusPanel dt {
+  font-family: 'Caviar Dreams', sans-serif;
+  font-weight: 700;
+  color: #fff;
+}
+
+.statusPanel dd {
+  margin: 0;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.cat {
+  position: absolute;
+  top: 80px;
+  right: -10px;
+  display: block;
+  width: 115px;
+  height: 83px;
+  transform: rotate(5.62deg);
+  object-fit: contain;
+}
+
+@media (max-width: 760px) {
+  .profilePage {
+    min-height: 1180px;
+  }
+
+  .wallpaper {
+    top: 60px;
+    height: 650px;
+    background-position: 58% top;
+  }
+
+  .profilePanel {
+    width: calc(100% - 24px);
+    margin-top: 32px;
+  }
+
+  .chartBackground {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .showcase {
+    width: calc(100% - 24px);
+    min-height: 800px;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgb(17 16 15 / 58%);
+  }
+
+  .mapList,
+  .mapPill {
     width: 100%;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding-top: 90px;
-    padding-bottom: 70px;
-    background-color: #2C2825;
-    background-image: 
-        linear-gradient(to bottom, rgba(44, 40, 37, 0) 550px, rgba(44, 40, 37, 0.8) 720px, #2C2825 820px),
-        url('/arlecchino_wallpaper.png');
-    background-size: 1440px auto;
-    background-repeat: no-repeat;
-    background-position: center 60px;
+  }
+
+  .statusPanel {
+    min-height: 180px;
+    padding: 12px 4px 0;
+  }
+
+  .statusPanel dl div {
+    grid-template-columns: minmax(135px, 1fr) auto;
+  }
+
+  .cat {
+    right: 0;
+  }
 }
 
-.rankingContainer {
-    width: 720px; /* Fundo meio principal */
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* Baseado nas posições relativas do figma */
-    margin-top: 71px; /* Para bater o top 141 absoluto */
-    position: relative;
-    padding: 0;
+@media (max-width: 430px) {
+  .profileHero {
+    height: 200px;
+  }
+
+  .avatarFrame {
+    top: 18px;
+    left: 18px;
+    width: 112px;
+    height: 112px;
+  }
+
+  .avatarFrame img {
+    width: 132px;
+    height: 132px;
+  }
+
+  .identity {
+    top: 55px;
+    left: 145px;
+  }
+
+  .relationshipActions {
+    top: 145px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .showcase {
+    margin-top: 15px;
+  }
 }
 
-.tableCard {
-    width: 720px;
-    background-color: rgba(25, 23, 21, 0.75); /* Fundo meio: #191715 com 75% */
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    position: relative;
-    padding-bottom: 20px;
-}
-
-.profileHeader {
-    display: flex;
-    align-items: center;
-    background-color: transparent;
-    border-radius: 20px;
-    width: 720px;
-    height: 165px;
-    padding: 20px;
-    box-sizing: border-box;
-    position: relative;
-}
-
-/* Camada que desenha o fundo escuro do header, com o buraco exato do gráfico excluído como no Figma! */
-.profileHeaderOverlay {
-    position: absolute;
-    inset: 0;
-    width: 720px;
-    height: 165px;
-    border-radius: 20px;
-    background-color: rgba(25, 23, 21, 0.75);
-    pointer-events: none;
-    z-index: 0;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='165' viewBox='0 0 720 165'%3E%3Cmask id='hole'%3E%3Crect width='720' height='165' rx='20' fill='white'/%3E%3Crect x='400' y='33' width='300' height='100' rx='20' fill='black'/%3E%3C/mask%3E%3Crect width='720' height='165' rx='20' fill='white' mask='url(%23hole)'/%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='165' viewBox='0 0 720 165'%3E%3Cmask id='hole'%3E%3Crect width='720' height='165' rx='20' fill='white'/%3E%3Crect x='400' y='33' width='300' height='100' rx='20' fill='black'/%3E%3C/mask%3E%3Crect width='720' height='165' rx='20' fill='white' mask='url(%23hole)'/%3E%3C/svg%3E");
-}
-
-.profileImg {
-    width: 125px;
-    height: 125px;
-    background-color: #000000;
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid #992727;
-    box-shadow: 0 0 8px rgba(153, 39, 39, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-}
-
-.profileImg img {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.profileGraph {
-    width: 300px;
-    height: 100px;
-    background-color: transparent; /* 100% transparente para revelar o Fundo meio mais claro! */
-    border-radius: 20px;
-    margin-left: auto;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden; /* Corta as pontas na curva de 20px */
-    z-index: 1;
-}
-
-.graphSvg {
-    width: 100%;
-    height: auto;
-    display: block;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-.profileHeaderInfo {
-    display: flex;
-    flex-direction: column;
-    margin-left: 6px;
-    align-items: center;
-    justify-content: center;
-    gap: 0px !important;
-    z-index: 2; /* Fica acima da sombra do header */
-    position: relative;
-}
-
-.profileNickname {
-    font-family: 'Caviar Dreams';
-    font-size: 15px;
-    font-weight: 700;
-    color: #FFFFFF;
-    line-height: 19px;
-}
-
-.profileLevel {
-    font-family: 'Caviar Dreams';
-    font-size: 10px;
-    line-height: 12px;
-    color: #88C0E8;
-    margin-top: 0px;
-}
-
-.progressBarLevel {
-    height: 5px;
-    width: 100px;
-    background: #D9D9D9;
-    border-radius: 3.5px;
-    margin-top: 5px;
-    position: relative;
-}
-
-/* Fundo amarelo e escuro baseado no figma (Barra de EXP) */
-.progressBarLevel::after {
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 98px;
-    left: 1px;
-    top: 1px;
-    background: #2C2825;
-    border-radius: 1.5px;
-}
-.progressBarLevel::before {
-    content: '';
-    position: absolute;
-    height: 3px;
-    width: 12px; /* Representando EXP atual */
-    left: 1px;
-    top: 1px;
-    background: #E89E00;
-    border-radius: 1.5px;
-    z-index: 1;
-}
-
-.rankArea {
-    display: flex;
-    justify-content: space-between;
-    width: 100px; /* Alinha com a largura de 100px da barra de EXP */
-    margin-top: 6px;
-    box-sizing: border-box;
-}
-
-.rankItem {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 38px;
-}
-
-.rankTitle {
-    font-family: 'Caviar Dreams';
-    font-size: 5px;
-    color: #FFFFFF;
-    line-height: 6px;
-    white-space: nowrap;
-}
-
-.rankNumber {
-    font-family: 'Caviar Dreams';
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 13px;
-    display: inline-block;
-    margin-top: 1px;
-    white-space: nowrap;
-    text-align: center;
-}
-
-/* Baseado no Figma #1000 */
-.rankGlobalGradient {
-    background: linear-gradient(360deg, #FFAE00 0%, #FFFF00 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 1px rgba(255, 98, 0, 0.4));
-}
-
-/* Baseado no Figma #25 */
-.rankEstadualGradient {
-    background: linear-gradient(360deg, #00D9FF 0%, #00FF99 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 1px rgba(0, 127, 150, 0.4));
-}
-
-.profileButtons {
-    display: flex;
-    justify-content: space-between;
-    width: 80px;
-    margin-top: 6px;
-}
-
-.profileButtons button {
-    height: 16.67px;
-    width: 25px;
-    border: none;
-    border-radius: 34.5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.friendBtn {
-    background: rgba(245, 54, 255, 0.75) !important;
-}
-
-.notificationBtn {
-    background: rgba(42, 156, 0, 0.75) !important;
-}
-
-.profileInfos {
-    width: 100%;
-    display: flex;
-    padding: 0 20px;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.profileMaps {
-    width: 330px;
-    height: 435px;
-    background-color: rgba(25, 23, 21, 0.75); /* #191715 0.75 */
-    border-radius: 20px;
-    padding: 20px; /* Figma aponta inicio dos mapas 20px depois */
-    display: flex;
-    flex-direction: column;
-    gap: 5px; /* Distância entre cada pill de 35px e top + 40px */
-}
-
-.mapsPill {
-    position: relative;
-    height: 35px;
-    width: 290px;
-    border-radius: 40px;
-    background-size: cover;
-    background-position: center;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    box-sizing: border-box;
-}
-
-/* O traçado sutil roxo/rosa do Figma (Linear 15%, Inside, Weight 2) */
-.mapsPill::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 40px;
-    padding: 2px;
-    background: linear-gradient(90deg, rgba(242, 154, 255, 0.15), rgba(255, 36, 251, 0.15)); /* Figma: Linear 15% */
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    z-index: 2;
-}
-
-
-.mapInfoOverlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(25, 23, 21, 0.5); /* Fill padrão do Figma: 50% de escurecimento */
-    border-radius: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 15px;
-    box-sizing: border-box;
-    z-index: 1;
-    transition: background-color 0.25s ease;
-}
-
-.mapsPill:hover .mapInfoOverlay {
-    background-color: rgba(25, 23, 21, 0.9); /* No hover escurece para 90% */
-}
-
-.mapName {
-    color: #FFFFFF;
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-family: 'Caviar Dreams';
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-}
-
-.mapsPill:hover .mapName {
-    opacity: 1;
-}
-
-.rightColumn {
-    width: 330px;
-}
-
-.profileStats {
-    background-color: rgba(25, 23, 21, 0.75);
-    width: 330px;
-    height: 174px;
-    border-radius: 20px;
-    padding: 18px 20px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-}
-
-.statRow {
-    display: flex;
-    align-items: center;
-    height: 18px; /* Cada linha pula 18px no Figma */
-    width: 100%;
-}
-
-.statRow span:first-child {
-    font-family: 'Caviar Dreams';
-    font-weight: 700;
-    font-size: 10px;
-    line-height: 13px;
-    color: #FFFFFF;
-    width: 153px; /* Distância exata da coluna de números: 903px - 750px = 153px */
-    flex-shrink: 0;
-}
-
-.statRow span:last-child {
-    font-family: 'Caviar Dreams';
-    font-weight: 400;
-    font-size: 10px;
-    line-height: 12px;
-    color: #FFFFFF;
-    text-align: left; /* Alinhado à esquerda na coluna! */
-}
-
-.catImg {
-    position: absolute;
-    left: 217px; /* Figma: 947.21px - 730px = 217.21px */
-    top: 99px;   /* Figma: 437.57px - 338px = 99.57px */
-    width: 115px;
-    height: 83px;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.catImg img {
-    width: 115px;
-    height: 83px;
-    transform: rotate(5.62deg);
-    object-fit: contain;
+@media (prefers-reduced-motion: reduce) {
+  .profilePage *,
+  .profilePage *::before,
+  .profilePage *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

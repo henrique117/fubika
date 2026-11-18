@@ -1,0 +1,249 @@
+.appShell {
+  position: relative;
+  min-height: 2415px;
+  padding-top: 60px;
+  overflow: clip;
+  background: #2c2825;
+  color: #fff;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-synthesis: none;
+}
+
+.heroArt {
+  position: absolute;
+  inset: 60px 0 auto;
+  height: 810px;
+  background-image:
+    linear-gradient(to bottom, transparent 82%, #2c2825 100%),
+    url("/assets/ad686.png");
+  background-position: center top;
+  background-size: auto 810px;
+  background-repeat: no-repeat;
+}
+
+.leaderboard {
+  position: relative;
+  z-index: 2;
+  width: min(720px, calc(100% - 32px));
+  min-height: 2218px;
+  margin: 71px auto 0;
+  padding: 18px 20px 96px;
+  border-radius: 20px;
+  background: rgb(25 23 21 / 89%);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 18%);
+}
+
+.leaderboardHeading {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 88px;
+}
+
+.leaderboardHeading h1 {
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.backButton {
+  position: absolute;
+  left: -2px;
+  top: 2px;
+  display: block;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.backButton:hover {
+  transform: translateX(-3px);
+  background: rgb(255 255 255 / 8%);
+}
+
+.backButton img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tableScroll {
+  width: 100%;
+}
+
+.playTable {
+  min-width: 640px;
+}
+
+.tableHeader,
+.playRow {
+  display: grid;
+  grid-template-columns: 23px minmax(210px, 1fr) 55px 28px 28px 24px 22px 72px 88px 103px;
+  align-items: center;
+}
+
+.tableHeader {
+  height: 34px;
+  padding: 0 7px;
+  color: #dcdcdc;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tableHeader span {
+  font-family: 'Caviar Dreams', sans-serif;
+  font-weight: 700;
+  color: #dcdcdc;
+}
+
+.rows {
+  display: grid;
+  gap: 5px;
+}
+
+.playRow {
+  min-height: 35px;
+  width: 100%;
+  padding: 0 7px;
+  border-radius: 12.5px;
+  color: #fff;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 8px;
+  text-align: center;
+  background: rgb(44 40 37 / 75%);
+  transition:
+    transform 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.playRow > span {
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+}
+
+.playRow:hover {
+  z-index: 1;
+  transform: translateX(3px);
+  background: rgb(57 52 48 / 92%);
+  box-shadow: 0 5px 14px rgb(0 0 0 / 18%);
+}
+
+.rankCell {
+  font-size: 10px;
+  text-align: left;
+}
+
+.rankCell img {
+  display: block;
+  width: 15px;
+  height: 13px;
+  object-fit: cover;
+}
+
+.songCell {
+  min-width: 0;
+  text-align: center;
+}
+
+.songCell strong,
+.songCell small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Caviar Dreams', sans-serif;
+  color: #fff;
+}
+
+.songCell strong {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.songCell small {
+  margin-top: 1px;
+  font-size: 8px;
+}
+
+.catMascot {
+  position: absolute;
+  left: 50%;
+  bottom: -53px;
+  display: block;
+  width: 166px;
+  height: 120px;
+  transform: translateX(-50%);
+  object-fit: contain;
+}
+
+@media (max-width: 760px) {
+  .appShell {
+    min-height: 2310px;
+  }
+
+  .leaderboard {
+    width: calc(100% - 20px);
+    margin-top: 36px;
+    padding: 14px 10px 92px;
+  }
+
+  .leaderboardHeading {
+    height: 76px;
+  }
+
+  .leaderboardHeading h1 {
+    font-size: 20px;
+  }
+
+  .backButton {
+    width: 38px;
+    height: 38px;
+  }
+
+  .playTable {
+    min-width: 0;
+  }
+
+  .tableHeader,
+  .playRow {
+    grid-template-columns: 24px minmax(126px, 1fr) 42px 58px 50px;
+  }
+
+  .tableHeader > :nth-child(4),
+  .tableHeader > :nth-child(5),
+  .tableHeader > :nth-child(6),
+  .tableHeader > :nth-child(7),
+  .tableHeader > :nth-child(10),
+  .playRow > :nth-child(4),
+  .playRow > :nth-child(5),
+  .playRow > :nth-child(6),
+  .playRow > :nth-child(7),
+  .playRow > :nth-child(10) {
+    display: none;
+  }
+
+  .songCell strong {
+    font-size: 8px;
+  }
+
+  .songCell small {
+    font-size: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appShell *,
+  .appShell *::before,
+  .appShell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -70,22 +70,8 @@ const achievementsLoader = async ({ params }: LoaderFunctionArgs) => {
 }
 
 const beatmapLoader = async ({ params }: LoaderFunctionArgs) => {
-    let targetId = params.id
-    if (!targetId && hasApiAuth()) {
-        const resolved = await fetchActivePlayer(undefined, { hydrateCount: 0 })
-        const topMapId = resolved?.player?.top_200?.[0]?.beatmap?.beatmap_id
-        if (topMapId && topMapId > 0) {
-            targetId = String(topMapId)
-        } else if (resolved?.player?.id) {
-            const recent = await fetchUserRecent(resolved.player.id, 1)
-            const recentMapId = recent[0]?.beatmap?.beatmap_id
-            if (recentMapId && recentMapId > 0) {
-                targetId = String(recentMapId)
-            }
-        }
-    }
-    if (targetId) {
-        await fetchBeatmapWithSetFromMirror(targetId)
+    if (params.id) {
+        await fetchBeatmapWithSetFromMirror(params.id)
     }
     return null
 }
@@ -187,18 +173,15 @@ const router = createBrowserRouter([
             },
             {
                 path: '/beatmap',
-                element: <BeatmapPage />,
-                loader: beatmapLoader,
+                element: <NotFoundPage />,
             },
             {
                 path: '/mapas',
-                element: <BeatmapPage />,
-                loader: beatmapLoader,
+                element: <NotFoundPage />,
             },
             {
                 path: '/beatmaps',
-                element: <BeatmapPage />,
-                loader: beatmapLoader,
+                element: <NotFoundPage />,
             },
             {
                 path: '/beatmap/:id',

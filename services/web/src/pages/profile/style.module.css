@@ -92,10 +92,10 @@
   width: 125px;
   height: 125px;
   overflow: hidden;
-  border: 1px solid #992727;
+  border: 1px solid rgb(255 255 255 / 45%);
   border-radius: 20px;
   background: #000;
-  box-shadow: 0 0 7px rgb(153 39 39 / 45%);
+  box-shadow: 0 0 8px rgb(255 255 255 / 20%);
 }
 
 .avatarFrame img {

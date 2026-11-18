@@ -2,28 +2,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import style from './style.module.css'
 import { WrapperComponent } from '../../components/components.export'
+import NotFoundPage from '../notfound'
 import {
     type ApiBeatmap,
     type ApiBeatmapset,
-    fetchActivePlayer,
     fetchBeatmapWithSetFromMirror,
-    fetchUserRecent,
     getCachedBeatmapSetFromMirror,
-    getDefaultCachedBeatmapSetSnapshot,
-    hasApiAuth,
 } from '../../services/profileData'
 
 const A = '/assets'
-
-const difficulties = [
-    { icon: '072f7.svg', label: '2.4', title: 'Iniciante' },
-    { icon: '23630.svg', label: '3.1', title: 'Fácil' },
-    { icon: '1adf0.svg', label: '4.0', title: 'Normal' },
-    { icon: '1730f.svg', label: '6.1', title: 'Challenger' },
-    { icon: '2ff96.svg', label: '7.2', title: 'Insano' },
-    { icon: 'b6e12.svg', label: '8.0', title: 'Expert' },
-    { icon: '886d5.svg', label: '9.3', title: 'Extremo' },
-]
 
 const rows = Array.from({ length: 50 }, (_, i) => i + 1)
 
@@ -110,11 +97,10 @@ function MapCard({
     currentBeatmap,
     beatmapSet,
 }: {
-    currentBeatmap: ApiBeatmap | null
+    currentBeatmap: ApiBeatmap
     beatmapSet: ApiBeatmapset | null
 }) {
     const navigate = useNavigate()
-    const [selectedDiff, setSelectedDiff] = useState(6)
     const [playingSetId, setPlayingSetId] = useState<number | null>(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const loadedAudioSetIdRef = useRef<number | null>(null)
@@ -185,60 +171,49 @@ function MapCard({
         return sortedSetDiffs.slice(start, start + 7)
     })()
 
-    const coverSrc = currentBeatmap?.cover || `${A}/9bef5.png`
-    const diffName = currentBeatmap
-        ? currentBeatmap.diff.includes("'") || !currentBeatmap.author_name
+    const coverSrc = currentBeatmap.cover || currentBeatmap.thumbnail || ''
+    const diffName =
+        currentBeatmap.diff.includes("'") || !currentBeatmap.author_name
             ? currentBeatmap.diff
             : `${currentBeatmap.author_name}'s ${currentBeatmap.diff}`
-        : `ismagius' ${difficulties[selectedDiff].title}`
-    const diffSrText = currentBeatmap
-        ? Number(currentBeatmap.star_rating || 0).toFixed(1)
-        : difficulties[selectedDiff].label
-    const statusText = currentBeatmap ? formatBeatmapStatus(currentBeatmap.status) : 'Ranqueado'
+    const diffSrText = Number(currentBeatmap.star_rating || 0).toFixed(1)
+    const statusText = formatBeatmapStatus(currentBeatmap.status)
 
-    const timeValue = currentBeatmap ? formatDuration(currentBeatmap.total_length) : '2:11'
-    const bpmValue = currentBeatmap ? String(Math.round(currentBeatmap.bpm || 0)) : '180'
-    const circleValue = currentBeatmap ? String(currentBeatmap.count_circles ?? 0) : '222'
-    const sliderValue = currentBeatmap ? String(currentBeatmap.count_sliders ?? 0) : '222'
+    const timeValue = formatDuration(currentBeatmap.total_length)
+    const bpmValue = String(Math.round(currentBeatmap.bpm || 0))
+    const circleValue = String(currentBeatmap.count_circles ?? 0)
+    const sliderValue = String(currentBeatmap.count_sliders ?? 0)
 
-    const detailRows: [string, number, string][] = currentBeatmap
-        ? [
-              [
-                  'Tamanho do círculo',
-                  barWidthForTenScale(currentBeatmap.cs),
-                  formatStatNumber(currentBeatmap.cs),
-              ],
-              [
-                  'Drenagem de HP',
-                  barWidthForTenScale(currentBeatmap.hp),
-                  formatStatNumber(currentBeatmap.hp),
-              ],
-              [
-                  'Precisão',
-                  barWidthForTenScale(currentBeatmap.od),
-                  formatStatNumber(currentBeatmap.od),
-              ],
-              [
-                  'Taxa de aproximação',
-                  barWidthForTenScale(currentBeatmap.ar),
-                  formatStatNumber(currentBeatmap.ar),
-              ],
-              [
-                  'Dificuldade',
-                  barWidthForTenScale(currentBeatmap.star_rating),
-                  Number(currentBeatmap.star_rating || 0).toFixed(1),
-              ],
-          ]
-        : [
-              ['Tamanho do círculo', 38, '5'],
-              ['Drenagem de HP', 46, '6'],
-              ['Precisão', 60, '8'],
-              ['Taxa de aproximação', 67, '9'],
-              ['Dificuldade', 47, difficulties[selectedDiff].label],
-          ]
+    const detailRows: [string, number, string][] = [
+        [
+            'Tamanho do círculo',
+            barWidthForTenScale(currentBeatmap.cs),
+            formatStatNumber(currentBeatmap.cs),
+        ],
+        [
+            'Drenagem de HP',
+            barWidthForTenScale(currentBeatmap.hp),
+            formatStatNumber(currentBeatmap.hp),
+        ],
+        [
+            'Precisão',
+            barWidthForTenScale(currentBeatmap.od),
+            formatStatNumber(currentBeatmap.od),
+        ],
+        [
+            'Taxa de aproximação',
+            barWidthForTenScale(currentBeatmap.ar),
+            formatStatNumber(currentBeatmap.ar),
+        ],
+        [
+            'Dificuldade',
+            barWidthForTenScale(currentBeatmap.star_rating),
+            Number(currentBeatmap.star_rating || 0).toFixed(1),
+        ],
+    ]
 
     const passRate =
-        currentBeatmap && (currentBeatmap.playcount ?? 0) > 0
+        (currentBeatmap.playcount ?? 0) > 0
             ? Math.min(
                   100,
                   Math.max(
@@ -246,66 +221,48 @@ function MapCard({
                       ((currentBeatmap.passcount ?? 0) / (currentBeatmap.playcount ?? 1)) * 100
                   )
               )
-            : null
-    const successFillWidth = passRate !== null ? Math.round((passRate / 100) * 207) : undefined
-    const successLabel = passRate !== null ? `${passRate.toFixed(1)}%` : '10.8%'
+            : 0
+    const successFillWidth = Math.round((passRate / 100) * 207)
+    const successLabel = `${passRate.toFixed(1)}%`
 
     return (
         <section className={style.mapCard} id="mapa">
             <div className={style.mapTitle}>
                 <img src={`${A}/17c9d.png`} alt="" />
-                <h1
-                    title={
-                        currentBeatmap
-                            ? `${currentBeatmap.title} - ${currentBeatmap.artist}`
-                            : 'Informações do mapa'
-                    }
-                >
-                    {currentBeatmap ? `${currentBeatmap.title} - ${currentBeatmap.artist}` : 'Informações do mapa'}
+                <h1 title={`${currentBeatmap.title} - ${currentBeatmap.artist}`}>
+                    {currentBeatmap.title} - {currentBeatmap.artist}
                 </h1>
             </div>
             <div className={style.mapHero}>
-                <img
-                    key={coverSrc}
-                    className={style.mapCover}
-                    src={coverSrc}
-                    alt={currentBeatmap ? `Arte de ${currentBeatmap.title}` : 'Arte do beatmap'}
-                    onError={(e) => {
-                        e.currentTarget.onerror = null
-                        e.currentTarget.src = `${A}/9bef5.png`
-                    }}
-                />
+                {coverSrc && (
+                    <img
+                        key={coverSrc}
+                        className={style.mapCover}
+                        src={coverSrc}
+                        alt={`Arte de ${currentBeatmap.title}`}
+                        onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                        }}
+                    />
+                )}
                 <div className={style.mapShade} />
                 <div className={style.difficultyPicker} aria-label="Dificuldades">
-                    {currentBeatmap && visibleSetDiffs.length > 0
-                        ? visibleSetDiffs.map((item) => {
-                              const sr = Number(item.star_rating || 0)
-                              const isSelected = item.beatmap_id === currentBeatmap.beatmap_id
-                              return (
-                                  <button
-                                      key={item.beatmap_id}
-                                      type="button"
-                                      className={isSelected ? style.selected : ''}
-                                      onClick={() => navigate(`/beatmap/${item.beatmap_id}`)}
-                                      title={`${item.diff} — ${sr.toFixed(1)}`}
-                                      aria-label={`Dificuldade ${item.diff}`}
-                                  >
-                                      <img src={`${A}/${getDifficultyIcon(sr)}`} alt="" />
-                                  </button>
-                              )
-                          })
-                        : difficulties.map((item, index) => (
-                              <button
-                                  key={item.icon}
-                                  type="button"
-                                  className={selectedDiff === index ? style.selected : ''}
-                                  onClick={() => setSelectedDiff(index)}
-                                  title={`${item.title} — ${item.label}`}
-                                  aria-label={`Dificuldade ${item.title}`}
-                              >
-                                  <img src={`${A}/${item.icon}`} alt="" />
-                              </button>
-                          ))}
+                    {visibleSetDiffs.map((item) => {
+                        const sr = Number(item.star_rating || 0)
+                        const isSelected = item.beatmap_id === currentBeatmap.beatmap_id
+                        return (
+                            <button
+                                key={item.beatmap_id}
+                                type="button"
+                                className={isSelected ? style.selected : ''}
+                                onClick={() => navigate(`/beatmap/${item.beatmap_id}`)}
+                                title={`${item.diff} — ${sr.toFixed(1)}`}
+                                aria-label={`Dificuldade ${item.diff}`}
+                            >
+                                <img src={`${A}/${getDifficultyIcon(sr)}`} alt="" />
+                            </button>
+                        )
+                    })}
                 </div>
                 <div className={style.difficultyMeta}>
                     <span className={style.difficultyValue}>
@@ -430,7 +387,7 @@ function Leaderboard() {
 
 const Beatmap: React.FC = () => {
     const { id } = useParams<{ id: string }>()
-    const routeKey = id ? `id:${id.trim()}` : '__default__'
+    const routeKey = id ? `id:${id.trim()}` : '__empty__'
     const [asyncBundle, setAsyncBundle] = useState<{
         key: string
         beatmap: ApiBeatmap | null
@@ -438,34 +395,14 @@ const Beatmap: React.FC = () => {
     } | null>(null)
 
     useEffect(() => {
+        if (!id) {
+            return
+        }
+
         let cancelled = false
 
         const loadBeatmap = async () => {
-            let targetBeatmapId = id
-
-            if (!targetBeatmapId && hasApiAuth()) {
-                const resolved = await fetchActivePlayer(undefined, { hydrateCount: 0 })
-                if (cancelled) return
-
-                const topMapId = resolved?.player?.top_200?.[0]?.beatmap?.beatmap_id
-                if (topMapId && topMapId > 0) {
-                    targetBeatmapId = String(topMapId)
-                } else if (resolved?.player?.id) {
-                    const recent = await fetchUserRecent(resolved.player.id, 1)
-                    if (cancelled) return
-                    const recentMapId = recent[0]?.beatmap?.beatmap_id
-                    if (recentMapId && recentMapId > 0) {
-                        targetBeatmapId = String(recentMapId)
-                    }
-                }
-            }
-
-            if (!targetBeatmapId) {
-                setAsyncBundle({ key: routeKey, beatmap: null, beatmapSet: null })
-                return
-            }
-
-            const cachedMirror = getCachedBeatmapSetFromMirror(targetBeatmapId)
+            const cachedMirror = getCachedBeatmapSetFromMirror(id)
             if (cachedMirror) {
                 setAsyncBundle({
                     key: routeKey,
@@ -475,7 +412,7 @@ const Beatmap: React.FC = () => {
                 return
             }
 
-            const mirror = await fetchBeatmapWithSetFromMirror(targetBeatmapId)
+            const mirror = await fetchBeatmapWithSetFromMirror(id)
             if (cancelled) return
 
             if (mirror) {
@@ -496,16 +433,28 @@ const Beatmap: React.FC = () => {
         }
     }, [id, routeKey])
 
+    if (!id) {
+        return <NotFoundPage />
+    }
+
     const syncBundle =
-        asyncBundle?.key === routeKey
-            ? null
-            : id
-              ? getCachedBeatmapSetFromMirror(id)
-              : getDefaultCachedBeatmapSetSnapshot()
+        asyncBundle?.key === routeKey ? null : getCachedBeatmapSetFromMirror(id)
     const currentBeatmap =
         asyncBundle?.key === routeKey ? asyncBundle.beatmap : (syncBundle?.beatmap ?? null)
     const beatmapSet =
         asyncBundle?.key === routeKey ? asyncBundle.beatmapSet : (syncBundle?.beatmapSet ?? null)
+
+    if (asyncBundle?.key === routeKey && !currentBeatmap) {
+        return <NotFoundPage />
+    }
+
+    if (!currentBeatmap) {
+        return (
+            <WrapperComponent>
+                <div className={style.appShell} />
+            </WrapperComponent>
+        )
+    }
 
     return (
         <WrapperComponent>

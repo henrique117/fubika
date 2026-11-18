@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, RouterProvider, type LoaderFunctionArgs } from 'react-router-dom'
+import { createBrowserRouter, Outlet, redirect, RouterProvider, type LoaderFunctionArgs } from 'react-router-dom'
 import { BeatmapPage, ForgotPassPage, GlobalRankingPage, HomePage, HowToConnectPage, LoginPage, NotFoundPage, RedefinePassPage, RegisterPage, ProfilePage, ProfileTopPlaysPage, ProfileRecentPlaysPage, ProfileAchievementsPage, MpLinkPage } from '../pages/pages.export'
 import PrivateRoute from './private'
 import { TopProgressBar } from '../components/components.export'
@@ -37,8 +37,22 @@ const RootHydrateFallback = () => {
 }
 
 const profileLoader = async ({ params }: LoaderFunctionArgs) => {
+    if (!params.id) {
+        if (!hasApiAuth()) {
+            return redirect('/')
+        }
+        const resolved = await fetchActivePlayer(undefined, { preferMe: true })
+        if (!resolved?.player?.id) {
+            return redirect('/')
+        }
+        if (resolved.player.top_200 === undefined || resolved.player.top_200.length === 0) {
+            await fetchUserRecent(resolved.player.id, 10)
+        }
+        return redirect(`/profile/${resolved.player.id}`)
+    }
+
     if (!hasApiAuth()) return null
-    const resolved = await fetchActivePlayer(params.id, { preferMe: !params.id })
+    const resolved = await fetchActivePlayer(params.id)
     if (resolved && (!resolved.player.top_200 || resolved.player.top_200.length === 0)) {
         await fetchUserRecent(resolved.player.id, 10)
     }
@@ -46,12 +60,36 @@ const profileLoader = async ({ params }: LoaderFunctionArgs) => {
 }
 
 const topPlaysLoader = async ({ params }: LoaderFunctionArgs) => {
+    if (!params.id) {
+        if (!hasApiAuth()) {
+            return redirect('/')
+        }
+        const resolved = await fetchActivePlayer(undefined, { preferMe: true, hydrateCount: 50 })
+        if (!resolved?.player?.id) {
+            return redirect('/')
+        }
+        return redirect(`/profile/${resolved.player.id}/top-plays`)
+    }
     if (!hasApiAuth()) return null
     await fetchActivePlayer(params.id, { hydrateCount: 50 })
     return null
 }
 
 const recentPlaysLoader = async ({ params }: LoaderFunctionArgs) => {
+    if (!params.id) {
+        if (!hasApiAuth()) {
+            return redirect('/')
+        }
+        const resolved = await fetchActivePlayer(undefined, { preferMe: true, hydrateCount: 0 })
+        if (!resolved?.player?.id) {
+            return redirect('/')
+        }
+        const recent = await fetchUserRecent(resolved.player.id, 50)
+        if (recent.length === 0 && resolved.player.top_200?.length) {
+            await hydrateScoresBeatmaps(resolved.player.top_200.slice(0, 50), 50)
+        }
+        return redirect(`/profile/${resolved.player.id}/recent-plays`)
+    }
     if (!hasApiAuth()) return null
     const resolved = await fetchActivePlayer(params.id, { hydrateCount: 0 })
     if (resolved) {
@@ -64,6 +102,16 @@ const recentPlaysLoader = async ({ params }: LoaderFunctionArgs) => {
 }
 
 const achievementsLoader = async ({ params }: LoaderFunctionArgs) => {
+    if (!params.id) {
+        if (!hasApiAuth()) {
+            return redirect('/')
+        }
+        const resolved = await fetchActivePlayer(undefined, { preferMe: true, hydrateCount: 0 })
+        if (!resolved?.player?.id) {
+            return redirect('/')
+        }
+        return redirect(`/profile/${resolved.player.id}/achievements`)
+    }
     if (!hasApiAuth()) return null
     await fetchActivePlayer(params.id, { hydrateCount: 0 })
     return null

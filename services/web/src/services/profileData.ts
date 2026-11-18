@@ -141,7 +141,6 @@ interface CatboyBeatmapRaw {
     set?: CatboyBeatmapSetRaw
 }
 
-const ACTIVE_PROFILE_STORAGE_KEY = 'fubika_active_profile_id'
 const BEATMAP_STORAGE_KEY = 'fubika_beatmaps_v1'
 const BEATMAPSET_STORAGE_KEY = 'fubika_beatmapsets_v1'
 const HOT_PLAYER_STORAGE_KEY = 'fubika_swr_hot_v1:player'
@@ -205,31 +204,6 @@ const readAuthUserId = (): number | null => {
         return typeof parsed?.id === 'number' && parsed.id > 0 ? parsed.id : null
     } catch {
         return null
-    }
-}
-
-const readStoredProfileId = (): string | null => {
-    try {
-        return (
-            sessionStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY) ||
-            localStorage.getItem(ACTIVE_PROFILE_STORAGE_KEY)
-        )
-    } catch {
-        return null
-    }
-}
-
-const writeStoredProfileId = (id: number): void => {
-    const value = String(id)
-    try {
-        sessionStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, value)
-    } catch {
-        // Ignora indisponibilidade de sessionStorage
-    }
-    try {
-        localStorage.setItem(ACTIVE_PROFILE_STORAGE_KEY, value)
-    } catch {
-        // Ignora indisponibilidade de localStorage
     }
 }
 
@@ -741,13 +715,9 @@ export const fetchUserRecent = async (
     return result ?? []
 }
 
-const getEffectivePlayerKey = (routeId?: string, preferMe?: boolean): string => {
+const getEffectivePlayerKey = (routeId?: string): string => {
     if (routeId) {
         return routeId.trim().toLowerCase()
-    }
-    if (!preferMe) {
-        const storedId = readStoredProfileId()
-        if (storedId) return storedId
     }
     return '__me__'
 }
@@ -828,48 +798,15 @@ const resolvePlayerAndStateRank = async (
         try {
             const res = await api.get<ApiPlayer>(`/user/${encodeURIComponent(routeId)}`)
             player = res.data
-            if (player?.id) {
-                writeStoredProfileId(player.id)
-            }
         } catch {
             return null
         }
     } else {
-        const storedId = readStoredProfileId()
-
-        if (!options?.preferMe && storedId) {
-            try {
-                const res = await api.get<ApiPlayer>(`/user/${encodeURIComponent(storedId)}`)
-                player = res.data
-            } catch {
-                player = null
-            }
-        }
-
-        if (!player) {
-            try {
-                const res = await api.get<ApiPlayer>('/user/me')
-                player = res.data
-            } catch {
-                player = null
-            }
-        }
-
-        if (!player) {
-            globalTopPage = await fetchRankingPageCached(0, 1)
-            const firstPlayer = globalTopPage[0]
-            if (firstPlayer?.id) {
-                try {
-                    const userRes = await api.get<ApiPlayer>(`/user/${firstPlayer.id}`)
-                    player = userRes.data
-                } catch {
-                    player = null
-                }
-            }
-        }
-
-        if (player?.id) {
-            writeStoredProfileId(player.id)
+        try {
+            const res = await api.get<ApiPlayer>('/user/me')
+            player = res.data
+        } catch {
+            player = null
         }
     }
 
@@ -911,30 +848,18 @@ const resolvePlayerAndStateRank = async (
 }
 
 export const getCachedActivePlayerSnapshot = (
-    routeId?: string,
-    options?: { preferMe?: boolean }
+    routeId?: string
 ): ResolvedPlayer | null => {
     if (!hasApiAuth()) {
         return null
     }
 
-    const effectiveKey = getEffectivePlayerKey(routeId, options?.preferMe)
-    let envelope = getEnvelopeSync<ResolvedPlayer>(
+    const effectiveKey = getEffectivePlayerKey(routeId)
+    const envelope = getEnvelopeSync<ResolvedPlayer>(
         getPlayerSwrKey(effectiveKey),
         PLAYER_MAX_AGE_MS,
         HOT_PLAYER_STORAGE_KEY
     )
-
-    if (!envelope && effectiveKey === '__me__') {
-        const storedId = readStoredProfileId()
-        if (storedId) {
-            envelope = getEnvelopeSync<ResolvedPlayer>(
-                getPlayerSwrKey(storedId),
-                PLAYER_MAX_AGE_MS,
-                HOT_PLAYER_STORAGE_KEY
-            )
-        }
-    }
 
     if (!envelope) {
         return null
@@ -974,7 +899,7 @@ export const getDefaultCachedBeatmapSetSnapshot = (): {
         return null
     }
 
-    const cachedPlayer = getCachedActivePlayerSnapshot(undefined, { preferMe: false })
+    const cachedPlayer = getCachedActivePlayerSnapshot()
     if (!cachedPlayer) {
         return null
     }
@@ -1005,7 +930,7 @@ export const fetchActivePlayer = async (
     }
 
     const hydrateCount = options?.hydrateCount ?? 10
-    const effectiveKey = getEffectivePlayerKey(routeId, options?.preferMe)
+    const effectiveKey = getEffectivePlayerKey(routeId)
     const swrKey = getPlayerSwrKey(effectiveKey)
 
     if (effectiveKey === '__me__') {
@@ -1060,8 +985,6 @@ export const fetchActivePlayer = async (
         return null
     }
 
-    writeStoredProfileId(result.player.id)
-
     const upgraded = await ensurePlayerTopHydrated(result, hydrateCount)
     if (upgraded !== result) {
         setEnvelope(swrKey, upgraded, {
@@ -1077,6 +1000,5 @@ export const fetchActivePlayer = async (
 
 export const subscribeToPlayerKey = (
     routeId: string | undefined,
-    preferMe: boolean,
     listener: (fresh: ResolvedPlayer) => void
-): (() => void) => subscribeKey(getPlayerSwrKey(getEffectivePlayerKey(routeId, preferMe)), listener)
+): (() => void) => subscribeKey(getPlayerSwrKey(getEffectivePlayerKey(routeId)), listener)

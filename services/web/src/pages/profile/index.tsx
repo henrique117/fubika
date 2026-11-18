@@ -137,7 +137,7 @@ const Profile: React.FC = () => {
 
     const cachedResolved =
         isAuthenticated && asyncState?.key !== routeKey
-            ? getCachedActivePlayerSnapshot(id, { preferMe: !id })
+            ? getCachedActivePlayerSnapshot(id)
             : null
     const resolved = asyncState?.key === routeKey ? asyncState.resolved : cachedResolved
     const player = resolved?.player ?? null

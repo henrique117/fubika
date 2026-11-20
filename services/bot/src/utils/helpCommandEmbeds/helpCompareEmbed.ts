@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js"
-import { COLORS } from "../../constants"
+import { URLS, COLORS } from "../../constants"
 
 export default function helpCompareEmbed() {
 
@@ -18,7 +18,7 @@ export default function helpCompareEmbed() {
             },
             {
                 name: "Exemplos",
-                value: "`!compare +iccy`\n`!c +iccy https://fubika.com.br/\nbeatmap/70077`\n`!gap`",
+                value: `\`!compare +iccy\`\n\`!c +iccy ${URLS.site}/\nbeatmap/70077\`\n\`!gap\``,
                 inline: true
             },
             {

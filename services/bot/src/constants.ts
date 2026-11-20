@@ -1,3 +1,16 @@
+import { env } from './config/env.config'
+
+/*
+ * Base pública do site do ambiente, derivada de PUBLIC_DOMAIN: em staging os
+ * links precisam apontar para staging, então nada de domínio fixo aqui.
+ */
+const SITE_URL = `https://${env.PUBLIC_DOMAIN}`
+
+// Escapa os caracteres especiais do domínio (os pontos!) para uso em RegExp.
+const DOMINIO_ESCAPADO = env.PUBLIC_DOMAIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+export const beatmapUrl = (beatmapId: string | number): string => `${SITE_URL}/beatmap/${beatmapId}`
+
 export const GUILD_CONFIG = {
     guild_id: "1450592028147712173",
     roles: {
@@ -11,11 +24,14 @@ export const GUILD_CONFIG = {
 
 export const REGEX = {
     osuUrl: /(?:https?:\/\/)?osu\.ppy\.sh\/(?:b\/|beatmaps\/|beatmapsets\/\d+#(?:osu|taiko|fruits|mania)\/)(\d+)/,
-    fubikaUrl: /(?:https?:\/\/)?fubika\.com\.br\/beatmap\/(\d+)/,
+    // Casa o domínio do ambiente, aceitando subdomínio e porta opcionais.
+    fubikaUrl: new RegExp(`(?:https?:\\/\\/)?(?:[\\w-]+\\.)*${DOMINIO_ESCAPADO}(?::\\d+)?\\/beatmap\\/(\\d+)`),
     rawId: /^\d+$/
 }
 
 export const URLS = {
+    site: SITE_URL,
+    ranking: `${SITE_URL}/ranking`,
     fubikaIcon: "https://i.imgur.com/F7FEYaG.png",
     std: "https://i.imgur.com/jhR2Swe.png",
     taiko: "https://i.imgur.com/D0asi8p.png",

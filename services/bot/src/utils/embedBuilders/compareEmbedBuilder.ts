@@ -1,6 +1,6 @@
 import { EmbedBuilder, time, TimestampStyles } from "discord.js"
 import { IBeatmap, IPlayer } from "../../interfaces/interfaces.export"
-import { URLS, EMOJIS, COLORS } from "../../constants"
+import { URLS, EMOJIS, COLORS, beatmapUrl } from "../../constants"
 import { scoreGradeToEmoji, applyModsToStats, formatTime, capitalizeFirstLetter } from "../utils.export"
 
 export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPlayer): Promise<EmbedBuilder> {
@@ -22,7 +22,7 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
         return score.player.id === player.id
     })
 
-    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const mapUrl = beatmapUrl(beatmap.beatmap_id)
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     

@@ -1,6 +1,6 @@
 import { EmbedBuilder, AttachmentBuilder, time, TimestampStyles } from "discord.js"
 import { IPlayer } from "../../interfaces/interfaces.export"
-import { URLS, EMOJIS, COLORS } from "../../constants"
+import { URLS, EMOJIS, COLORS, beatmapUrl } from "../../constants"
 import { scoreGradeToEmoji } from "../utils.export"
 
 export default async function top200EmbedsBuilder(player: IPlayer): Promise<{ embeds: EmbedBuilder[], attachment: AttachmentBuilder }> {
@@ -73,7 +73,7 @@ export default async function top200EmbedsBuilder(player: IPlayer): Promise<{ em
 
             const fullDisplay = `${tempTitle} [${tempDiff}]`
 
-            const mapUrl = `https://fubika.com.br/beatmap/${score.beatmap.beatmap_id}`
+            const mapUrl = beatmapUrl(score.beatmap.beatmap_id)
 
             
             const line1 = `**#${position} [${fullDisplay}](${mapUrl})** [${score.beatmap.star_rating.toLocaleString('en-US', options)}★]`

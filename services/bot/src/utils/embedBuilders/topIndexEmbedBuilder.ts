@@ -1,6 +1,6 @@
 import { EmbedBuilder, time, TimestampStyles } from "discord.js"
 import { IPlayer, IScore } from "../../interfaces/interfaces.export"
-import { URLS, EMOJIS, COLORS } from "../../constants"
+import { URLS, EMOJIS, COLORS, beatmapUrl } from "../../constants"
 import { scoreGradeToEmoji, applyModsToStats, formatTime, capitalizeFirstLetter } from "../utils.export"
 
 export default async function topIndexEmbedBuilder(player: IPlayer, score: IScore, index: number): Promise<EmbedBuilder> {
@@ -19,7 +19,7 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
     
     const displayMods = score.mods === '' ? '' : `+${score.mods}`
 
-    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const mapUrl = beatmapUrl(beatmap.beatmap_id)
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()

@@ -1,13 +1,12 @@
 import OpenAI from 'openai'
+import { env } from './env.config'
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
-
-if (!GROQ_API_KEY) {
-    console.warn('⚠️ GROQ_API_KEY não está definida no .env! O MCP não funcionará.')
+if (!env.GROQ_API_KEY) {
+    console.warn('⚠️ GROQ_API_KEY não está definida no .env da raiz! O MCP não funcionará.')
 }
 
 export const groqClient = new OpenAI({
-    apiKey: GROQ_API_KEY,
+    apiKey: env.GROQ_API_KEY,
     baseURL: 'https://api.groq.com/openai/v1',
 })
 

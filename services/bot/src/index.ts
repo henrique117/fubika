@@ -1,11 +1,11 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-
 import { Client, Collection, GatewayIntentBits } from 'discord.js'
-import * as dotenv from 'dotenv'
 import path from 'path'
 import fs from 'fs'
 
-dotenv.config()
+import { env, validarEnv } from './config/env.config'
+
+// Falha explícita e cedo: sem token/Redis o bot não tem o que fazer.
+validarEnv(['DISCORD_TOKEN', 'REDIS_URL'])
 
 declare module 'discord.js' {
     export interface Client {
@@ -73,4 +73,4 @@ if (fs.existsSync(eventsPath)) {
     }
 }
 
-client.login(process.env.TOKEN)
+client.login(env.DISCORD_TOKEN)

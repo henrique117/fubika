@@ -1,16 +1,25 @@
 import { Client } from 'discord.js'
 import { createClient } from 'redis'
 import { sendSnipeEmbed, sendTop1Embed } from '../events/snipe'
+import { env } from '../config/env.config'
+
+/*
+ * A REDIS_URL carrega a senha, então nunca vai inteira para o log: só host:porta.
+ */
+function destinoSemCredencial(url: string): string {
+    try {
+        const { hostname, port } = new URL(url)
+        return `${hostname}:${port || '6379'}`
+    } catch {
+        return 'destino desconhecido'
+    }
+}
 
 export async function startRedisListener(discordClient: Client) {
-    const host = process.env.REDIS_HOST || 'redis'
-    const port = process.env.REDIS_PORT || '6379'
-    const pass = process.env.REDIS_PASS ? `:${process.env.REDIS_PASS}@` : ''
-    
-    const redisUrl = process.env.REDIS_URL || `redis://${pass}${host}:${port}`
+    const destino = destinoSemCredencial(env.REDIS_URL)
 
     const subscriber = createClient({ 
-        url: redisUrl,
+        url: env.REDIS_URL,
         socket: {
             reconnectStrategy: (retries) => {
                 console.log(`[Redis] Tentativa de reconexão nº${retries}...`)
@@ -30,7 +39,7 @@ export async function startRedisListener(discordClient: Client) {
 
     try {
         await subscriber.connect()
-        console.log(`📡 Bot conectado ao Redis (${host}:${port}) e aguardando eventos...`)
+        console.log(`📡 Bot conectado ao Redis (${destino}) e aguardando eventos...`)
 
         await subscriber.subscribe('fubika:notifications', async (message) => {
             try {

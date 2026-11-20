@@ -1,6 +1,6 @@
 import { EmbedBuilder, time, TimestampStyles } from "discord.js"
 import { IBeatmap } from "../../interfaces/interfaces.export"
-import { URLS, EMOJIS, COLORS } from "../../constants"
+import { URLS, EMOJIS, COLORS, beatmapUrl } from "../../constants"
 import { scoreGradeToEmoji } from "../utils.export"
 
 export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promise<Array<EmbedBuilder>> {
@@ -12,7 +12,7 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
     const embeds: EmbedBuilder[] = []
     const scoresPerPage = 10
 
-    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const mapUrl = beatmapUrl(beatmap.beatmap_id)
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     if (!beatmap.scores) { 

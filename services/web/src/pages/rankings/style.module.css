@@ -103,6 +103,13 @@
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     position: relative;
+    overflow: hidden;
+}
+
+.listSection {
+    zoom: 1.25;
+    width: 80%;
+    margin: 0 auto;
 }
 
 .tableHeader {

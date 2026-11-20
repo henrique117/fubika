@@ -153,60 +153,62 @@ const GlobalRanking: React.FC = () => {
                             </div>  
                         </div>
                         
-                        <div className={style.tableHeader}>
-                            <span className={style.colRank}></span>
-                            <span className={style.colPlayer}></span>
-                            <span className={style.colPP} style={{ marginLeft: '57px' }}>Performance (Pontuação)</span>
-                            <span className={style.colAcc}>Precisão</span>
-                            <span className={style.colPlays} style={{ marginRight: '20px' }}>Jogadas Totais</span>
-                        </div>
+                        <div className={style.listSection}>
+                            <div className={style.tableHeader}>
+                                <span className={style.colRank}></span>
+                                <span className={style.colPlayer}></span>
+                                <span className={style.colPP} style={{ marginLeft: '57px' }}>Performance (Pontuação)</span>
+                                <span className={style.colAcc}>Precisão</span>
+                                <span className={style.colPlays} style={{ marginRight: '20px' }}>Jogadas Totais</span>
+                            </div>
 
-                        <div className={style.rowsContainer}>
-                            {loading ? (
-                                <div style={{ padding: '40px', textAlign: 'center', color: '#888' }}>
-                                    Carregando ranking...
-                                </div>
-                            ) : players.length > 0 ? (
-                                players.map((user) => (
-                                    <Link key={user.id} to={`/profile/${user.id}`} className={style.playerRow}>
-                                        
-                                        <div className={`${style.colRank} ${style.rankNumber}`}>
-                                            #{user.rank}
-                                        </div>
-
-                                        <div className={style.colPlayer}>
-                                            <div className={style.nameInfo}>
-                                                {/* Renderiza a bandeira. Se der erro (ex: não achar a imagem), usa a do BR de fallback */}
-                                                <img 
-                                                    src={`/flags/${user.country || 'BR'}.svg`} 
-                                                    alt={stateNames[user.country || 'BR'] || user.country || 'Brasil'} 
-                                                    title={stateNames[user.country || 'BR'] || user.country || 'Brasil'} /* <-- O BALÃOZINHO MÁGICO AQUI */
-                                                    className={style.flagIcon}
-                                                    onError={(e) => { e.currentTarget.src = '/flags/BR.svg' }} 
-                                                />
-                                                <span className={style.username}>{user.name}</span>
+                            <div className={style.rowsContainer}>
+                                {loading ? (
+                                    <div style={{ padding: '40px', textAlign: 'center', color: '#888' }}>
+                                        Carregando ranking...
+                                    </div>
+                                ) : players.length > 0 ? (
+                                    players.map((user) => (
+                                        <Link key={user.id} to={`/profile/${user.id}`} className={style.playerRow}>
+                                            
+                                            <div className={`${style.colRank} ${style.rankNumber}`}>
+                                                #{user.rank}
                                             </div>
-                                        </div>
 
-                                        <div className={`${style.colPP} ${style.ppValue}`}>
-                                            {Math.round(user.pp).toLocaleString()}pp
-                                        </div>
-                                        
-                                        <div className={`${style.colAcc} ${style.statValue}`}>
-                                            {(user.acc).toFixed(2)}%
-                                        </div>
-                                        
-                                        <div className={`${style.colPlays} ${style.statValue}`}>
-                                            {user.playcount.toLocaleString()}
-                                        </div>
+                                            <div className={style.colPlayer}>
+                                                <div className={style.nameInfo}>
+                                                    {/* Renderiza a bandeira. Se der erro (ex: não achar a imagem), usa a do BR de fallback */}
+                                                    <img 
+                                                        src={`/flags/${user.country || 'BR'}.svg`} 
+                                                        alt={stateNames[user.country || 'BR'] || user.country || 'Brasil'} 
+                                                        title={stateNames[user.country || 'BR'] || user.country || 'Brasil'} /* <-- O BALÃOZINHO MÁGICO AQUI */
+                                                        className={style.flagIcon}
+                                                        onError={(e) => { e.currentTarget.src = '/flags/BR.svg' }} 
+                                                    />
+                                                    <span className={style.username}>{user.name}</span>
+                                                </div>
+                                            </div>
 
-                                    </Link>
-                                ))
-                            ) : (
-                                <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-                                    Nenhum jogador encontrado neste modo.
-                                </div>
-                            )}
+                                            <div className={`${style.colPP} ${style.ppValue}`}>
+                                                {Math.round(user.pp).toLocaleString()}pp
+                                            </div>
+                                            
+                                            <div className={`${style.colAcc} ${style.statValue}`}>
+                                                {(user.acc).toFixed(2)}%
+                                            </div>
+                                            
+                                            <div className={`${style.colPlays} ${style.statValue}`}>
+                                                {user.playcount.toLocaleString()}
+                                            </div>
+
+                                        </Link>
+                                    ))
+                                ) : (
+                                    <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+                                        Nenhum jogador encontrado neste modo.
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className={style.footerContainer}>

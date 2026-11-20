@@ -1,0 +1,19 @@
+# ==============================================================================
+# Fubika — override de STAGING (AWS Lightsail)
+#
+# Uso: COMPOSE_FILE=docker-compose.yml:docker-compose.staging.yml no .env do servidor
+#
+# Publica MySQL e Redis APENAS em 127.0.0.1 do servidor de staging. Nada disso
+# fica exposto na internet: o acesso é só através do túnel SSH
+# (`make tunnel-staging`), que é o que permite rodar a API local contra os dados
+# do staging. O Caddy continua sendo o único serviço com portas públicas.
+# ==============================================================================
+
+services:
+  mysql:
+    ports:
+      - "127.0.0.1:3306:3306"
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"

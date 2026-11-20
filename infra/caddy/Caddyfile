@@ -1,56 +1,65 @@
+# ==============================================================================
+# Fubika — Caddyfile (um só arquivo para dev, staging e produção)
+# ==============================================================================
+#
+# Tudo é derivado de {$DOMAIN}:
+#   <DOMAIN>, www ....... site (React)
+#   api ................. API (Fastify)
+#   c, ce, c4, osu, b ... bancho (cliente do jogo)
+#   a ................... avatares (arquivos de ./volumes/avatars)
+#   assets .............. assets (arquivos de ./volumes/assets)
+#
+# {$TLS_OPTS} é "tls internal" em dev e vazio em staging/produção (ACME real).
+#
+# No fim há um `import` de uma pasta de blocos extras. Em staging ela está
+# vazia (um glob sem arquivos é válido no Caddy, apenas gera um aviso); em
+# produção o docker-compose.prod.yml monta infra/caddy/extras-prod, que
+# contém os domínios de terceiros servidos por este mesmo Caddy.
+# ==============================================================================
 {
-    email hassis.moreira117@gmail.com
+	email {$ACME_EMAIL}
 }
 
-# --- 1. O SITE PRINCIPAL (React) ---
+# --- 1. SITE PRINCIPAL (React servido por nginx) ---
 {$DOMAIN}, www.{$DOMAIN} {
-    {$TLS_OPTS}
-    encode gzip
-    reverse_proxy web:80
+	{$TLS_OPTS}
+	encode gzip
+	reverse_proxy web:{$WEB_PORT}
 }
 
-# --- 2. A API (Fastify) ---
+# --- 2. API (Fastify) ---
 api.{$DOMAIN} {
-    {$TLS_OPTS}
-    encode gzip
-    reverse_proxy api:{$API_PORT}
+	{$TLS_OPTS}
+	encode gzip
+	reverse_proxy api:{$API_PORT}
 }
 
-# --- 3. BANCHO (Game Client) ---
+# --- 3. BANCHO (cliente do jogo) ---
 c.{$DOMAIN}, ce.{$DOMAIN}, c4.{$DOMAIN}, osu.{$DOMAIN}, b.{$DOMAIN} {
-    {$TLS_OPTS}
-    reverse_proxy bancho:{$APP_PORT} {
-        header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
-    }
+	{$TLS_OPTS}
+	reverse_proxy bancho:{$APP_PORT} {
+		header_up X-Real-IP {remote_host}
+	}
 }
 
-# --- 4. AVATARES (Serviço de Imagens) ---
+# --- 4. AVATARES ---
 a.{$DOMAIN} {
-    {$TLS_OPTS}
-    encode gzip
-    root * /srv/avatars
-    
-    try_files {path} {path}.png {path}.jpg {path}.jpeg {path}.gif /default.jpg /default.png
-    
-    file_server
+	{$TLS_OPTS}
+	encode gzip
+	root * /srv/avatars
+
+	try_files {path} {path}.png {path}.jpg {path}.jpeg {path}.gif /default.jpg /default.png
+
+	file_server
 }
 
-# --- 5. ASSETS (Medalhas, Banners, etc) ---
+# --- 5. ASSETS (medalhas, banners, etc) ---
 assets.{$DOMAIN} {
-    {$TLS_OPTS}
-    encode gzip
-    root * /srv/assets
-    file_server browse
+	{$TLS_OPTS}
+	encode gzip
+	root * /srv/assets
+	file_server browse
 }
 
-# --- 6. TICKETS (Bot de tickets do Discord) ---
-tickets.fubika.com.br {
-    {$TLS_OPTS}
-    reverse_proxy tickets_app:8169
-}
-
-app.fubika.com.br {
-    {$TLS_OPTS}
-    reverse_proxy avaliacao_app:80
-}
+# --- 6. BLOCOS EXTRAS (só existem em produção) ---
+import /etc/caddy/extras/*.caddyfile

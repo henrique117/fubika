@@ -1,0 +1,24 @@
+# ==============================================================================
+# Fubika — override de PRODUÇÃO (VM da Azure)
+#
+# Uso: COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml no .env do servidor
+#
+# Única diferença em relação ao base: o Caddy também entra na rede externa
+# `public_proxy` e passa a servir os dois projetos de terceiros que ainda
+# dependem dele (tickets.fubika.com.br e app.fubika.com.br). Esses blocos vivem
+# em infra/caddy/extras-prod/ e serão removidos no futuro — nenhum outro
+# ambiente os carrega.
+# ==============================================================================
+
+services:
+  caddy:
+    networks:
+      - internal
+      - public_proxy
+    volumes:
+      # Substitui o diretório de extras vazio do base pelos blocos de terceiros.
+      - ./infra/caddy/extras-prod:/etc/caddy/extras:ro
+
+networks:
+  public_proxy:
+    external: true

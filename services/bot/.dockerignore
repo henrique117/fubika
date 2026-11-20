@@ -1,0 +1,23 @@
+# Mantém fora da imagem tudo o que não é código de produção.
+# Em especial o .env: com o antigo `COPY . .` o token real do bot ia junto.
+.env
+.env.*
+*.env
+
+node_modules
+dist
+*.tsbuildinfo
+
+.git
+.gitignore
+.dockerignore
+Dockerfile
+
+docs
+scripts
+README.md
+TESTING_GUIDE.md
+
+logs
+*.log
+npm-debug.log*

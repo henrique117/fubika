@@ -1,4 +1,23 @@
+# Dependências e artefatos de build (reconstruídos dentro da imagem).
 node_modules
 dist
+*.tsbuildinfo
+
+# Segredos e configuração local (o compose injeta as variáveis).
 .env
+.env.*
+
+# Metadados de versionamento.
 .git
+.gitignore
+.dockerignore
+
+# Testes e cobertura não entram na imagem.
+tests
+vitest.config.ts
+coverage
+
+# Ruído.
+*.log
+npm-debug.log*
+README.md

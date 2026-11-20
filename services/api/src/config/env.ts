@@ -31,13 +31,6 @@ export const env = {
             `redis://${process.env.REDIS_HOST ?? "redis"}:${process.env.REDIS_PORT ?? 6379}`,
     },
 
-    db: {
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-        name: process.env.DB_NAME,
-    },
-
     upload: {
         maxFileSizeBytes: toNumber(process.env.UPLOAD_MAX_SIZE, 2_000_000),
     },

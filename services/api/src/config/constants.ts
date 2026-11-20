@@ -30,11 +30,7 @@ export const PROFILE_TOP_SCORES_LIMIT = 200;
 
 export const LEADERBOARD_PAGE_SIZE = 50;
 
-export const BACKUP_RETENTION_DAYS = 7;
-
 export const RANK_HISTORY_RETENTION_DAYS = 60;
-
-export const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 export const AUTH_RATE_LIMIT = {
     max: 10,

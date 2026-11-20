@@ -1,55 +1,7 @@
 import cron from "node-cron";
-import { exec } from "child_process";
-import { promisify } from "util";
-import path from "path";
-import fs from "fs";
 import prisma from "../../utils/prisma";
 import { logger } from "../../utils/logger";
-import { env } from "../../config/env";
-import {
-    GAME_MODES,
-    BACKUP_RETENTION_DAYS,
-    RANK_HISTORY_RETENTION_DAYS,
-    ONE_DAY_MS,
-} from "../../config/constants";
-
-const execPromise = promisify(exec);
-
-const performBackup = async () => {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const backupFolder = path.join(process.cwd(), "backups");
-    const fileName = `fubika_backup_${timestamp}.sql`;
-    const filePath = path.join(backupFolder, fileName);
-
-    if (!fs.existsSync(backupFolder)) {
-        fs.mkdirSync(backupFolder, { recursive: true });
-    }
-
-    logger.info(`[Cron/Backup] Gerando backup diário: ${fileName}...`);
-
-    const { host, user, password, name } = env.db;
-
-    try {
-        const command = `mysqldump -h ${host} -u ${user} -p'${password}' --no-tablespaces ${name} > ${filePath}`;
-        await execPromise(command);
-        logger.info("[Cron/Backup] Backup concluído com sucesso.");
-
-        const files = fs.readdirSync(backupFolder);
-        const now = Date.now();
-        const retentionMs = BACKUP_RETENTION_DAYS * ONE_DAY_MS;
-
-        for (const file of files) {
-            const fPath = path.join(backupFolder, file);
-            const stats = fs.statSync(fPath);
-            if (now - stats.mtimeMs > retentionMs) {
-                fs.unlinkSync(fPath);
-                logger.info(`[Cron/Backup] Backup antigo removido: ${file}`);
-            }
-        }
-    } catch (err) {
-        logger.error({ err }, "[Cron/Backup Error] Falha ao gerar backup");
-    }
-};
+import { GAME_MODES, RANK_HISTORY_RETENTION_DAYS } from "../../config/constants";
 
 const captureRankSnapshot = async () => {
     logger.info("[Cron/History] Verificando mudanças nos rankings...");
@@ -121,7 +73,6 @@ export const initCronJobs = () => {
             logger.info("🕒 [Cron] Iniciando rotina de manutenção (00:00 BRT)...");
 
             try {
-                await performBackup();
                 await captureRankSnapshot();
                 await cleanOldHistory();
 
@@ -135,5 +86,7 @@ export const initCronJobs = () => {
         }
     );
 
-    logger.info("✅ Cron de Manutenção ativado (Backup 7d + Rank 60d + Snapshot Inteligente).");
+    logger.info(
+        `✅ Cron de Manutenção ativado (Rank ${RANK_HISTORY_RETENTION_DAYS}d + Snapshot Inteligente).`
+    );
 };

@@ -41,71 +41,182 @@ class BeatmapApiResponse(TypedDict):
     status_code: int
 
 
-@retry(reraise=True, stop=stop_after_attempt(3))
+def normalize_catboy_beatmap(
+    bmap: dict[str, Any],
+    set_data: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Normaliza o formato do Catboy v2 Mirror para o formato da osu!api v1."""
+    parent_set = set_data or bmap.get("set") or {}
+    raw_date = (
+        bmap.get("last_updated")
+        or parent_set.get("last_updated")
+        or "1970-01-01 00:00:00"
+    )
+    clean_date = raw_date.replace("T", " ").replace("Z", "")[:19]
+    if len(clean_date) < 19:
+        clean_date = clean_date.ljust(19, "0")
+
+    return {
+        "beatmapset_id": str(bmap.get("beatmapset_id") or parent_set.get("id") or 0),
+        "beatmap_id": str(bmap.get("id") or 0),
+        "approved": str(bmap.get("ranked", parent_set.get("ranked", 0))),
+        "total_length": str(bmap.get("total_length") or 0),
+        "hit_length": str(bmap.get("hit_length") or 0),
+        "version": str(bmap.get("version") or ""),
+        "file_md5": str(bmap.get("checksum") or ""),
+        "diff_size": str(bmap.get("cs") or 0.0),
+        "diff_overall": str(bmap.get("accuracy") or 0.0),
+        "diff_approach": str(bmap.get("ar") or 0.0),
+        "diff_drain": str(bmap.get("drain") or 0.0),
+        "mode": str(bmap.get("mode_int") or 0),
+        "approved_date": None,
+        "last_update": clean_date,
+        "artist": str(parent_set.get("artist") or ""),
+        "title": str(parent_set.get("title") or ""),
+        "creator": str(parent_set.get("creator") or ""),
+        "creator_id": str(parent_set.get("user_id") or 0),
+        "bpm": str(bmap.get("bpm") or parent_set.get("bpm") or 0.0),
+        "source": str(parent_set.get("source") or ""),
+        "tags": str(parent_set.get("tags") or ""),
+        "genre_id": str(parent_set.get("genre_id") or 0),
+        "language_id": str(parent_set.get("language_id") or 0),
+        "favourite_count": str(parent_set.get("favourite_count") or 0),
+        "rating": str(parent_set.get("rating") or 0.0),
+        "storyboard": "0",
+        "video": "0",
+        "download_unavailable": "0",
+        "audio_unavailable": "0",
+        "playcount": str(bmap.get("playcount") or 0),
+        "passcount": str(bmap.get("passcount") or 0),
+        "packs": None,
+        "max_combo": (
+            str(bmap.get("max_combo") or 0)
+            if bmap.get("max_combo") is not None
+            else None
+        ),
+        "diff_aim": None,
+        "diff_speed": None,
+        "difficultyrating": str(bmap.get("difficulty_rating") or 0.0),
+    }
+
+
+async def _query_catboy_mirror(
+    client: httpx.AsyncClient,
+    **params: Any,
+) -> list[dict[str, Any]] | None:
+    """Consulta o Catboy v2 Mirror (Plano B) com suporte a MD5, Beatmap ID e Set ID."""
+    headers = {"User-Agent": "Fubika/1.0 (Bancho; osu! private server)"}
+    url: str | None = None
+
+    if "h" in params:
+        url = f"https://catboy.best/api/v2/md5/{params['h']}"
+    elif "b" in params:
+        url = f"https://catboy.best/api/v2/b/{params['b']}"
+    elif "s" in params:
+        url = f"https://catboy.best/api/v2/s/{params['s']}"
+
+    if not url:
+        return None
+
+    try:
+        response = await client.get(url, headers=headers, timeout=8.0)
+        if response.status_code != 200 or not response.content:
+            return None
+
+        response_data = response.json()
+        if not response_data or not isinstance(response_data, dict):
+            return None
+
+        if "s" in params:
+            beatmaps_list = response_data.get("beatmaps")
+            if isinstance(beatmaps_list, list) and beatmaps_list:
+                return [
+                    normalize_catboy_beatmap(bmap, response_data)
+                    for bmap in beatmaps_list
+                ]
+            return None
+
+        # Para 'b' ou 'h', Catboy retorna o objeto beatmap com 'set' aninhado
+        if "id" in response_data or "checksum" in response_data:
+            return [normalize_catboy_beatmap(response_data)]
+
+        return None
+    except Exception as e:
+        if app.settings.DEBUG:
+            log(f"[Catboy Mirror Error]: {str(e)}", Ansi.LYELLOW)
+        return None
+
+
 async def api_get_beatmaps(**params: Any) -> BeatmapApiResponse:
     """
-    Busca dados do beatmap na osu!api oficial ou em um mirror.
-    Adicionado logs de debug para identificar falhas de conexão ou credenciais.
+    Busca dados do beatmap via Cascata de Resiliência:
+    - Plano A: osu!api oficial (se OSU_API_KEY configurada)
+    - Plano B: Catboy v2 Mirror (suporte completo a md5, bid e sid)
+    - Plano C: Mirror configurado (ex: Sayobot / MIRROR_SEARCH_ENDPOINT)
+    - Fallback: Retorna status 404 sem derrubar o serviço.
     """
-    if app.settings.OSU_API_KEY:
-        # Uso da API Oficial
-        params["k"] = app.settings.OSU_API_KEY
-        url = "https://osu.ppy.sh/api/get_beatmaps"
-        source = "osu!api oficial"
-    else:
-        # Uso do Mirror (Ex: Chimu, Sayobot)
-        url = app.settings.MIRROR_SEARCH_ENDPOINT
-        source = f"Mirror ({url})"
-
-    if app.settings.DEBUG:
-        log(f"Solicitando dados de mapa ao {source}: {params}", Ansi.LMAGENTA)
-
     async with httpx.AsyncClient() as client:
-        try:
-            # Timeout de 10 segundos para não travar o Bancho
-            response = await client.get(url, params=params, timeout=10.0)
-            
-            # --- DIAGNÓSTICO DE RESPOSTA ---
-            if response.status_code != 200:
-                log(f"[API Error] {source} retornou status {response.status_code}", Ansi.LRED)
-                if response.status_code == 401:
-                    log("Causa Provável: Sua OSU_API_KEY é inválida ou expirou.", Ansi.LYELLOW)
-                return {"data": None, "status_code": response.status_code}
-
-            if not response.content:
-                log(f"[API Warning] {source} retornou um corpo vazio.", Ansi.LYELLOW)
-                return {"data": None, "status_code": 204}
-
+        # --- PLANO A: osu!api oficial ---
+        if app.settings.OSU_API_KEY:
             try:
-                response_data = response.json()
-            except json.JSONDecodeError:
-                log(f"[API Error] {source} enviou dados que não são JSON. Verifique a URL do Mirror.", Ansi.LRED)
-                return {"data": None, "status_code": 502} 
-            
-            # Se a resposta for uma lista vazia, o mapa não existe na base da osu!
-            if not response_data:
-                log(f"[API info] Mapa não encontrado no {source} (Query: {params})", Ansi.LCYAN)
-                return {"data": None, "status_code": 404}
+                osuapi_params = dict(params)
+                osuapi_params["k"] = app.settings.OSU_API_KEY
+                url = "https://osu.ppy.sh/api/get_beatmaps"
 
-            # Normalização dos dados (osu!api retorna lista, alguns mirrors retornam dict)
-            if isinstance(response_data, list):
-                return {"data": response_data, "status_code": 200}
-            
-            if isinstance(response_data, dict):
-                # Se for o formato do Chimu/Sayobot que encapsula em 'data' ou 'results'
-                inner_data = response_data.get("data") or response_data.get("results")
-                if inner_data:
-                    return {"data": inner_data if isinstance(inner_data, list) else [inner_data], "status_code": 200}
-                return {"data": [response_data], "status_code": 200}
+                if app.settings.DEBUG:
+                    log(f"[Cascata Resiliência] Plano A (osu!api oficial): {params}", Ansi.LMAGENTA)
 
-        except httpx.ConnectError:
-            log(f"[API Error] Não foi possível conectar ao {source}. Verifique sua internet ou firewall.", Ansi.LRED)
-            return {"data": None, "status_code": 503}
+                response = await client.get(url, params=osuapi_params, timeout=8.0)
+                if response.status_code == 200 and response.content:
+                    try:
+                        response_data = response.json()
+                        if isinstance(response_data, list) and len(response_data) > 0:
+                            return {"data": response_data, "status_code": 200}
+                    except json.JSONDecodeError:
+                        pass
+                log(f"[Cascata Resiliência] Plano A não obteve mapa (status {response.status_code}). Acionando Plano B...", Ansi.LYELLOW)
+            except Exception as e:
+                log(f"[Cascata Resiliência] Falha de conexão no Plano A: {str(e)}. Acionando Plano B...", Ansi.LYELLOW)
+
+        # --- PLANO B: Catboy v2 Mirror ---
+        try:
+            if app.settings.DEBUG:
+                log(f"[Cascata Resiliência] Plano B (Catboy Mirror): {params}", Ansi.LCYAN)
+
+            catboy_data = await _query_catboy_mirror(client, **params)
+            if catboy_data:
+                log(f"[Cascata Resiliência] Mapa recuperado via Catboy Mirror (Plano B) para {params}", Ansi.LGREEN)
+                return {"data": catboy_data, "status_code": 200}
         except Exception as e:
-            log(f"[API Error] Falha inesperada: {str(e)}", Ansi.LRED)
-            return {"data": None, "status_code": 500}
+            log(f"[Cascata Resiliência] Falha no Plano B: {str(e)}", Ansi.LYELLOW)
 
-    return {"data": None, "status_code": 500}
+        # --- PLANO C: Mirror Secundário (MIRROR_SEARCH_ENDPOINT) ---
+        if app.settings.MIRROR_SEARCH_ENDPOINT:
+            try:
+                mirror_url = app.settings.MIRROR_SEARCH_ENDPOINT
+                if app.settings.DEBUG:
+                    log(f"[Cascata Resiliência] Plano C (Mirror Secundário {mirror_url}): {params}", Ansi.LMAGENTA)
+
+                response = await client.get(mirror_url, params=params, timeout=8.0)
+                if response.status_code == 200 and response.content:
+                    try:
+                        resp_json = response.json()
+                        if isinstance(resp_json, list) and len(resp_json) > 0:
+                            return {"data": resp_json, "status_code": 200}
+                        if isinstance(resp_json, dict):
+                            inner = resp_json.get("data") or resp_json.get("results")
+                            if inner:
+                                data_list = inner if isinstance(inner, list) else [inner]
+                                return {"data": data_list, "status_code": 200}
+                            return {"data": [resp_json], "status_code": 200}
+                    except json.JSONDecodeError:
+                        pass
+            except Exception as e:
+                log(f"[Cascata Resiliência] Falha no Plano C: {str(e)}", Ansi.LYELLOW)
+
+    # --- FALLBACK FINAL: Mapa não encontrado ---
+    log(f"[Cascata Resiliência] Mapa não encontrado em nenhum plano da cascata (Query: {params})", Ansi.LCYAN)
+    return {"data": None, "status_code": 404}
 
 
 @retry(reraise=True, stop=stop_after_attempt(3))

@@ -4,6 +4,7 @@ import IBeatmap from "../../interfaces/beatmap.interface";
 import { getModString } from "../../utils/getModString";
 import { hashPassword, verifyPassword } from "../../utils/hash";
 import prisma from "../../utils/prisma";
+import axios from "axios";
 import osuApiClient from "../../utils/axios";
 import { checkInvite, useInvite } from "../invite/invite.service";
 import { CreateUserInput, LoginUserInput, PostPfpInput, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
@@ -116,24 +117,195 @@ const mapLocalRowToBeatmap = (row: any): Omit<IBeatmap, 'scores'> => {
     };
 };
 
-const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player'>> => {
-    let beatmapData: Omit<IBeatmap, 'scores'>;
+const mapCatboyDataToBeatmap = (data: any): Omit<IBeatmap, 'scores'> => {
+    const parentSet = data.set || {};
+    const setId = Number(data.beatmapset_id || parentSet.id || 0);
+    return {
+        artist: parentSet.artist || data.artist || 'Artista Desconhecido',
+        beatmap_id: Number(data.id || 0),
+        beatmapset_id: setId,
+        beatmap_md5: data.checksum || '',
+        title: parentSet.title || data.title || 'Sem título',
+        mode: data.mode || 'osu',
+        mode_int: Number(data.mode_int || 0),
+        status: data.status || 'ranked',
+        total_length: Number(data.total_length || 0),
+        author_id: Number(parentSet.user_id || data.user_id || 0),
+        author_name: parentSet.creator || 'Desconhecido',
+        cover: setId > 0 ? `https://assets.ppy.sh/beatmaps/${setId}/covers/cover.jpg` : '',
+        thumbnail: setId > 0 ? `https://assets.ppy.sh/beatmaps/${setId}/covers/list@2x.jpg` : '',
+        diff: data.version || 'Normal',
+        star_rating: Number(data.difficulty_rating || 0),
+        bpm: Number(data.bpm || parentSet.bpm || 0),
+        od: Number(data.accuracy || 0),
+        ar: Number(data.ar || 0),
+        cs: Number(data.cs || 0),
+        hp: Number(data.drain || 0),
+        max_combo: Number(data.max_combo || 0),
+        count_circles: Number(data.count_circles || 0),
+        count_sliders: Number(data.count_sliders || 0),
+        passcount: Number(data.passcount || 0),
+        playcount: Number(data.playcount || 0)
+    };
+};
 
-    if (row.map_title) {
-        beatmapData = mapLocalRowToBeatmap(row);
-    } else {
+const persistResolvedBeatmap = async (bmap: Omit<IBeatmap, 'scores'>) => {
+    const bId = Number(bmap.beatmap_id);
+    if (!bId || bId <= 0) return;
+
+    try {
+        const cleanArtist = (bmap.artist || 'Artista Desconhecido').slice(0, 128);
+        const cleanTitle = (bmap.title || 'Sem título').slice(0, 128);
+        const cleanCreator = (bmap.author_name || 'Desconhecido').slice(0, 19);
+        const cleanVersion = (bmap.diff || 'Normal').slice(0, 128);
+        const filename = `${cleanArtist} - ${cleanTitle} (${cleanCreator}) [${cleanVersion}].osu`.slice(0, 256);
+
+        await prisma.maps.upsert({
+            where: { id: bId },
+            create: {
+                id: bId,
+                set_id: Number(bmap.beatmapset_id) || 0,
+                status: 2,
+                md5: bmap.beatmap_md5 || '',
+                artist: cleanArtist,
+                title: cleanTitle,
+                version: cleanVersion,
+                creator: cleanCreator,
+                filename: filename,
+                last_update: new Date(),
+                total_length: Number(bmap.total_length) || 0,
+                max_combo: Number(bmap.max_combo) || 0,
+                mode: Number(bmap.mode_int) || 0,
+                bpm: Number(bmap.bpm) || 0,
+                cs: Number(bmap.cs) || 0,
+                ar: Number(bmap.ar) || 0,
+                od: Number(bmap.od) || 0,
+                hp: Number(bmap.hp) || 0,
+                diff: Number(bmap.star_rating) || 0
+            },
+            update: {
+                set_id: Number(bmap.beatmapset_id) || 0,
+                artist: cleanArtist,
+                title: cleanTitle,
+                version: cleanVersion,
+                creator: cleanCreator,
+                total_length: Number(bmap.total_length) || 0,
+                max_combo: Number(bmap.max_combo) || 0,
+                bpm: Number(bmap.bpm) || 0,
+                cs: Number(bmap.cs) || 0,
+                ar: Number(bmap.ar) || 0,
+                od: Number(bmap.od) || 0,
+                hp: Number(bmap.hp) || 0,
+                diff: Number(bmap.star_rating) || 0
+            }
+        });
+    } catch {
+        // Ignora silenciosamente para não interromper a resposta da API
+    }
+};
+
+const resolveBeatmapWithCascade = async (row: any): Promise<Omit<IBeatmap, 'scores'>> => {
+    const hasValidLocal = Boolean(
+        row.map_title &&
+        row.map_title !== 'Mapa não encontrado' &&
+        row.map_title !== 'Sem título'
+    );
+
+    if (hasValidLocal) {
+        return mapLocalRowToBeatmap(row);
+    }
+
+    const mapId = Number(row.map_id || 0);
+    const mapMd5 = row.map_md5;
+
+    // --- PLANO A: osu!api oficial (v2) ---
+    if (mapId > 0) {
         try {
-            const response = await osuApiClient.get(`/beatmaps/${row.map_id}`);
-            
-            if (response.data) {
-                beatmapData = mapOsuApiDataToBeatmap(response.data);
-            } else {
-                throw new Error("Dados vazios");
+            const response = await osuApiClient.get(`/beatmaps/${mapId}`);
+            if (response.data && (response.data.title || response.data.beatmapset?.title)) {
+                const bmap = mapOsuApiDataToBeatmap(response.data);
+                persistResolvedBeatmap(bmap);
+                return bmap;
             }
         } catch {
-            beatmapData = mapLocalRowToBeatmap(row);
+            // Falha no Plano A, avança para o Plano B
         }
     }
+
+    // --- PLANO B: Catboy v2 Mirror (suporte a ID e MD5) ---
+    try {
+        const catboyHeaders = { 'User-Agent': 'Fubika/1.0 (Web API; osu! private server)' };
+        let catboyUrl: string | null = null;
+        if (mapId > 0) {
+            catboyUrl = `https://catboy.best/api/v2/b/${mapId}`;
+        } else if (mapMd5) {
+            catboyUrl = `https://catboy.best/api/v2/md5/${mapMd5}`;
+        }
+
+        if (catboyUrl) {
+            const catboyRes = await axios.get(catboyUrl, {
+                headers: catboyHeaders,
+                timeout: 5000
+            });
+            if (catboyRes.data && (catboyRes.data.id || catboyRes.data.checksum)) {
+                const bmap = mapCatboyDataToBeatmap(catboyRes.data);
+                persistResolvedBeatmap(bmap);
+                return bmap;
+            }
+        }
+    } catch {
+        // Falha no Plano B, avança para o Plano C
+    }
+
+    // --- PLANO C: Sayobot Mirror ---
+    try {
+        if (mapId > 0) {
+            const sayoRes = await axios.get(`https://api.sayobot.cn/v2/beatmapinfo?K=${mapId}`, {
+                timeout: 5000
+            });
+            if (sayoRes.data?.data) {
+                const sData = sayoRes.data.data;
+                const bmap: Omit<IBeatmap, 'scores'> = {
+                    artist: sData.artist || 'Artista Desconhecido',
+                    beatmap_id: Number(sData.bid || mapId),
+                    beatmapset_id: Number(sData.sid || 0),
+                    beatmap_md5: mapMd5 || '',
+                    title: sData.title || 'Sem título',
+                    mode: 'osu',
+                    mode_int: 0,
+                    status: 'ranked',
+                    total_length: Number(sData.length || 0),
+                    author_id: 0,
+                    author_name: sData.creator || 'Desconhecido',
+                    cover: sData.sid ? `https://assets.ppy.sh/beatmaps/${sData.sid}/covers/cover.jpg` : '',
+                    thumbnail: sData.sid ? `https://assets.ppy.sh/beatmaps/${sData.sid}/covers/list@2x.jpg` : '',
+                    diff: sData.version || 'Normal',
+                    star_rating: Number(sData.star || 0),
+                    bpm: Number(sData.bpm || 0),
+                    od: Number(sData.od || 0),
+                    ar: Number(sData.ar || 0),
+                    cs: Number(sData.cs || 0),
+                    hp: Number(sData.hp || 0),
+                    max_combo: Number(sData.maxcombo || 0),
+                    count_circles: 0,
+                    count_sliders: 0,
+                    passcount: 0,
+                    playcount: 0
+                };
+                persistResolvedBeatmap(bmap);
+                return bmap;
+            }
+        }
+    } catch {
+        // Falha no Plano C
+    }
+
+    // --- FALLBACK FINAL: Retorna fallback local sem omitir o score ---
+    return mapLocalRowToBeatmap(row);
+};
+
+const mapProfileScoreWithApiMap = async (row: any): Promise<Omit<IScore, 'player'>> => {
+    const beatmapData = await resolveBeatmapWithCascade(row);
 
     return {
         id: Number(row.score_id),
@@ -409,7 +581,7 @@ export const getUserRecent = async (filter: UserFilter, input: ScoreQueryInput) 
             m.max_combo as map_max_combo
 
         FROM scores s
-        INNER JOIN maps m ON s.map_md5 = m.md5
+        LEFT JOIN maps m ON s.map_md5 = m.md5
         WHERE 
             s.userid = ${user.id} 
             AND s.mode = ${mode}

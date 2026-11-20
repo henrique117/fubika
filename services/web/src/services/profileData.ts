@@ -213,6 +213,45 @@ export const preloadImage = (src?: string, timeoutMs = 2500): Promise<boolean> =
     })
 }
 
+export const getUniqueShowcaseScores = (
+    scores?: ApiScore[],
+    maxCount = 10
+): ApiScore[] => {
+    if (!Array.isArray(scores) || scores.length === 0) return []
+
+    const uniqueScores: ApiScore[] = []
+    const seenMapKeys = new Set<string>()
+
+    for (const score of scores) {
+        const beatmap = score.beatmap
+        const setId = Number(beatmap?.beatmapset_id || 0)
+
+        let mapKey = ''
+        if (setId > 0) {
+            mapKey = `set:${setId}`
+        } else if (beatmap?.title && beatmap?.artist) {
+            const author = (beatmap.author_name || beatmap.author_id || '').toString().trim().toLowerCase()
+            mapKey = `song:${beatmap.artist.trim().toLowerCase()}-${beatmap.title.trim().toLowerCase()}${author ? `-${author}` : ''}`
+        } else if (beatmap?.beatmap_id && beatmap.beatmap_id > 0) {
+            mapKey = `bm:${beatmap.beatmap_id}`
+        } else if (beatmap?.beatmap_md5) {
+            mapKey = `md5:${beatmap.beatmap_md5}`
+        } else {
+            mapKey = `score:${score.id}`
+        }
+
+        if (!seenMapKeys.has(mapKey)) {
+            seenMapKeys.add(mapKey)
+            uniqueScores.push(score)
+            if (uniqueScores.length >= maxCount) {
+                break
+            }
+        }
+    }
+
+    return uniqueScores
+}
+
 export const preloadScoresBeatmapCovers = async (
     scores: ApiScore[],
     maxCount = 10,
@@ -240,11 +279,13 @@ export const preloadProfileAssets = async (
         preloadImage(player.pfp || DEFAULT_AVATAR_URL, timeoutMs),
     ]
 
-    const scoreSource =
+    const rawScores =
         player.top_200 && player.top_200.length > 0 ? player.top_200 : fallbackScores
 
-    if (scoreSource && scoreSource.length > 0) {
-        tasks.push(preloadScoresBeatmapCovers(scoreSource, maxMaps, timeoutMs))
+    const showcaseScores = getUniqueShowcaseScores(rawScores, maxMaps)
+
+    if (showcaseScores.length > 0) {
+        tasks.push(preloadScoresBeatmapCovers(showcaseScores, maxMaps, timeoutMs))
     }
 
     await Promise.all(tasks)
@@ -1012,7 +1053,7 @@ const resolvePlayerAndStateRank = async (
         return null
     }
 
-    const hydrateCount = options?.hydrateCount ?? 10
+    const hydrateCount = options?.hydrateCount ?? 25
     if (Array.isArray(player.top_200) && player.top_200.length > 0) {
         const hydratedTop = await hydrateScoresBeatmaps(player.top_200, hydrateCount)
         player = { ...player, top_200: hydratedTop }
@@ -1220,7 +1261,7 @@ export const fetchActivePlayer = async (
         return null
     }
 
-    const hydrateCount = options?.hydrateCount ?? 10
+    const hydrateCount = options?.hydrateCount ?? 25
     const effectiveKey = getEffectivePlayerKey(routeId)
     const swrKey = getPlayerSwrKey(effectiveKey)
 

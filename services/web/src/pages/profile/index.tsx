@@ -12,6 +12,7 @@ import {
     fetchUserRecent,
     getCachedActivePlayerSnapshot,
     getCachedUserRecentSnapshot,
+    getUniqueShowcaseScores,
     hasApiAuth,
 } from '../../services/profileData'
 
@@ -230,7 +231,9 @@ const Profile: React.FC = () => {
     const scoreSource =
         player.top_200 && player.top_200.length > 0 ? player.top_200 : recentScores
 
-    const displayedMaps: MapItem[] = scoreSource.slice(0, 10).map((score, index) => {
+    const showcaseScores = getUniqueShowcaseScores(scoreSource, 10)
+
+    const displayedMaps: MapItem[] = showcaseScores.map((score, index) => {
         const beatmap = score.beatmap
         const title = beatmap ? `${beatmap.title} - ${beatmap.artist}` : 'Mapa desconhecido'
         const image = beatmap?.cover || beatmap?.thumbnail || FALLBACK_AVATAR_URL

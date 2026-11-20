@@ -122,18 +122,18 @@
 }
 
 .colRank {
-    width: 54px;
-    min-width: 54px;
+    width: 56px;
+    min-width: 56px;
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
-    padding-left: 14px;
+    padding-left: 20px;
 }
 
 .rankHash {
     color: rgba(255, 255, 255, 0.45);
     font-size: 9px;
-    margin-right: 2px;
+    margin-right: 1px;
     font-weight: 600;
 }
 
@@ -142,8 +142,6 @@
     color: var(--color-branco);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    min-width: 16px;
-    text-align: right;
 }
 
 .colPlayer { 

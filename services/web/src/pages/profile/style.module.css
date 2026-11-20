@@ -257,21 +257,37 @@
   margin: 32px auto 0;
   grid-template-columns: 290px 1fr;
   gap: 60px;
-  padding: 20px;
+  padding: 13px 20px 13px;
   background: url("/assets/9d29a.svg") top left / 680px 435px no-repeat;
+}
+
+.mapSection {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mapSectionTitle {
+  margin: 0 0 7px 4px;
+  font-family: 'Caviar Dreams', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.2px;
+  text-align: left;
 }
 
 .mapList {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .mapPill {
   position: relative;
   width: 290px;
-  height: 35px;
-  flex: 0 0 35px;
+  height: 34px;
+  flex: 0 0 34px;
   overflow: hidden;
   cursor: pointer;
   border: 2px solid rgb(242 154 255 / 52%);
@@ -312,7 +328,7 @@
   color: transparent;
   font-size: 10.5px;
   font-weight: 700;
-  line-height: 31px;
+  line-height: 30px;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -337,7 +353,7 @@
 .statusPanel {
   position: relative;
   min-width: 0;
-  padding-top: 1px;
+  padding-top: 6px;
 }
 
 .statusPanel dl {
@@ -495,6 +511,7 @@
     background: rgb(17 16 15 / 58%);
   }
 
+  .mapSection,
   .mapList,
   .mapPill {
     width: 100%;

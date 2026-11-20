@@ -312,49 +312,52 @@ const Profile: React.FC = () => {
                     </section>
 
                     <section className={style.showcase} id="maps">
-                        <div className={style.mapList} aria-label="Mapas favoritos">
-                            {displayedMaps.length > 0 ? (
-                                displayedMaps.map((map) => (
-                                    <div
-                                        key={map.key}
-                                        className={style.mapPill}
-                                        title={map.title}
-                                        role={map.beatmapId > 0 ? 'link' : undefined}
-                                        tabIndex={map.beatmapId > 0 ? 0 : undefined}
-                                        onClick={
-                                            map.beatmapId > 0
-                                                ? () => navigate(`/beatmap/${map.beatmapId}`)
-                                                : undefined
-                                        }
-                                        onKeyDown={
-                                            map.beatmapId > 0
-                                                ? (e) => {
-                                                      if (e.key === 'Enter' || e.key === ' ') {
-                                                          e.preventDefault()
-                                                          navigate(`/beatmap/${map.beatmapId}`)
+                        <div className={style.mapSection}>
+                            <h2 className={style.mapSectionTitle}>Mais jogados</h2>
+                            <div className={style.mapList} aria-label="Mais jogados">
+                                {displayedMaps.length > 0 ? (
+                                    displayedMaps.map((map) => (
+                                        <div
+                                            key={map.key}
+                                            className={style.mapPill}
+                                            title={map.title}
+                                            role={map.beatmapId > 0 ? 'link' : undefined}
+                                            tabIndex={map.beatmapId > 0 ? 0 : undefined}
+                                            onClick={
+                                                map.beatmapId > 0
+                                                    ? () => navigate(`/beatmap/${map.beatmapId}`)
+                                                    : undefined
+                                            }
+                                            onKeyDown={
+                                                map.beatmapId > 0
+                                                    ? (e) => {
+                                                          if (e.key === 'Enter' || e.key === ' ') {
+                                                              e.preventDefault()
+                                                              navigate(`/beatmap/${map.beatmapId}`)
+                                                          }
                                                       }
-                                                  }
-                                                : undefined
-                                        }
-                                    >
-                                        <img
-                                            src={map.image}
-                                            alt=""
-                                            loading="eager"
-                                            decoding="async"
-                                            onError={(e) => {
-                                                e.currentTarget.onerror = null
-                                                e.currentTarget.src = map.fallbackImage
-                                            }}
-                                        />
-                                        <span>{map.title}</span>
+                                                    : undefined
+                                            }
+                                        >
+                                            <img
+                                                src={map.image}
+                                                alt=""
+                                                loading="eager"
+                                                decoding="async"
+                                                onError={(e) => {
+                                                    e.currentTarget.onerror = null
+                                                    e.currentTarget.src = map.fallbackImage
+                                                }}
+                                            />
+                                            <span>{map.title}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className={style.emptyMapsState}>
+                                        Nenhuma jogada registrada ainda.
                                     </div>
-                                ))
-                            ) : (
-                                <div className={style.emptyMapsState}>
-                                    Nenhuma jogada registrada ainda.
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
 
                         <div className={style.statusPanel}>

@@ -9,7 +9,11 @@
 
 set -euo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")/.."
+# Agora o .env e os arquivos compose vivem na RAIZ do repositório (antes era
+# infra/.env), então o docker compose precisa rodar de lá.
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+. "$ROOT/infra/scripts/lib.sh"
+cd "$ROOT"
 
 USER_ID="${1:-}"
 NEW_NAME="${2:-}"
@@ -26,18 +30,11 @@ if [[ -z "$NEW_NAME" && -z "$NEW_PASS" ]]; then
     exit 1
 fi
 
-if [[ ! -f .env ]]; then
-    echo "❌ infra/.env não encontrado." >&2
-    exit 1
-fi
+exigir_env_file
 
-set -a
-# shellcheck disable=SC1091
-source ./.env
-set +a
-
-: "${DB_ROOT_PASS:?DB_ROOT_PASS ausente no .env}"
-: "${DB_NAME:?DB_NAME ausente no .env}"
+# Lê só o que precisa, sem sourcear o .env (valores com espaço/# não quebram).
+DB_ROOT_PASS="$(exigir_env DB_ROOT_PASS)"
+DB_NAME="$(env_get DB_NAME fubika)"
 
 running() {
     docker compose ps --status running --services 2>/dev/null | grep -qx "$1"

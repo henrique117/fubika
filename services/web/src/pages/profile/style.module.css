@@ -268,13 +268,14 @@
 }
 
 .mapSectionTitle {
-  margin: 0 0 7px 4px;
+  width: 100%;
+  margin: 0 0 7px 0;
   font-family: 'Caviar Dreams', sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.2px;
-  text-align: left;
+  text-align: center;
 }
 
 .mapList {

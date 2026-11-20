@@ -66,5 +66,15 @@ shell-api:
 restart-api:
 	docker compose restart api
 
+restart-bancho:
+	docker compose restart bancho
+
+# --- Comandos de Administração de Jogadores ---
+
+# Troca nome e/ou senha de um jogador pelo ID (senha gravada como bcrypt(md5(senha)))
+# Uso: make set-player id=3 name="Sayo da Leh" pass="luvleh"
+set-player:
+	@bash scripts/set-player-credentials.sh "$(id)" "$(name)" "$(pass)"
+
 bump:
 	cd osu-bancho-service && poetry version $(version)

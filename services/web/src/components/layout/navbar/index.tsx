@@ -2,12 +2,15 @@ import { Link } from 'react-router-dom'
 import style from './style.module.css'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useState, useEffect } from 'react'
+import { avatarUrl } from '../../../config'
 
 const Navbar: React.FC = () => {
     const { signed, user, signOut } = useAuth()
     const [menuOpen, setMenuOpen] = useState(false)
 
-    const userAvatar = signed && user ? `https://a.fubika.com.br/${user.id}` : 'https://a.fubika.com.br/0'
+    // Avatar padrão quando não há usuário logado ou quando o avatar falha.
+    const fallbackAvatar = avatarUrl()
+    const userAvatar = signed && user ? avatarUrl(user.id) : fallbackAvatar
     useEffect(() => {
         let resizeTimer: number;
         
@@ -96,7 +99,13 @@ const Navbar: React.FC = () => {
                                 alt={user.name}
                                 className={style.avatarTrigger}
                                 onClick={() => setMenuOpen(!menuOpen)}
-                                onError={(e) => e.currentTarget.src = 'https://a.bpy.local/0'}
+                                onError={(e) => {
+                                    // Sem esta guarda o onError dispara de novo quando o
+                                    // próprio fallback falha, criando laço infinito.
+                                    if (e.currentTarget.src !== fallbackAvatar) {
+                                        e.currentTarget.src = fallbackAvatar
+                                    }
+                                }}
                             />
 
 

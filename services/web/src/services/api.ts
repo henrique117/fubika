@@ -1,10 +1,13 @@
 import axios from 'axios'
+import { API_BASE_URL } from '../config'
 
-const apiUrl = import.meta.env.VITE_API_URL || 'https://api.fubika.com.br'
 
-
+// API_BASE_URL já vem com o prefixo '/api/v1' (ver src/config.ts), então aqui
+// NÃO se concatena mais nada: em produção/staging é
+// 'https://api.<domínio>/api/v1' e em dev é '/api/v1', atendido pelo proxy do
+// Vite. Nenhuma URL fica embutida em build time.
 export const api = axios.create({
-    baseURL: apiUrl + '/api/v1',
+    baseURL: API_BASE_URL,
 })
 
 api.interceptors.request.use(config => {

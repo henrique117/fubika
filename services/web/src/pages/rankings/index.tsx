@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import style from './style.module.css'
 import { WrapperComponent } from '../../components/components.export'
 import { Link } from 'react-router-dom'
@@ -82,6 +82,30 @@ const GlobalRanking: React.FC = () => {
         }
     }, [players, selectedState])
 
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+    const dropdownRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false)
+            }
+        }
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setIsDropdownOpen(false)
+            }
+        }
+        if (isDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside)
+            document.addEventListener('keydown', handleKeyDown)
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [isDropdownOpen])
+
     // Nova função que impede o jogador de continuar passando as páginas infinitamente caso o número de jogadores exibidos na pág seja menor que 50.
     const isLastPage = players.length < 50;
 
@@ -115,19 +139,73 @@ const GlobalRanking: React.FC = () => {
 
                         <div className={style.titleContainer}>
                             <h2 className={style.title}>Colocações</h2>
-                            <select 
-                                className={style.stateSelector}
-                                value={selectedState}
-                                onChange={(e) => {
-                                    setSelectedState(e.target.value);
-                                    setPage(1); // Volta para a página 1 ao trocar de estado
-                                }}
-                            >
-                                <option value="">Brasil (Geral)</option>
-                                {states.map(uf => (
-                                    <option key={uf} value={uf}>{stateNames[uf]}</option>
-                                ))}
-                            </select>
+                            <div className={style.stateSelectorWrapper} ref={dropdownRef}>
+                                <button 
+                                    type="button"
+                                    className={`${style.stateSelectorButton} ${isDropdownOpen ? style.stateSelectorButtonActive : ''}`}
+                                    onClick={() => setIsDropdownOpen((prev) => !prev)}
+                                    aria-haspopup="listbox"
+                                    aria-expanded={isDropdownOpen}
+                                >
+                                    <div className={style.stateSelectorCurrent}>
+                                        <img 
+                                            src={`/flags/${selectedState || 'BR'}.svg`} 
+                                            alt="" 
+                                            className={style.stateSelectorFlag}
+                                            onError={(e) => { e.currentTarget.src = '/flags/BR.svg' }} 
+                                        />
+                                        <span>{selectedState ? stateNames[selectedState] : 'Brasil (Geral)'}</span>
+                                    </div>
+                                    <svg 
+                                        className={`${style.dropdownChevron} ${isDropdownOpen ? style.dropdownChevronRotated : ''}`}
+                                        width="12" 
+                                        height="8" 
+                                        viewBox="0 0 12 8" 
+                                        fill="none"
+                                    >
+                                        <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </button>
+
+                                {isDropdownOpen && (
+                                    <div className={style.dropdownList} role="listbox">
+                                        <div 
+                                            className={`${style.dropdownOption} ${!selectedState ? style.dropdownOptionSelected : ''}`}
+                                            onClick={() => {
+                                                setSelectedState('');
+                                                setPage(1);
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            role="option"
+                                            aria-selected={!selectedState}
+                                        >
+                                            <img src="/flags/BR.svg" alt="" className={style.dropdownOptionFlag} />
+                                            <span>Brasil (Geral)</span>
+                                        </div>
+                                        {states.map((uf) => (
+                                            <div 
+                                                key={uf}
+                                                className={`${style.dropdownOption} ${selectedState === uf ? style.dropdownOptionSelected : ''}`}
+                                                onClick={() => {
+                                                    setSelectedState(uf);
+                                                    setPage(1);
+                                                    setIsDropdownOpen(false);
+                                                }}
+                                                role="option"
+                                                aria-selected={selectedState === uf}
+                                            >
+                                                <img 
+                                                    src={`/flags/${uf}.svg`} 
+                                                    alt="" 
+                                                    className={style.dropdownOptionFlag}
+                                                    onError={(e) => { e.currentTarget.src = '/flags/BR.svg' }}
+                                                />
+                                                <span>{stateNames[uf]}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             
                             <div className={style.arrows}>
                                 <img 

@@ -230,29 +230,134 @@
     margin-top: -2px; /* Ajuste fino para alinhar visualmente com a fonte */
 }
 
-.stateSelector {
-    background-color: #2a2a2a; /* Fundo escuro para combinar com o tema */
-    color: #ffffff; /* Texto branco */
-    border: 2px solid #444444; /* Bordinha sutil */
-    border-radius: 8px; /* Cantos arredondados */
-    padding: 6px 12px; /* Espaçamento */
-    font-family: inherit; /* Puxa a fonte do projeto */
-    font-size: 1rem;
-    cursor: pointer;
-    outline: none;
-    margin-top: 10px; /* Descola um pouco do título "Colocações" */
-    transition: all 0.2s ease-in-out;
+.stateSelectorWrapper {
+    position: relative;
+    margin-top: 10px;
+    width: 220px;
+    z-index: 40;
 }
 
-/* Efeito quando o usuário clica/passa o mouse */
-.stateSelector:hover, .stateSelector:focus {
+.stateSelectorButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 2px solid #444444;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.stateSelectorButton:hover,
+.stateSelectorButtonActive {
     border-color: #888888;
     background-color: #333333;
 }
 
-/* Pinta a caixinha das opções por dentro também */
-.stateSelector option {
+.stateSelectorCurrent {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.stateSelectorFlag {
+    width: 22px;
+    height: 15px;
+    border-radius: 3px;
+    object-fit: cover;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+}
+
+.dropdownChevron {
+    color: #aaaaaa;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+
+.dropdownChevronRotated {
+    transform: rotate(180deg);
+}
+
+.dropdownList {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
     background-color: #2a2a2a;
+    border: 2px solid #444444;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    padding: 4px;
+    z-index: 50;
+    scrollbar-width: thin;
+    scrollbar-color: #555555 #222222;
+    box-sizing: border-box;
+}
+
+.dropdownList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdownList::-webkit-scrollbar-track {
+    background: #222222;
+    border-radius: 4px;
+}
+
+.dropdownList::-webkit-scrollbar-thumb {
+    background: #555555;
+    border-radius: 4px;
+}
+
+.dropdownList::-webkit-scrollbar-thumb:hover {
+    background: #777777;
+}
+
+.dropdownOption {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px;
+    border-radius: 5px;
     color: #ffffff;
-    font-family: inherit;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdownOption:hover {
+    background-color: #383838;
+}
+
+.dropdownOptionSelected {
+    background-color: #3a3a3a;
+    color: var(--color-azul-baitola, #4ea8de);
+    font-weight: 700;
+}
+
+.dropdownOptionFlag {
+    width: 20px;
+    height: 14px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
 }

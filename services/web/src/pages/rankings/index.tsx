@@ -157,9 +157,9 @@ const GlobalRanking: React.FC = () => {
                             <div className={style.tableHeader}>
                                 <span className={style.colRank}></span>
                                 <span className={style.colPlayer}></span>
-                                <span className={style.colPP} style={{ marginLeft: '57px' }}>Performance (Pontuação)</span>
+                                <span className={style.colPP}>Performance (Pontuação)</span>
                                 <span className={style.colAcc}>Precisão</span>
-                                <span className={style.colPlays} style={{ marginRight: '20px' }}>Jogadas Totais</span>
+                                <span className={style.colPlays}>Jogadas Totais</span>
                             </div>
 
                             <div className={style.rowsContainer}>
@@ -171,8 +171,9 @@ const GlobalRanking: React.FC = () => {
                                     players.map((user) => (
                                         <Link key={user.id} to={`/profile/${user.id}`} className={style.playerRow}>
                                             
-                                            <div className={`${style.colRank} ${style.rankNumber}`}>
-                                                #{user.rank}
+                                            <div className={style.colRank}>
+                                                <span className={style.rankHash}>#</span>
+                                                <span className={style.rankValue}>{user.rank}</span>
                                             </div>
 
                                             <div className={style.colPlayer}>

@@ -108,13 +108,12 @@
 
 .listSection {
     zoom: 1.25;
-    width: 80%;
-    margin: 0 auto;
+    width: 100%;
 }
 
 .tableHeader {
     display: flex;
-    padding: 15px 0px;
+    padding: 12px 14px;
     background-color: inherit;
     color: var(--color-branco);
     font-size: 8px;
@@ -122,12 +121,36 @@
     align-items: center;
 }
 
+.colRank {
+    width: 54px;
+    min-width: 54px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    padding-left: 14px;
+}
+
+.rankHash {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 9px;
+    margin-right: 2px;
+    font-weight: 600;
+}
+
+.rankValue {
+    font-size: 10px;
+    color: var(--color-branco);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    min-width: 16px;
+    text-align: right;
+}
+
 .colPlayer { 
-    flex: 5;
+    flex: 4;
     display: flex; 
     align-items: center; 
-    gap: 15px; 
-    min-width: 150px;
+    min-width: 140px;
 }
 
 .colAcc { 
@@ -136,14 +159,13 @@
 }
 
 .colPlays { 
-    flex: 1; 
+    flex: 1.2; 
     text-align: center; 
 }
 
 .colPP { 
-    flex: 1; 
+    flex: 1.5; 
     text-align: center; 
-    padding-right: 20px;
 }
 
 .rowsContainer {
@@ -154,28 +176,26 @@
 .playerRow {
     display: flex;
     align-items: center;
-    height: 30px;
+    height: 32px;
     background-color: var(--color-background);
     text-decoration: none;
     color: inherit;
-    margin-bottom: 10px;
-    border-radius: 15px;
-    margin-inline: 20px; 
+    margin-bottom: 8px;
+    border-radius: 16px;
+    margin-inline: 14px; 
 }
 
-.rankNumber, .ppValue, .statValue {
+.ppValue, .statValue {
     font-size: 10px;
     color: var(--color-branco);
 }
 
-.rankNumber {
-    padding-left: 20px;
-}
-
 .nameInfo {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+    gap: 8px;
 }
 
 .username {
@@ -199,15 +219,6 @@
     height: auto;
     bottom: -45px;
     left: 38.5%;
-}
-
-.nameInfo {
-    display: flex;
-    flex-direction: row !important;
-    align-items: center;
-    height: 100%;
-    gap: 6px; 
-    margin-left: 12px; 
 }
 
 /* O visual da bandeira */

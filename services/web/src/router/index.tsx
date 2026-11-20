@@ -3,12 +3,15 @@ import { BeatmapPage, ForgotPassPage, GlobalRankingPage, HomePage, HowToConnectP
 import PrivateRoute from './private'
 import { TopProgressBar } from '../components/components.export'
 import {
+    DEFAULT_AVATAR_URL,
     fetchActivePlayer,
     fetchBeatmapWithSetFromMirror,
     fetchRankingPageCached,
     fetchUserRecent,
     hasApiAuth,
     hydrateScoresBeatmaps,
+    preloadImage,
+    preloadProfileAssets,
 } from '../services/profileData'
 
 const ProtectedLayout = () => {
@@ -45,16 +48,22 @@ const profileLoader = async ({ params }: LoaderFunctionArgs) => {
         if (!resolved?.player?.id) {
             return redirect('/')
         }
+        let recentScores = undefined
         if (resolved.player.top_200 === undefined || resolved.player.top_200.length === 0) {
-            await fetchUserRecent(resolved.player.id, 10)
+            recentScores = await fetchUserRecent(resolved.player.id, 10)
         }
+        await preloadProfileAssets(resolved.player, recentScores, 10)
         return redirect(`/profile/${resolved.player.id}`)
     }
 
     if (!hasApiAuth()) return null
     const resolved = await fetchActivePlayer(params.id)
-    if (resolved && (!resolved.player.top_200 || resolved.player.top_200.length === 0)) {
-        await fetchUserRecent(resolved.player.id, 10)
+    if (resolved) {
+        let recentScores = undefined
+        if (!resolved.player.top_200 || resolved.player.top_200.length === 0) {
+            recentScores = await fetchUserRecent(resolved.player.id, 10)
+        }
+        await preloadProfileAssets(resolved.player, recentScores, 10)
     }
     return null
 }
@@ -68,10 +77,14 @@ const topPlaysLoader = async ({ params }: LoaderFunctionArgs) => {
         if (!resolved?.player?.id) {
             return redirect('/')
         }
+        await preloadImage(resolved.player.pfp || DEFAULT_AVATAR_URL)
         return redirect(`/profile/${resolved.player.id}/top-plays`)
     }
     if (!hasApiAuth()) return null
-    await fetchActivePlayer(params.id, { hydrateCount: 50 })
+    const resolved = await fetchActivePlayer(params.id, { hydrateCount: 50 })
+    if (resolved) {
+        await preloadImage(resolved.player.pfp || DEFAULT_AVATAR_URL)
+    }
     return null
 }
 
@@ -88,6 +101,7 @@ const recentPlaysLoader = async ({ params }: LoaderFunctionArgs) => {
         if (recent.length === 0 && resolved.player.top_200?.length) {
             await hydrateScoresBeatmaps(resolved.player.top_200.slice(0, 50), 50)
         }
+        await preloadImage(resolved.player.pfp || DEFAULT_AVATAR_URL)
         return redirect(`/profile/${resolved.player.id}/recent-plays`)
     }
     if (!hasApiAuth()) return null
@@ -97,6 +111,7 @@ const recentPlaysLoader = async ({ params }: LoaderFunctionArgs) => {
         if (recent.length === 0 && resolved.player.top_200?.length) {
             await hydrateScoresBeatmaps(resolved.player.top_200.slice(0, 50), 50)
         }
+        await preloadImage(resolved.player.pfp || DEFAULT_AVATAR_URL)
     }
     return null
 }
@@ -110,10 +125,14 @@ const achievementsLoader = async ({ params }: LoaderFunctionArgs) => {
         if (!resolved?.player?.id) {
             return redirect('/')
         }
+        await preloadImage(resolved.player.pfp || DEFAULT_AVATAR_URL)
         return redirect(`/profile/${resolved.player.id}/achievements`)
     }
     if (!hasApiAuth()) return null
-    await fetchActivePlayer(params.id, { hydrateCount: 0 })
+    const resolved = await fetchActivePlayer(params.id, { hydrateCount: 0 })
+    if (resolved) {
+        await preloadImage(resolved.player.pfp || DEFAULT_AVATAR_URL)
+    }
     return null
 }
 

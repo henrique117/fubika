@@ -266,6 +266,8 @@ const ProfileAchievements: React.FC = () => {
                                 key={avatarSrc}
                                 src={avatarSrc}
                                 alt={`Foto de perfil de ${displayName}`}
+                                loading="eager"
+                                decoding="async"
                                 onError={(e) => {
                                     e.currentTarget.onerror = null
                                     e.currentTarget.src = FALLBACK_AVATAR_URL

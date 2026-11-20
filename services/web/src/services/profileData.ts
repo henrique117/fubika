@@ -172,6 +172,84 @@ const inFlightBatchBeatmapRequests = new Map<number, Promise<void>>()
 export const DEFAULT_AVATAR_URL = '/assets/default-avatar.svg'
 export const FALLBACK_AVATAR_URL = '/assets/default-avatar.svg'
 
+export const preloadImage = (src?: string, timeoutMs = 2500): Promise<boolean> => {
+    if (!src || typeof window === 'undefined') {
+        return Promise.resolve(false)
+    }
+    return new Promise((resolve) => {
+        let settled = false
+        const done = (success: boolean) => {
+            if (!settled) {
+                settled = true
+                resolve(success)
+            }
+        }
+
+        const img = new Image()
+        img.onload = () => {
+            if (typeof img.decode === 'function') {
+                img.decode().then(() => done(true)).catch(() => done(true))
+            } else {
+                done(true)
+            }
+        }
+        img.onerror = () => done(false)
+        img.src = src
+
+        if (img.complete) {
+            if (img.naturalWidth > 0) {
+                if (typeof img.decode === 'function') {
+                    img.decode().then(() => done(true)).catch(() => done(true))
+                } else {
+                    done(true)
+                }
+            } else {
+                done(false)
+            }
+            return
+        }
+
+        setTimeout(() => done(false), timeoutMs)
+    })
+}
+
+export const preloadScoresBeatmapCovers = async (
+    scores: ApiScore[],
+    maxCount = 10,
+    timeoutMs = 2500
+): Promise<void> => {
+    if (!Array.isArray(scores) || scores.length === 0) return
+    const urls = scores
+        .slice(0, maxCount)
+        .map((s) => s.beatmap?.cover || s.beatmap?.thumbnail)
+        .filter((url): url is string => Boolean(url && url.trim().length > 0))
+
+    if (urls.length === 0) return
+    await Promise.all(urls.map((url) => preloadImage(url, timeoutMs)))
+}
+
+export const preloadProfileAssets = async (
+    player?: ApiPlayer | null,
+    fallbackScores?: ApiScore[],
+    maxMaps = 10,
+    timeoutMs = 2500
+): Promise<void> => {
+    if (!player) return
+
+    const tasks: Promise<unknown>[] = [
+        preloadImage(player.pfp || DEFAULT_AVATAR_URL, timeoutMs),
+    ]
+
+    const scoreSource =
+        player.top_200 && player.top_200.length > 0 ? player.top_200 : fallbackScores
+
+    if (scoreSource && scoreSource.length > 0) {
+        tasks.push(preloadScoresBeatmapCovers(scoreSource, maxMaps, timeoutMs))
+    }
+
+    await Promise.all(tasks)
+}
+
 const GRADE_ASSETS: Record<string, string> = {
     XH: '/assets/8e9f0.png',
     SSH: '/assets/8e9f0.png',
@@ -1189,6 +1267,9 @@ export const fetchActivePlayer = async (
                   } else {
                       syncPlayerAliases(fresh, swrKey, effectiveKey === '__me__')
                   }
+                  if (upgraded?.player) {
+                      await preloadProfileAssets(upgraded.player, undefined, 10)
+                  }
                   options.onUpdate?.(upgraded)
               }
             : undefined,
@@ -1206,6 +1287,10 @@ export const fetchActivePlayer = async (
             maxAgeMs: PLAYER_MAX_AGE_MS,
         })
         syncPlayerAliases(upgraded, swrKey, effectiveKey === '__me__')
+    }
+
+    if (upgraded?.player) {
+        await preloadProfileAssets(upgraded.player, undefined, 10)
     }
 
     return upgraded

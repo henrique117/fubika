@@ -599,9 +599,37 @@ export const hydrateScoresBeatmaps = async (
                             cachedNewItems = true
                         }
                     }
+                } else {
+                    // Fallback para API do backend com cascata multi-tier
+                    await Promise.all(
+                        chunk.map(async (id) => {
+                            try {
+                                const res = await api.get<ApiBeatmap>(`/beatmap/${id}`)
+                                if (res.data && res.data.beatmap_id > 0) {
+                                    setCachedBeatmap(res.data)
+                                    cachedNewItems = true
+                                }
+                            } catch {
+                                // Mantém fallback determinístico caso o id não resolva
+                            }
+                        })
+                    )
                 }
             } catch {
-                // Mantém fallback determinístico se o mirror falhar
+                // Se o mirror falhar (ex: CORS / 403), consulta API do backend
+                await Promise.all(
+                    chunk.map(async (id) => {
+                        try {
+                            const res = await api.get<ApiBeatmap>(`/beatmap/${id}`)
+                            if (res.data && res.data.beatmap_id > 0) {
+                                setCachedBeatmap(res.data)
+                                cachedNewItems = true
+                            }
+                        } catch {
+                            // Mantém fallback determinístico caso o id não resolva
+                        }
+                    })
+                )
             } finally {
                 for (const id of chunk) {
                     inFlightBatchBeatmapRequests.delete(id)
@@ -666,6 +694,48 @@ export const fetchBeatmapWithSetFromMirror = async (
     }
 
     const requestPromise = (async () => {
+        // --- 1. Consulta o backend Fubika (que executa a cascata Multi-Tier A -> B -> C e auto-cura no MySQL) ---
+        try {
+            const res = await api.get<ApiBeatmap>(`/beatmap/${encodeURIComponent(requestKey)}`)
+            if (res.data && res.data.beatmap_id > 0) {
+                const beatmap = res.data
+                let beatmapSet: ApiBeatmapset | null = null
+
+                if (beatmap.beatmapset_id > 0) {
+                    try {
+                        const setRes = await api.get<ApiBeatmapset>(`/beatmap/c/${beatmap.beatmapset_id}`)
+                        if (setRes.data && setRes.data.beatmapset_id > 0) {
+                            beatmapSet = setRes.data
+                        }
+                    } catch {
+                        // Não interrompe caso a rota do set falhe
+                    }
+                }
+
+                if (!beatmapSet) {
+                    beatmapSet = {
+                        beatmapset_id: beatmap.beatmapset_id || 0,
+                        title: beatmap.title,
+                        artist: beatmap.artist,
+                        playcount: beatmap.playcount || 0,
+                        favourite_count: 0,
+                        cover: beatmap.cover,
+                        thumbnail: beatmap.thumbnail,
+                        author_id: String(beatmap.author_id || 0),
+                        beatmaps: [beatmap]
+                    }
+                }
+
+                setCachedBeatmap(beatmap)
+                setCachedBeatmapSet(beatmapSet)
+
+                return { beatmap, beatmapSet }
+            }
+        } catch {
+            // Se o backend falhar, segue para tentativa direta via mirror
+        }
+
+        // --- 2. Fallback direto caso o backend esteja indisponível ---
         try {
             const response = await fetch(
                 `${CATBOY_API_BASE}/b/${encodeURIComponent(requestKey)}`

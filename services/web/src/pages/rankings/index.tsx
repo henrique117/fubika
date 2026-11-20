@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import style from './style.module.css'
 import { WrapperComponent } from '../../components/components.export'
 import { Link } from 'react-router-dom'
@@ -6,6 +6,7 @@ import {
     type ApiPlayer,
     fetchRankingPageCached,
     getCachedRankingPageSnapshot,
+    recordRankingPlayers,
 } from '../../services/profileData'
 
 const GlobalRanking: React.FC = () => {
@@ -47,11 +48,13 @@ const GlobalRanking: React.FC = () => {
             const data = await fetchRankingPageCached(activeMode, page, selectedState, {
                 onUpdate: (fresh) => {
                     if (!cancelled) {
+                        recordRankingPlayers(fresh, selectedState)
                         setAsyncRanking({ key: rankingKey, players: fresh })
                     }
                 },
             })
             if (!cancelled) {
+                recordRankingPlayers(data, selectedState)
                 setAsyncRanking({ key: rankingKey, players: data })
             }
         }
@@ -67,9 +70,17 @@ const GlobalRanking: React.FC = () => {
         asyncRanking?.key === rankingKey
             ? null
             : getCachedRankingPageSnapshot(activeMode, page, selectedState)
-    const players =
-        asyncRanking?.key === rankingKey ? asyncRanking.players : (syncPlayers ?? [])
+    const players = useMemo(
+        () => (asyncRanking?.key === rankingKey ? asyncRanking.players : (syncPlayers ?? [])),
+        [asyncRanking, rankingKey, syncPlayers]
+    )
     const loading = asyncRanking?.key !== rankingKey && syncPlayers === null
+
+    useEffect(() => {
+        if (players.length > 0) {
+            recordRankingPlayers(players, selectedState)
+        }
+    }, [players, selectedState])
 
     // Nova função que impede o jogador de continuar passando as páginas infinitamente caso o número de jogadores exibidos na pág seja menor que 50.
     const isLastPage = players.length < 50;

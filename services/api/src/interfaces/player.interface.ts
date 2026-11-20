@@ -5,6 +5,7 @@ export default interface IPlayer {
     name: string;
     safe_name: string;
     country?: string;
+    state_rank?: number | null;
     rank: number;
     pp: number;
     acc: number;

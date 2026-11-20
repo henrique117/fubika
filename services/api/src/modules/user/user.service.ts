@@ -266,6 +266,21 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         }
     }) + 1;
 
+    const normalizedCountry = user.country ? user.country.trim().toLowerCase() : '';
+    const hasValidState = normalizedCountry.length === 2 && normalizedCountry !== 'xx';
+    const stateRank = hasValidState && userStats.pp > 0
+        ? await prisma.stats.count({
+            where: {
+                mode: mode,
+                pp: { gt: userStats.pp },
+                user: {
+                    priv: { gt: 0 },
+                    country: user.country
+                }
+            }
+        }) + 1
+        : null;
+
     const topScoresRaw = await prisma.$queryRaw<any[]>`
         SELECT 
             s.id as score_id, 
@@ -331,6 +346,7 @@ export const getUserStats = async (filter: UserFilter, mode: number = 0): Promis
         name: user.name,
         safe_name: user.safe_name,
         country: user.country,
+        state_rank: stateRank,
         pfp: `https://a.${process.env.DOMAIN}/${user.id}`,
         banner: `https://assets.ppy.sh/user-profile-covers/${user.id}.jpg`,
         

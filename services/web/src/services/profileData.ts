@@ -73,6 +73,7 @@ export interface ApiPlayer {
     name: string
     safe_name?: string
     country?: string
+    state_rank?: number | null
     rank: number
     pp: number
     acc: number
@@ -592,6 +593,117 @@ export const fetchBeatmapWithSetFromMirror = async (
     return requestPromise
 }
 
+interface KnownPlayerMeta {
+    country?: string
+    stateRank?: number
+}
+
+const PLAYER_META_STORAGE_KEY = 'fubika:player_meta_v1'
+const MAX_PLAYER_META_ENTRIES = 500
+
+const playerMetaMemoryMap = new Map<number, KnownPlayerMeta>()
+let playerMetaStorageLoaded = false
+
+const loadPlayerMetaStorage = (): void => {
+    if (playerMetaStorageLoaded || typeof window === 'undefined') return
+    playerMetaStorageLoaded = true
+    try {
+        const raw = window.localStorage.getItem(PLAYER_META_STORAGE_KEY)
+        if (!raw) return
+        const parsed = JSON.parse(raw) as Record<string, KnownPlayerMeta>
+        for (const [idStr, meta] of Object.entries(parsed)) {
+            const numId = Number(idStr)
+            if (numId > 0 && meta && typeof meta === 'object') {
+                playerMetaMemoryMap.set(numId, meta)
+            }
+        }
+    } catch {
+        // ignore
+    }
+}
+
+const persistPlayerMetaStorage = (): void => {
+    if (typeof window === 'undefined') return
+    try {
+        const entries = Array.from(playerMetaMemoryMap.entries()).slice(-MAX_PLAYER_META_ENTRIES)
+        const obj: Record<string, KnownPlayerMeta> = {}
+        for (const [id, meta] of entries) {
+            obj[String(id)] = meta
+        }
+        window.localStorage.setItem(PLAYER_META_STORAGE_KEY, JSON.stringify(obj))
+    } catch {
+        // ignore
+    }
+}
+
+export const recordPlayerMeta = (
+    playerId: number,
+    patch: { country?: string; stateRank?: number }
+): void => {
+    if (!playerId || playerId <= 0) return
+    loadPlayerMetaStorage()
+
+    const existing = playerMetaMemoryMap.get(playerId) ?? {}
+    let changed = false
+
+    if (
+        patch.country &&
+        patch.country.trim().length === 2 &&
+        patch.country.toLowerCase() !== 'xx'
+    ) {
+        const normalized = patch.country.trim().toUpperCase()
+        if (existing.country !== normalized) {
+            existing.country = normalized
+            changed = true
+        }
+    }
+
+    if (typeof patch.stateRank === 'number' && patch.stateRank > 0) {
+        if (existing.stateRank !== patch.stateRank) {
+            existing.stateRank = patch.stateRank
+            changed = true
+        }
+    }
+
+    if (changed) {
+        playerMetaMemoryMap.set(playerId, existing)
+        persistPlayerMetaStorage()
+    }
+}
+
+export const getKnownPlayerMeta = (playerId: number): KnownPlayerMeta | null => {
+    if (!playerId || playerId <= 0) return null
+    loadPlayerMetaStorage()
+    return playerMetaMemoryMap.get(playerId) ?? null
+}
+
+export const recordRankingPlayers = (
+    players: ApiPlayer[],
+    countryFilter?: string
+): void => {
+    if (!Array.isArray(players) || players.length === 0) return
+    const normalizedFilter = countryFilter?.trim().toUpperCase()
+    const isStateFilter = Boolean(
+        normalizedFilter && normalizedFilter !== 'GLOBAL' && normalizedFilter.length === 2
+    )
+
+    for (const player of players) {
+        if (!player || !player.id) continue
+        const itemCountry =
+            player.country?.trim() || (isStateFilter ? normalizedFilter : undefined)
+        const patch: { country?: string; stateRank?: number } = {}
+        if (itemCountry && itemCountry.length === 2 && itemCountry.toLowerCase() !== 'xx') {
+            patch.country = itemCountry.toUpperCase()
+        }
+        if (isStateFilter && typeof player.rank === 'number' && player.rank > 0) {
+            patch.stateRank = player.rank
+        }
+        if (patch.country || patch.stateRank) {
+            recordPlayerMeta(player.id, patch)
+        }
+    }
+}
+
 const getRankingSwrKey = (mode = 0, page = 1, country?: string): string => {
     const normalizedCountry = country?.trim().toUpperCase() || 'GLOBAL'
     return `ranking:${mode}:${page}:${normalizedCountry}`
@@ -633,13 +745,22 @@ export const fetchRankingPageCached = async (
                         country: normalizedCountry,
                     },
                 })
-                return Array.isArray(res.data) ? res.data : []
+                const list = Array.isArray(res.data) ? res.data : []
+                recordRankingPlayers(list, normalizedCountry)
+                return list
             } catch {
                 return null
             }
         },
-        onUpdate: options?.onUpdate,
+        onUpdate: (fresh) => {
+            recordRankingPlayers(fresh, normalizedCountry)
+            options?.onUpdate?.(fresh)
+        },
     })
+
+    if (result) {
+        recordRankingPlayers(result, normalizedCountry)
+    }
 
     return result ?? []
 }
@@ -792,7 +913,6 @@ const resolvePlayerAndStateRank = async (
     options?: { preferMe?: boolean; hydrateCount?: number }
 ): Promise<ResolvedPlayer | null> => {
     let player: ApiPlayer | null = null
-    let globalTopPage: ApiPlayer[] | null = null
 
     if (routeId) {
         try {
@@ -820,27 +940,90 @@ const resolvePlayerAndStateRank = async (
         player = { ...player, top_200: hydratedTop }
     }
 
+    // 1. Resolve Country
     let country = player.country?.trim()
-    if (!country) {
-        if (!globalTopPage) {
-            globalTopPage = await fetchRankingPageCached(0, 1)
-        }
-        const foundInGlobal = globalTopPage.find((item) => item.id === player!.id)
-        if (foundInGlobal?.country) {
-            country = foundInGlobal.country.trim()
+    if (!country || country.toLowerCase() === 'xx') {
+        const cachedMeta = getKnownPlayerMeta(player.id)
+        if (cachedMeta?.country && cachedMeta.country.toLowerCase() !== 'xx') {
+            country = cachedMeta.country
             player = { ...player, country }
         }
     }
 
+    // If country is still missing and player has global rank > 0, locate them in global ranking
+    if (
+        (!country || country.toLowerCase() === 'xx') &&
+        typeof player.rank === 'number' &&
+        player.rank > 0
+    ) {
+        const expectedGlobalPage = Math.max(1, Math.floor((player.rank - 1) / 50) + 1)
+        const pagesToCheck = [expectedGlobalPage]
+        if (expectedGlobalPage > 1) {
+            pagesToCheck.push(expectedGlobalPage - 1)
+        }
+        pagesToCheck.push(expectedGlobalPage + 1)
+
+        for (const p of pagesToCheck) {
+            const globalPage = await fetchRankingPageCached(0, p)
+            const foundInGlobal = globalPage.find((item) => item.id === player!.id)
+            if (foundInGlobal?.country && foundInGlobal.country.toLowerCase() !== 'xx') {
+                country = foundInGlobal.country.trim().toUpperCase()
+                player = { ...player, country }
+                recordPlayerMeta(player.id, { country })
+                break
+            }
+        }
+    }
+
+    // 2. Resolve State Rank
     let stateRank: number | null = null
-    if (country && country.length === 2 && country.toLowerCase() !== 'xx') {
-        const stateList = await fetchRankingPageCached(0, 1, country)
-        const found = stateList.find((item) => item.id === player!.id)
-        if (found) {
-            stateRank =
-                typeof found.rank === 'number' && found.rank > 0
-                    ? found.rank
-                    : stateList.indexOf(found) + 1
+
+    // If backend directly provided state_rank
+    if (typeof player.state_rank === 'number' && player.state_rank > 0) {
+        stateRank = player.state_rank
+        recordPlayerMeta(player.id, { stateRank })
+    }
+
+    // Check cached state rank
+    if (!stateRank) {
+        const cachedMeta = getKnownPlayerMeta(player.id)
+        if (typeof cachedMeta?.stateRank === 'number' && cachedMeta.stateRank > 0) {
+            stateRank = cachedMeta.stateRank
+        }
+    }
+
+    // Search state ranking pages if country is a valid 2-letter state
+    if (!stateRank && country && country.length === 2 && country.toLowerCase() !== 'xx') {
+        const MAX_STATE_PAGES = 5
+        for (let page = 1; page <= MAX_STATE_PAGES; page++) {
+            const stateList = await fetchRankingPageCached(0, page, country)
+            if (!stateList || stateList.length === 0) {
+                break
+            }
+
+            const found = stateList.find((item) => item.id === player!.id)
+            if (found) {
+                stateRank =
+                    typeof found.rank === 'number' && found.rank > 0
+                        ? found.rank
+                        : (page - 1) * 50 + stateList.indexOf(found) + 1
+                recordPlayerMeta(player.id, { country, stateRank })
+                break
+            }
+
+            if (stateList.length < 50) {
+                break
+            }
+
+            const lastPlayer = stateList[stateList.length - 1]
+            if (
+                typeof player.pp === 'number' &&
+                typeof lastPlayer?.pp === 'number' &&
+                lastPlayer.pp > 0 &&
+                player.pp > lastPlayer.pp
+            ) {
+                break
+            }
         }
     }
 
@@ -872,20 +1055,50 @@ export const getCachedActivePlayerSnapshot = (
         }
     }
 
-    const topScores = envelope.data.player.top_200
+    let resolved = envelope.data
+
+    if (resolved.player?.id) {
+        const meta = getKnownPlayerMeta(resolved.player.id)
+        let resolvedChanged = false
+        let updatedPlayer = resolved.player
+        let updatedStateRank = resolved.stateRank
+
+        if (
+            (!updatedPlayer.country || updatedPlayer.country.toLowerCase() === 'xx') &&
+            meta?.country
+        ) {
+            updatedPlayer = { ...updatedPlayer, country: meta.country }
+            resolvedChanged = true
+        }
+
+        if (updatedStateRank === null && typeof meta?.stateRank === 'number' && meta.stateRank > 0) {
+            updatedStateRank = meta.stateRank
+            resolvedChanged = true
+        }
+
+        if (resolvedChanged) {
+            resolved = {
+                ...resolved,
+                player: updatedPlayer,
+                stateRank: updatedStateRank,
+            }
+        }
+    }
+
+    const topScores = resolved.player.top_200
     if (!Array.isArray(topScores) || topScores.length === 0) {
-        return envelope.data
+        return resolved
     }
 
     const hydrated = applyCachedBeatmapsSync(topScores)
     if (!hydrated.changed) {
-        return envelope.data
+        return resolved
     }
 
     return {
-        ...envelope.data,
+        ...resolved,
         player: {
-            ...envelope.data.player,
+            ...resolved.player,
             top_200: hydrated.scores,
         },
     }

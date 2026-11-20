@@ -151,15 +151,17 @@ services:
       DATABASE_URL: mysql://${DB_USER}:${DB_PASS}@mysql:3306/${DB_NAME}
       SHADOW_DATABASE_URL: mysql://${DB_USER}:${DB_PASS}@mysql:3306/${DB_NAME}_shadow
       REDIS_URL: redis://default:${REDIS_PASS}@redis:6379/0
-      DB_HOST: mysql
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
-      DB_NAME: ${DB_NAME}
+      # Nada de DB_HOST/DB_USER/DB_PASS/DB_NAME soltas aqui: a API não lê
+      # nenhuma delas (o único consumidor era o mysqldump do cron de backup, que
+      # virou serviço próprio). A conexão é toda pela DATABASE_URL acima.
+      # DOMAIN é usada para montar as URLs de avatar/assets nas respostas
+      # (src/modules/*/*.service.ts: https://a.${DOMAIN}/<id>).
       DOMAIN: ${DOMAIN}
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       OWNER_DISCORD_ID: ${OWNER_DISCORD_ID}
-      OSU_API_KEY: ${OSU_API_KEY}
+      # OSU_API_KEY (a chave v1) não entra aqui: quem a usa é o bancho.
+      # A API fala com a API v2 do osu! via client id/secret.
       OSU_CLIENT_ID: ${OSU_CLIENT_ID}
       OSU_CLIENT_SECRET: ${OSU_CLIENT_SECRET}
     volumes:

@@ -40,7 +40,17 @@ Este é o serviço de interface web do **Fubika**, desenvolvido com **React 19**
    ```
    O site estará disponível por padrão em `http://localhost:5173`.
 
-> **Nota sobre API:** Este projeto não requer configuração de arquivo `.env`. As rotas e endpoints da API já estão pré-configurados para apontar para o serviço de backend do Fubika.
+> **Nota sobre a API:** não existe `.env` dentro deste serviço — o Vite lê o `.env`
+> único da raiz do repositório (`envDir`), e só variáveis `VITE_*` chegam ao
+> navegador. Em desenvolvimento, `/api` é um proxy para
+> `https://api.<VITE_DEV_DOMAIN>` (padrão: `staging.fubika.com.br`), então você
+> trabalha contra a API do staging sem subir nada local.
+>
+> Em produção e staging **nada de URL é embutido no build**: `src/config.ts` deriva
+> API, avatares e assets de `window.location.hostname` em runtime — é isso que
+> permite promover a mesma imagem do staging para a produção.
+>
+> O jeito recomendado de subir é `make web`, na raiz do repositório.
 
 ---
 

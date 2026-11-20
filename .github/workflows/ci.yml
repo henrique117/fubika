@@ -1,0 +1,159 @@
+# ==============================================================================
+# Fubika — CI
+# ==============================================================================
+#
+# Roda em todo PR para `develop` e para `main`, e também pode ser chamado por
+# outro workflow (`workflow_call`) — é assim que o deploy de staging revalida o
+# commit de merge antes de publicar imagens no GHCR.
+#
+# Os IDs dos jobs (`api`, `bot`, `web`, `docker`) são CONTRATO: eles viram os
+# nomes dos required checks na proteção de branch do GitHub. Por isso nenhum job
+# define `name:` — um `name:` substituiria o ID no nome do check e quebraria a
+# configuração de branch protection. Os jobs de matriz aparecem como
+# `docker (api)`, `docker (web)`, etc.
+# ==============================================================================
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+  # Permite que os workflows de deploy reaproveitem este CI inteiro.
+  workflow_call:
+
+# Só leitura: o CI não publica nada (quem publica é o deploy).
+permissions:
+  contents: read
+
+# Cancelar um CI de PR desatualizado é desejável; já quando este workflow é
+# chamado por um deploy, cancelar no meio não é — daí a expressão.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # --------------------------------------------------------------------- API ---
+  api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # A imagem da API é node:20-bookworm-slim: o CI usa a mesma major.
+          node-version: '20'
+          cache: npm
+          # `cache-dependency-path` é resolvido a partir da raiz do repositório,
+          # e não do `working-directory` acima.
+          cache-dependency-path: services/api/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar o client do Prisma
+        # OBRIGATÓRIO antes do build: os tipos do PrismaClient são gerados a
+        # partir do schema e o `tsc` falha sem eles.
+        run: npx prisma generate
+
+      - name: Build
+        run: npm run build
+
+      - name: Testes
+        # Os testes não precisam de banco: todos mockam o prisma
+        # (services/api/tests/*.test.ts usam vi.mock), então não há serviço
+        # de MySQL neste job.
+        run: npm test
+
+  # --------------------------------------------------------------------- Bot ---
+  bot:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/bot
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # Imagem do bot: node:20-alpine.
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: services/bot/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build
+        # `tsc --build --force && tsc-alias`. Nada de `npm start` nem de
+        # `deploy:commands` aqui: registrar comandos chama a API do Discord e
+        # não tem lugar num CI.
+        run: npm run build
+
+  # --------------------------------------------------------------------- Web ---
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # Exceção ao Node 20 do resto: o estágio de build do
+          # services/web/Dockerfile é node:22-alpine. O CI reproduz o que a
+          # imagem realmente faz (o Vite 7 exige ^20.19 || >=22.12, então o 20
+          # também funcionaria — mas aí o CI deixaria de validar a versão usada
+          # no build da imagem).
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: services/web/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  # ------------------------------------------------------------------ Docker ---
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      # Uma imagem quebrada não deve esconder o estado das outras quatro.
+      fail-fast: false
+      matrix:
+        include:
+          - service: bancho
+            context: ./services/bancho
+          - service: api
+            context: ./services/api
+          - service: bot
+            context: ./services/bot
+          - service: web
+            context: ./services/web
+          - service: backup
+            context: ./infra/backup
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build da imagem (sem push)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          # CI só valida que a imagem compila; publicar é tarefa do deploy.
+          push: false
+          # Cache do GitHub Actions. O `scope` separa um serviço do outro —
+          # sem ele as cinco builds escreveriam na MESMA chave de cache e se
+          # sobrescreveriam a cada run.
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}

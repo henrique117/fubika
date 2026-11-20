@@ -1,0 +1,136 @@
+# ==============================================================================
+# Fubika — deploy de PRODUÇÃO
+# ==============================================================================
+#
+# Dispara no push em `main` (o merge do PR de `develop` -> `main`) e também
+# manualmente, por workflow_dispatch, para ROLLBACK.
+#
+# Este workflow NÃO BUILDA NADA. A imagem que vai para produção é exatamente a
+# que rodou em staging: `docker buildx imagetools create` só reescreve o
+# manifesto no registry, apontando `:prod` e `:prod-<sha>` para o mesmo digest
+# de `:staging`. Nenhuma camada é reconstruída, então não existe a chance de
+# "funcionava em staging e em produção é outro binário".
+#
+# ROLLBACK: rode manualmente informando o campo `tag` com uma tag antiga
+# (ex.: `prod-a1b2c3d`). Nesse caso nada é promovido — o deploy só reaponta o
+# servidor para aquela tag, que continua no GHCR.
+#
+# A aprovação manual fica no GitHub Environment `production` (configurada pelo
+# dono do repositório). Por isso promoção e deploy estão no MESMO job: dois jobs
+# no mesmo environment pediriam aprovação duas vezes no mesmo run, e a promoção
+# acabaria acontecendo antes do portão.
+# ==============================================================================
+
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Rollback: tag já existente no GHCR (ex.: prod-a1b2c3d). Vazio = promove o staging atual.'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+# Concorrência própria de produção: não compartilha grupo com o staging, para
+# que um deploy de staging não fique na fila atrás de um deploy de produção
+# (e vice-versa). cancel-in-progress: false pelo mesmo motivo do staging.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  # Precisa casar com os `image:` do docker-compose.yml da raiz.
+  IMAGE_PREFIX: ghcr.io/henrique117/fubika
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Mesmos NOMES de secrets/variables do staging (SSH_HOST, SSH_USER, SSH_KEY,
+    # SSH_PORT, DEPLOY_PATH), com os valores de produção definidos NESTE
+    # environment — é também aqui que vive a aprovação manual.
+    environment:
+      name: production
+      url: https://${{ vars.PUBLIC_URL || 'fubika.com.br' }}
+    permissions:
+      contents: read
+      # `packages: write` para retaggear no GHCR (promoção) e ler para o pull.
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Resolver a tag a implantar
+        id: alvo
+        env:
+          # Vazio em push na main; preenchido só no workflow_dispatch de rollback.
+          TAG_INFORMADA: ${{ github.event.inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "${TAG_INFORMADA:-}" ]; then
+            # Rollback: a tag vem de um humano, então é validada antes de ir
+            # para o .env do servidor e para o docker compose.
+            case "$TAG_INFORMADA" in
+              *[!A-Za-z0-9._-]*)
+                echo "::error::tag inválida: '$TAG_INFORMADA'"
+                exit 1
+                ;;
+            esac
+            echo "tag=$TAG_INFORMADA" >>"$GITHUB_OUTPUT"
+            echo "promover=false" >>"$GITHUB_OUTPUT"
+            echo "::notice::rollback para a tag $TAG_INFORMADA (nada será promovido)"
+          else
+            echo "tag=prod-${GITHUB_SHA}" >>"$GITHUB_OUTPUT"
+            echo "promover=true" >>"$GITHUB_OUTPUT"
+            echo "::notice::promovendo :staging para :prod e :prod-${GITHUB_SHA}"
+          fi
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        if: steps.alvo.outputs.promover == 'true'
+
+      - name: Login no GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        if: steps.alvo.outputs.promover == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Promover as imagens de staging para produção
+        if: steps.alvo.outputs.promover == 'true'
+        env:
+          TAG_PROD: ${{ steps.alvo.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # `imagetools create` copia o MANIFESTO: a imagem de produção fica com
+          # o mesmo digest da que foi validada em staging.
+          for servico in bancho api bot web backup; do
+            repo="${IMAGE_PREFIX}-${servico}"
+            echo "==> $repo:staging -> :prod e :$TAG_PROD"
+            docker buildx imagetools create \
+              --tag "$repo:prod" \
+              --tag "$repo:$TAG_PROD" \
+              "$repo:staging"
+          done
+
+      - name: Deploy por SSH
+        # Mesmo script do staging (.github/scripts/deploy.sh): a mecânica de
+        # deploy existe em um lugar só, para os dois ambientes não divergirem.
+        run: bash .github/scripts/deploy.sh
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+          TAG: ${{ steps.alvo.outputs.tag }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apagar a chave SSH do runner
+        if: always()
+        run: rm -rf "${RUNNER_TEMP}/fubika-ssh"

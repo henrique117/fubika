@@ -1,0 +1,147 @@
+# ==============================================================================
+# Fubika — deploy de STAGING
+# ==============================================================================
+#
+# Dispara em todo push em `develop`, que na prática só acontece por merge de PR
+# (a proteção de branch exige PR + os checks do ci.yml).
+#
+# Fluxo: revalida o commit de merge no CI -> builda as 5 imagens e publica no
+# GHCR com DUAS tags (`<sha>` e `staging`) -> copia os arquivos de infra para o
+# servidor e sobe a stack apontando para `TAG=<sha>`.
+#
+# A tag `staging` é o que o deploy de produção promove depois: é sempre a mesma
+# imagem que foi validada aqui, nunca um rebuild.
+# ==============================================================================
+
+name: Deploy staging
+
+on:
+  push:
+    branches:
+      - develop
+
+# Mínimo no topo; o job que publica imagens amplia para `packages: write`.
+permissions:
+  contents: read
+
+# Um grupo por ambiente: nunca dois deploys de staging ao mesmo tempo.
+# cancel-in-progress: false — matar um deploy no meio (entre o `pull` e o
+# `up -d`) deixa a stack num estado pior do que esperar o anterior terminar.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  # Precisa casar com os `image:` do docker-compose.yml da raiz.
+  IMAGE_PREFIX: ghcr.io/henrique117/fubika
+  # Plataforma do build, configurável por variável de repositório para o dia em
+  # que o servidor virar arm64 (Lightsail/Azure oferecem as duas).
+  BUILD_PLATFORM: ${{ vars.BUILD_PLATFORM || 'linux/amd64' }}
+
+jobs:
+  # ------------------------------------------------------------------- CI ---
+  # Reaproveita o ci.yml inteiro (via workflow_call). O PR já rodou esses
+  # checks, mas é o COMMIT DE MERGE que vira imagem — vale revalidar antes de
+  # publicar qualquer coisa no GHCR.
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  # ---------------------------------------------------------------- build ---
+  build:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      # Sem fail-fast: um deploy com 4 de 5 imagens publicadas não sobe
+      # (o job de deploy só roda com o build inteiro verde), mas saber de uma vez
+      # quais imagens quebraram economiza um ciclo.
+      fail-fast: false
+      matrix:
+        include:
+          - service: bancho
+            context: ./services/bancho
+          - service: api
+            context: ./services/api
+          - service: bot
+            context: ./services/bot
+          - service: web
+            context: ./services/web
+          - service: backup
+            context: ./infra/backup
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Configurar QEMU
+        # Só necessário quando a plataforma alvo difere da arquitetura do
+        # runner (amd64). Em linux/amd64 seria tempo jogado fora.
+        if: ${{ env.BUILD_PLATFORM != 'linux/amd64' }}
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Login no GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          # GITHUB_TOKEN do próprio job (expira no fim dele): não existe PAT
+          # de longa duração guardado em segredo nenhum.
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          platforms: ${{ env.BUILD_PLATFORM }}
+          push: true
+          # `<sha>` é a tag imutável que o deploy usa; `staging` é o ponteiro
+          # móvel que a promoção para produção lê depois.
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}:staging
+          # `scope` por serviço: sem ele as cinco builds disputariam a mesma
+          # chave de cache.
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          # Rastreabilidade: liga a imagem ao commit que a gerou.
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+  # --------------------------------------------------------------- deploy ---
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    # Os secrets (SSH_*) e a variable DEPLOY_PATH ficam NO ENVIRONMENT, não no
+    # repositório: produção usa os mesmos nomes com outros valores.
+    environment:
+      name: staging
+      url: https://${{ vars.PUBLIC_URL || 'staging.fubika.com.br' }}
+    permissions:
+      contents: read
+      # O servidor faz `docker login` com este mesmo token para dar `pull`.
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Deploy por SSH
+        # Script versionado e compartilhado com o deploy de produção, em vez de
+        # uma action de SSH de terceiro. O porquê está no cabeçalho do script.
+        run: bash .github/scripts/deploy.sh
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+          TAG: ${{ github.sha }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apagar a chave SSH do runner
+        # `always()`: a chave privada tem que sair do disco do runner mesmo
+        # quando o deploy falha ou é cancelado.
+        if: always()
+        run: rm -rf "${RUNNER_TEMP}/fubika-ssh"

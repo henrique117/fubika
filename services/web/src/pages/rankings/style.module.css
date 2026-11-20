@@ -93,6 +93,8 @@
 
 .activeMode {
     background: linear-gradient(var(--color-azul-menos-baitola, #3b82f6) 0%, var(--color-roxo-baitola, #9333ea) 100%);
+    background-origin: border-box;
+    background-repeat: no-repeat;
     color: white;
     border-color: transparent;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);

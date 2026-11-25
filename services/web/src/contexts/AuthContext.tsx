@@ -1,18 +1,16 @@
-import React, { createContext, useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { api } from '../services/api'
+import { AuthContext, type AuthUser } from './auth'
 
-interface AuthContextData {
-    signed: boolean
-    user: any | null
-    signIn: (token: string, user: any) => void
-    signOut: () => void
-    loading: boolean
+const clearSession = () => {
+    localStorage.removeItem('osu_token')
+    localStorage.removeItem('osu_user')
+
+    delete api.defaults.headers.common['Authorization']
 }
 
-const AuthContext = createContext<AuthContextData>({} as AuthContextData)
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<any | null>(null)
+    const [user, setUser] = useState<AuthUser | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -33,10 +31,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 } catch (error) {
                     console.error("Sessão expirada ou token inválido.", error)
-                    signOut()
+                    clearSession()
+                    setUser(null)
                 }
             } else {
-                signOut()
+                clearSession()
+                setUser(null)
             }
 
             setLoading(false)
@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         validateToken()
     }, [])
 
-    const signIn = (token: string, userData: any) => {
+    const signIn = (token: string, userData: AuthUser) => {
         localStorage.setItem('osu_token', token)
         localStorage.setItem('osu_user', JSON.stringify(userData))
         
@@ -55,11 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const signOut = () => {
-        localStorage.removeItem('osu_token')
-        localStorage.removeItem('osu_user')
-        
-        delete api.defaults.headers.common['Authorization']
-        
+        clearSession()
         setUser(null)
     }
 
@@ -68,10 +64,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             {children}
         </AuthContext.Provider>
     )
-}
-
-export const useAuth = () => {
-    const context = useContext(AuthContext)
-    if (!context) throw new Error('useAuth must be used within an AuthProvider')
-    return context
 }

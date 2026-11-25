@@ -13,6 +13,23 @@ import circles from '/circles.svg'
 import catOpenEye from '/cat_open_eye.png'
 import catHead from '/cat_head.png'
 
+interface ScoreProps {
+    id: number;
+    grade: string;
+    pp: number;
+    n300: number;
+    n100: number;
+    n50: number;
+    nmiss: number;
+    acc: number;
+    mods: string;
+    max_combo: number;
+    perfect: boolean;
+    player: {
+        name: string;
+    };
+}
+
 interface BeatmapProps {
     beatmap_id: number;
     beatmapset_id: number;
@@ -29,7 +46,7 @@ interface BeatmapProps {
     hp: number;
     max_combo: number;
     status: string;
-    scores: any[];
+    scores: ScoreProps[];
     playcount: number;
     passcount: number;
     total_length: number;
@@ -59,8 +76,7 @@ const Beatmap: React.FC = () => {
     const navigate = useNavigate();
     const [currentBeatmap, setCurrentBeatmap] = useState<BeatmapProps | null>(null);
     const [beatmapSet, setBeatmapSet] = useState<BeatmapSetProps | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('leaderboard');
+    const [activeTab] = useState('leaderboard');
     const [isInitialLoading, setIsInitialLoading] = useState(true);
 
     useEffect(() => {

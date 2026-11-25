@@ -54,6 +54,62 @@ To play on Fubika, use the official osu! client with the following flag in your 
 
 ---
 
+## 🤝 Como contribuir
+
+### Fluxo de branches
+
+```
+sua-feature ──PR──► develop ──► staging automático ──PR──► main ──► produção
+```
+
+- Toda mudança entra por **PR**. `develop` e `main` são protegidas: sem push direto.
+- O PR precisa passar nos checks `api`, `bot`, `web` e `docker` (CI do GitHub).
+- Merge em `develop` → deploy automático em **staging** (`staging.fubika.com.br`).
+- Merge de `develop` em `main` → **produção**, promovendo a MESMA imagem que já está
+  rodando no staging (com aprovação manual).
+
+### Primeira vez
+
+```bash
+git clone https://github.com/henrique117/fubika.git && cd fubika
+cp .env.example .env     # preencha; é o ÚNICO arquivo de variáveis
+make help                # lista todos os comandos
+```
+
+### Rodar só um serviço
+
+Você **não** precisa subir a stack inteira: por padrão o front e o bot usam a API do
+staging, e a API usa o banco do staging por um túnel SSH.
+
+**Front (web)** — só precisa de Node:
+```bash
+make web          # Vite em http://localhost:5173, /api -> api.staging.fubika.com.br
+```
+
+**Bot** — com o SEU bot de teste (`DISCORD_TOKEN` + `DISCORD_GUILD_ID` no `.env`):
+```bash
+make deps                      # sobe só o Redis local, em Docker
+make bot                       # bot rodando, API do staging
+make fake-event type=snipe     # simula um evento de snipe do bancho
+```
+
+**API** — contra o banco e o Redis do staging:
+```bash
+make tunnel-staging    # deixe aberto (túnel SSH: 3307 MySQL, 6380 Redis)
+make api               # API em http://localhost:3000
+# make api-local       # alternativa: MySQL/Redis locais (make deps-db)
+```
+
+**Stack completa** (única forma de testar o bancho localmente):
+```bash
+make dev          # builda e sobe tudo em 127.0.0.1
+make logs svc=bancho
+```
+
+Detalhes de arquitetura, deploy, rollback e backup: [`infra/README.md`](infra/README.md).
+
+---
+
 ## ⚖️ Licença e Créditos / License and Credits
 
 ### Original Project

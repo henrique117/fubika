@@ -1,0 +1,45 @@
+# ==============================================================================
+# Fubika — override de DESENVOLVIMENTO (máquina do dev)
+#
+# Uso: `make dev` (ou COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml)
+#
+# Stack completa local, buildando o código do repositório. Todas as portas são
+# publicadas apenas em 127.0.0.1. O backup fica desligado (profile `backup`):
+# `make backup-now` continua funcionando sob demanda.
+# ==============================================================================
+
+services:
+  mysql:
+    ports:
+      - "127.0.0.1:3306:3306"
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  bancho:
+    ports:
+      - "127.0.0.1:10000:10000"
+
+  api:
+    environment:
+      NODE_ENV: development
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  web:
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  caddy:
+    # `!override` (Compose >= 2.24) é obrigatório aqui: sem ele o Compose
+    # SOMA as portas do base (0.0.0.0:80/443) com estas e o `up` falha com
+    # "port is already allocated".
+    ports: !override
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
+      - "127.0.0.1:443:443/udp"
+
+  backup:
+    # Só sobe com `--profile backup` (é o que o `make backup-now` faz).
+    profiles: ["backup"]

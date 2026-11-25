@@ -1,6 +1,6 @@
 import { EmbedBuilder, time, TimestampStyles } from "discord.js"
 import { IBeatmap, IPlayer } from "../../interfaces/interfaces.export"
-import { URLS, EMOJIS, COLORS } from "../../constants"
+import { URLS, EMOJIS, COLORS, beatmapUrl } from "../../constants"
 import { scoreGradeToEmoji, applyModsToStats, formatTime, capitalizeFirstLetter } from "../utils.export"
 
 export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPlayer): Promise<EmbedBuilder> {
@@ -13,7 +13,7 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
     if (!beatmap.scores)
         throw new Error("Beatmap scores data are missing")
 
-    // Procura um score do player no mapa
+    
     const score = beatmap.scores.find(score => {
                 
         if (!score.player)
@@ -22,10 +22,10 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
         return score.player.id === player.id
     })
 
-    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const mapUrl = beatmapUrl(beatmap.beatmap_id)
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
-    // Caso não haja scores do player no mapa
+    
     if (!score)        
         return new EmbedBuilder()
             .setAuthor({ 
@@ -61,10 +61,10 @@ export default async function compareEmbedBuilder(beatmap: IBeatmap, player: IPl
 
     return new EmbedBuilder()
         .setAuthor({ 
-            name: `${player.name}: ${player.pp}pp (#${player.rank})`, 
+            name: `${player.name}: ${player.pp.toLocaleString('en-US')}pp (#${player.rank})`,
             iconURL: URLS.fubikaIcon,
             url: player.url
-        }) //                                       Mudar --->  score.star_rating.toLocaleString('en-US', options)}
+        })
         .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
         .setURL(mapUrl)
         .setColor(COLORS.blue)

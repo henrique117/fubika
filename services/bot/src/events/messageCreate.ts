@@ -28,9 +28,9 @@ export default {
 
         if (!commandName) return
 
-        let command = message.client.commands.get(commandName) as ICommand // Tenta achar pelo nome exato
+        let command = message.client.commands.get(commandName) as ICommand 
 
-        if (!command) { // Se não achar, tenta pelos aliases
+        if (!command) { 
             command = message.client.commands.find((cmd: ICommand) => 
                 cmd.aliases && cmd.aliases.includes(commandName)
             )

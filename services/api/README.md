@@ -2,6 +2,16 @@
 
 Esta API utiliza **Fastify** e **Prisma**. Todas as rotas retornam JSON.
 
+## 🌐 Base URL & Versionamento
+
+Todas as rotas são versionadas sob o prefixo **`/api/v1`**.
+
+```
+https://api.fubika.com.br/api/v1/...
+```
+
+O health check fica fora do versionamento, em `GET /ping`.
+
 ---
 
 ## ⚠️ Erros
@@ -47,9 +57,19 @@ A maioria das rotas requer autenticação via um dos dois métodos:
 
 ---
 
-## 👤 Usuários — `/api/user`
+## 🚦 Rate Limiting
 
-### `POST /api/user/register`
+A API aplica um limite global de requisições por IP (padrão `100/min`, configurável via
+`RATE_LIMIT_MAX` / `RATE_LIMIT_WINDOW_MS`). As rotas de autenticação (`/login`, `/register`)
+têm um limite mais estrito (`10/min`). Ao exceder, a API responde com `429 Too Many Requests`.
+
+Cabeçalhos de segurança são aplicados via `@fastify/helmet`.
+
+---
+
+## 👤 Usuários — `/api/v1/user`
+
+### `POST /api/v1/user/register`
 Cria uma nova conta. Requer um código de convite válido.
 
 **Autenticação:** Não necessária.
@@ -87,7 +107,7 @@ Cria uma nova conta. Requer um código de convite válido.
 
 ---
 
-### `POST /api/user/login`
+### `POST /api/v1/user/login`
 Autentica o usuário e retorna o token JWT.
 
 **Autenticação:** Não necessária.
@@ -112,18 +132,18 @@ Autentica o usuário e retorna o token JWT.
 
 ---
 
-### `GET /api/user/me`
+### `GET /api/v1/user/me`
 Retorna o perfil do usuário autenticado.
 
 **Autenticação:** Obrigatória.
 
-**Resposta `200`:** Mesmo formato de `GET /api/user/:id`.
+**Resposta `200`:** Mesmo formato de `GET /api/v1/user/:id`.
 
 **Erros:** `401`, `404`
 
 ---
 
-### `DELETE /api/user/me`
+### `DELETE /api/v1/user/me`
 Deleta permanentemente a própria conta. Remove scores e stats associados.
 
 **Autenticação:** Obrigatória.
@@ -146,7 +166,7 @@ Deleta permanentemente a própria conta. Remove scores e stats associados.
 
 ---
 
-### `GET /api/user/count`
+### `GET /api/v1/user/count`
 Retorna contagem de usuários totais e online.
 
 **Autenticação:** Não necessária.
@@ -161,7 +181,7 @@ Retorna contagem de usuários totais e online.
 
 ---
 
-### `GET /api/user/:id`
+### `GET /api/v1/user/:id`
 Busca o perfil completo de um usuário. O parâmetro `:id` aceita:
 - ID numérico do jogo (ex: `3`)
 - ID do Discord (string numérica com mais de 15 dígitos)
@@ -206,7 +226,7 @@ Busca o perfil completo de um usuário. O parâmetro `:id` aceita:
 
 ---
 
-### `GET /api/user/:id/recent`
+### `GET /api/v1/user/:id/recent`
 Busca as scores recentes de um usuário. Aceita os mesmos tipos de `:id` da rota acima.
 
 **Autenticação:** Obrigatória.
@@ -246,7 +266,7 @@ Busca as scores recentes de um usuário. Aceita os mesmos tipos de `:id` da rota
 
 ---
 
-### `GET /api/user/:id/history`
+### `GET /api/v1/user/:id/history`
 Retorna o histórico de rank do usuário ao longo do tempo.
 
 **Autenticação:** Obrigatória.
@@ -278,7 +298,7 @@ Retorna o histórico de rank do usuário ao longo do tempo.
 
 ---
 
-### `GET /api/user/:id/map/:mapId`
+### `GET /api/v1/user/:id/map/:mapId`
 Busca a melhor score de um usuário em um mapa específico.
 
 **Autenticação:** Obrigatória.
@@ -327,7 +347,7 @@ Busca a melhor score de um usuário em um mapa específico.
 
 ---
 
-### `POST /api/user/avatar`
+### `POST /api/v1/user/avatar`
 Faz upload da foto de perfil de um usuário via Discord ID.
 
 **Autenticação:** Obrigatória + Discord Ownership.
@@ -352,11 +372,11 @@ Faz upload da foto de perfil de um usuário via Discord ID.
 
 ---
 
-## 🎵 Beatmaps — `/api/beatmap`
+## 🎵 Beatmaps — `/api/v1/beatmap`
 
 **Autenticação:** Obrigatória em todas as rotas.
 
-### `GET /api/beatmap/:id`
+### `GET /api/v1/beatmap/:id`
 Busca informações de uma dificuldade e sua leaderboard local.
 
 **Resposta `200`:**
@@ -395,7 +415,7 @@ Busca informações de uma dificuldade e sua leaderboard local.
 
 ---
 
-### `GET /api/beatmap/c/:id`
+### `GET /api/v1/beatmap/c/:id`
 Busca todas as dificuldades de um beatmapset.
 
 **Resposta `200`:**
@@ -433,11 +453,11 @@ Busca todas as dificuldades de um beatmapset.
 
 ---
 
-## 🏆 Ranking — `/api/ranking`
+## 🏆 Ranking — `/api/v1/ranking`
 
 **Autenticação:** Obrigatória.
 
-### `GET /api/ranking/global`
+### `GET /api/v1/ranking/global`
 Retorna o leaderboard global paginado.
 
 **Query parameters:**
@@ -477,11 +497,11 @@ Retorna o leaderboard global paginado.
 
 ---
 
-## 🤖 Discord — `/api/discord`
+## 🤖 Discord — `/api/v1/discord`
 
 **Autenticação:** Não necessária.
 
-### `POST /api/discord/createlink`
+### `POST /api/v1/discord/createlink`
 Inicia o vínculo entre conta Discord e conta osu!. Envia um código de 6 caracteres via chat in-game.
 
 **Body:**
@@ -504,7 +524,7 @@ Inicia o vínculo entre conta Discord e conta osu!. Envia um código de 6 caract
 
 ---
 
-### `POST /api/discord/checklink`
+### `POST /api/v1/discord/checklink`
 Confirma o código recebido in-game e finaliza o vínculo.
 
 **Body:**
@@ -527,9 +547,9 @@ Confirma o código recebido in-game e finaliza o vínculo.
 
 ---
 
-## 🎟️ Convites — `/api/invite`
+## 🎟️ Convites — `/api/v1/invite`
 
-### `POST /api/invite/create`
+### `POST /api/v1/invite/create`
 Gera um novo código de convite.
 
 **Autenticação:** Obrigatória + Discord Ownership.
@@ -559,9 +579,9 @@ O campo `id` aceita tanto string (Discord ID) quanto número (ID do jogo).
 
 ---
 
-## 🔑 API Keys — `/api/key`
+## 🔑 API Keys — `/api/v1/key`
 
-### `POST /api/key/`
+### `POST /api/v1/key/`
 Gera uma nova API Key vinculada a um usuário alvo.
 
 **Autenticação:** Obrigatória + Discord Ownership.
@@ -597,11 +617,11 @@ Gera uma nova API Key vinculada a um usuário alvo.
 
 ---
 
-## 🛡️ Admin — `/api/admin`
+## 🛡️ Admin — `/api/v1/admin`
 
 Todas as rotas requerem autenticação, privilégio de admin e Discord Ownership.
 
-### `POST /api/admin/ban`
+### `POST /api/v1/admin/ban`
 Bane um jogador, setando `priv = 0`.
 
 **Autenticação:** Obrigatória + Admin + Discord Ownership.
@@ -625,7 +645,7 @@ Bane um jogador, setando `priv = 0`.
 
 ---
 
-### `POST /api/admin/giveadmin`
+### `POST /api/v1/admin/giveadmin`
 Promove um jogador a administrador (`priv = 1048575`). Exclusivo para o dono do servidor (verificado via `OWNER_DISCORD_ID`).
 
 **Autenticação:** Obrigatória + Discord Ownership.

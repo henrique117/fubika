@@ -1,0 +1,4 @@
+# Pasta de blocos extras do Caddy, montada em /etc/caddy/extras.
+# Vazia em dev e staging — o `import /etc/caddy/extras/*.caddyfile` com glob
+# vazio é válido no Caddy (apenas registra um aviso no log).
+# Em produção, o docker-compose.prod.yml monta infra/caddy/extras-prod no lugar.

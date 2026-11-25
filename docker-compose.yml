@@ -1,0 +1,265 @@
+# ==============================================================================
+# Fubika — stack base (compartilhada por staging e produção)
+# ==============================================================================
+#
+# Os arquivos compose vivem na RAIZ do repositório de propósito: assim o
+# "project directory" do Docker Compose é a raiz, e o `.env` único da raiz é
+# lido automaticamente, sem precisar de `--env-file` em nenhum comando.
+#
+# REDES
+#   internal ......... rede padrão de todos os serviços. NÃO usa `internal: true`
+#                      de propósito: API, bot e bancho precisam de saída para a
+#                      internet (osu! API, Discord, Groq, mirrors de mapas) e o
+#                      Caddy precisa falar com o Let's Encrypt. O isolamento vem
+#                      de NÃO publicar portas no host, não de bloquear egress.
+#   public_proxy ..... rede externa, só em produção (docker-compose.prod.yml),
+#                      onde vivem os projetos de terceiros (tickets/avaliação).
+#
+# PORTAS
+#   Só o Caddy publica portas (80, 443, 443/udp). MySQL, Redis, API, bancho e
+#   web ficam acessíveis apenas dentro da rede `internal`.
+#   O staging publica MySQL e Redis em 127.0.0.1 (ver docker-compose.staging.yml)
+#   exclusivamente para o túnel SSH de desenvolvimento.
+#
+# VARIÁVEIS
+#   Cada serviço recebe só o que usa, via `environment:` explícito. A única
+#   exceção é o bancho, que lê dezenas de configs de jogo e por isso recebe o
+#   `.env` inteiro via `env_file`.
+# ==============================================================================
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ---------------------------------------------------------------- MySQL -----
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:?defina DB_ROOT_PASS no .env}
+      # root só existe via socket local do container: não há root@'%'.
+      MYSQL_ROOT_HOST: localhost
+      MYSQL_DATABASE: ${DB_NAME:?defina DB_NAME no .env}
+      MYSQL_USER: ${DB_USER:?defina DB_USER no .env}
+      MYSQL_PASSWORD: ${DB_PASS:?defina DB_PASS no .env}
+    volumes:
+      - ./volumes/mysql:/var/lib/mysql
+      - ./infra/mysql/init:/docker-entrypoint-initdb.d:ro
+      - ./infra/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    healthcheck:
+      # Sem senha na linha de comando: em acesso negado o mysqladmin ainda sai
+      # com código 0 (servidor vivo) e só falha quando o servidor está fora.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    networks: [internal]
+
+  # ---------------------------------------------------------------- Redis -----
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    logging: *default-logging
+    command:
+      [
+        "redis-server",
+        "--requirepass", "${REDIS_PASS:?defina REDIS_PASS no .env}",
+        "--appendonly", "yes",
+      ]
+    environment:
+      # Usado só pelo redis-cli do healthcheck (evita senha na linha de comando).
+      REDISCLI_AUTH: ${REDIS_PASS:?defina REDIS_PASS no .env}
+    volumes:
+      - ./volumes/redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks: [internal]
+
+  # --------------------------------------------------------------- Bancho -----
+  bancho:
+    image: ghcr.io/henrique117/fubika-bancho:${TAG:-latest}
+    build:
+      context: ./services/bancho
+    restart: unless-stopped
+    logging: *default-logging
+    init: true
+    tty: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Exceção consciente ao "só o que usa": o bancho lê dezenas de configs de
+    # jogo (app/settings.py), então recebe o .env da raiz inteiro.
+    env_file:
+      - .env
+    environment:
+      # Valores internos do Docker: fixos aqui, fora do .env.
+      APP_HOST: 0.0.0.0
+      APP_PORT: "10000"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_USER: default
+      REDIS_PASS: ${REDIS_PASS}
+      REDIS_DB: "0"
+      DOMAIN: ${DOMAIN:?defina DOMAIN no .env}
+      # Links do menu in-game derivados do domínio do ambiente (sobrescrevíveis).
+      MENU_ICON_URL: ${MENU_ICON_URL:-https://assets.${DOMAIN}/logo.png}
+      MENU_ONCLICK_URL: ${MENU_ONCLICK_URL:-https://${DOMAIN}}
+    volumes:
+      - ./volumes/avatars:/srv/root/.data/avatars
+      - ./volumes/replays:/srv/root/.data/osr
+      - ./volumes/maps:/srv/root/.data/osu
+      - ./volumes/logs:/srv/root/.data/logs
+      - ./volumes/assets:/srv/root/.data/assets
+      # Screenshots (osu! Shift+F12). Não existia volume para .data/ss: as
+      # imagens viviam só na camada do container e sumiam a cada recreate.
+      - ./volumes/screenshots:/srv/root/.data/ss
+    networks: [internal]
+
+  # ------------------------------------------------------------------ API -----
+  api:
+    image: ghcr.io/henrique117/fubika-api:${TAG:-latest}
+    build:
+      context: ./services/api
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      API_HOST: 0.0.0.0
+      API_PORT: "3000"
+      # DATABASE_URL/REDIS_URL são montadas aqui a partir de DB_*/REDIS_PASS.
+      DATABASE_URL: mysql://${DB_USER}:${DB_PASS}@mysql:3306/${DB_NAME}
+      SHADOW_DATABASE_URL: mysql://${DB_USER}:${DB_PASS}@mysql:3306/${DB_NAME}_shadow
+      REDIS_URL: redis://default:${REDIS_PASS}@redis:6379/0
+      # Nada de DB_HOST/DB_USER/DB_PASS/DB_NAME soltas aqui: a API não lê
+      # nenhuma delas (o único consumidor era o mysqldump do cron de backup, que
+      # virou serviço próprio). A conexão é toda pela DATABASE_URL acima.
+      # DOMAIN é usada para montar as URLs de avatar/assets nas respostas
+      # (src/modules/*/*.service.ts: https://a.${DOMAIN}/<id>).
+      DOMAIN: ${DOMAIN}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      OWNER_DISCORD_ID: ${OWNER_DISCORD_ID}
+      # OSU_API_KEY (a chave v1) não entra aqui: quem a usa é o bancho.
+      # A API fala com a API v2 do osu! via client id/secret.
+      OSU_CLIENT_ID: ${OSU_CLIENT_ID}
+      OSU_CLIENT_SECRET: ${OSU_CLIENT_SECRET}
+    volumes:
+      - ./volumes/avatars:/app/.data/avatars
+    networks: [internal]
+
+  # ------------------------------------------------------------------ Web -----
+  web:
+    image: ghcr.io/henrique117/fubika-web:${TAG:-latest}
+    build:
+      context: ./services/web
+    restart: unless-stopped
+    logging: *default-logging
+    # Sem variáveis: a mesma imagem roda em staging e produção porque o
+    # front deriva os domínios de window.location (services/web/src/config.ts).
+    networks: [internal]
+
+  # ------------------------------------------------------------------ Bot -----
+  bot:
+    image: ghcr.io/henrique117/fubika-bot:${TAG:-latest}
+    build:
+      context: ./services/bot
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      DISCORD_TOKEN: ${DISCORD_TOKEN:?defina DISCORD_TOKEN no .env}
+      CLIENT_ID: ${CLIENT_ID:?defina CLIENT_ID no .env}
+      # Vazio = registra os comandos globalmente (produção/staging).
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID:-}
+      # URL base da API, sem /api — o cliente acrescenta /api/v1.
+      API_URL: http://api:3000
+      API_KEY: ${API_KEY}
+      REDIS_URL: redis://default:${REDIS_PASS}@redis:6379/0
+      PUBLIC_DOMAIN: ${DOMAIN}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+    networks: [internal]
+
+  # ---------------------------------------------------------------- Caddy -----
+  caddy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    logging: *default-logging
+    # Único serviço que publica portas no host.
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?defina DOMAIN no .env}
+      ACME_EMAIL: ${ACME_EMAIL:?defina ACME_EMAIL no .env}
+      # Vazio em staging/produção (ACME real); "tls internal" em dev.
+      TLS_OPTS: ${TLS_OPTS:-}
+      API_PORT: "3000"
+      APP_PORT: "10000"
+      WEB_PORT: "8080"
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Blocos extras opcionais; em produção o override troca por extras-prod.
+      - ./infra/caddy/extras:/etc/caddy/extras:ro
+      - ./volumes/caddy_data:/data
+      - ./volumes/caddy_config:/config
+      - ./volumes/avatars:/srv/avatars:ro
+      - ./volumes/assets:/srv/assets:ro
+    depends_on:
+      - web
+      - api
+      - bancho
+    networks: [internal]
+
+  # --------------------------------------------------------------- Backup -----
+  backup:
+    image: ghcr.io/henrique117/fubika-backup:${TAG:-latest}
+    build:
+      context: ./infra/backup
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      BACKUP_HOUR: ${BACKUP_HOUR:-04}
+      RETENTION_DAYS: ${RETENTION_DAYS:-7}
+      TZ: ${TZ:-America/Sao_Paulo}
+    volumes:
+      - ./backups:/backups
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge

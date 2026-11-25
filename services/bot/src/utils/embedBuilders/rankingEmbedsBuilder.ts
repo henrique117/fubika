@@ -27,13 +27,13 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
     const embeds: EmbedBuilder[] = []
     const playersPerPage = 20
 
-    // Se não tiver jogadores
+    
     if (!players || players.length === 0) {
         const embed = new EmbedBuilder()
             .setAuthor({
                 name: `Performance Ranking for ${getModeName(mode)}`,
                 iconURL: URLS.fubikaIcon,
-                url: 'https://fubika.com.br/ranking'
+                url: URLS.ranking
             })
             .setColor(COLORS.blue)
             .setDescription("Ainda não há jogadores neste ranking!")
@@ -81,7 +81,7 @@ export default async function leaderboardEmbedsBuilder(players: Array<IPlayer>, 
         const embed = new EmbedBuilder()
             .setAuthor({
                 name: `Performance Ranking for ${getModeName(mode)}`,
-                url: 'https://fubika.com.br/ranking',
+                url: URLS.ranking,
                 iconURL: URLS.fubikaIcon
             })
             .setColor(COLORS.blue)

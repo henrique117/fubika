@@ -1,6 +1,6 @@
 import { EmbedBuilder, time, TimestampStyles } from "discord.js"
 import { IBeatmap } from "../../interfaces/interfaces.export"
-import { URLS, EMOJIS, COLORS } from "../../constants"
+import { URLS, EMOJIS, COLORS, beatmapUrl } from "../../constants"
 import { scoreGradeToEmoji } from "../utils.export"
 
 export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promise<Array<EmbedBuilder>> {
@@ -12,13 +12,13 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
     const embeds: EmbedBuilder[] = []
     const scoresPerPage = 10
 
-    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const mapUrl = beatmapUrl(beatmap.beatmap_id)
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
-    if (!beatmap.scores) { // Caso não haja o array de scores
+    if (!beatmap.scores) { 
         throw new Error("Scores data are missing")
 
-    }else if (beatmap.scores.length === 0) { // Caso o array de scores seja vazio
+    }else if (beatmap.scores.length === 0) { 
 
         const embed = new EmbedBuilder()
         .setAuthor({ 
@@ -53,7 +53,7 @@ export default async function leaderboardEmbedsBuilder(beatmap: IBeatmap): Promi
             const displayMods = score.mods === '' ? '' : `+${score.mods}`
             const displayMiss = score.nmiss > 0 ? `${score.nmiss}${EMOJIS.miss}` : ''
             // Linha 1: #Número Usuário: Score [Combo] Mods  VVV **[${score.player.name}](${score.player.url}):** <--- Mudar
-            const line1 = `**#${position}** **${score.player.name}:** ${score.score.toLocaleString('en-US')} [**${score.max_combo}x**/${beatmap.max_combo}x] **${displayMods} **`
+            const line1 = `**#${position}** **${score.player.name}:** ${score.score.toLocaleString('en-US')} [**${score.max_combo}x**/${beatmap.max_combo}x] **${displayMods}**`
             // Linha 2: Rank PP/maxPP • Acc • Miss Tempo 
             const line2 = `${scoreGradeToEmoji(score.grade)} **${score.pp.toLocaleString('en-US', options)}pp** • ${score.acc.toLocaleString('en-US', options)}% • ${displayMiss}${time(new Date(score.play_time), TimestampStyles.RelativeTime)}`
             // Junta as duas linhas

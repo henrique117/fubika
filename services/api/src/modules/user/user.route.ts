@@ -21,16 +21,23 @@ import {
     DeleteUserInput,
     deleteUserSchema
 } from "./user.schema";
+import { AUTH_RATE_LIMIT } from "../../config/constants";
+
+const authRateLimit = {
+    rateLimit: { max: AUTH_RATE_LIMIT.max, timeWindow: AUTH_RATE_LIMIT.windowMs },
+};
 
 const userRoutes = async (server: FastifyInstance) => {
-    
+
     server.post<{ Body: CreateUserInput }>('/register', {
+        config: authRateLimit,
         schema: {
             body: createUserInputSchema
         }
     }, handleUserRegister);
 
     server.post<{ Body: LoginUserInput }>('/login', {
+        config: authRateLimit,
         schema: {
             body: loginUserInputSchema
         }

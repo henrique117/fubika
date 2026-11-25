@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import style from './style.module.css'
 import { WrapperComponent } from '../../components/components.export'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../../services/api'
 
-//img stuff
+
 import catHead from '/cat_head.png'
 import follow from '/follow.svg'
 import following from '/following.svg'
@@ -37,14 +37,13 @@ export interface IPlayer {
 const Profile: React.FC = () => {
     const [loading, setLoading] = useState(true)
     const [player, setPlayer] = useState<IPlayer | null>(null);
-    const top10Maps = player?.top_200.reduce((acc: any[], curr: any) => {
-        acc.push(curr);
-        return acc.sort((a, b) => b.pp - a.pp).slice(0, 10);
-    }, []) || [];
+    const top10Maps = useMemo(() => {
+        if (!player?.top_200) return [];
+        return [...player.top_200].sort((a, b) => b.pp - a.pp).slice(0, 10);
+    }, [player?.top_200]);
 
     const id = useParams<{ id: string }>();
     const userId = Number(id.id)
-    console.log("🚀 ~ Profile ~ userId:", userId)
 
     const getUser = async (id: number) => {
         setLoading(true)
@@ -73,7 +72,7 @@ const Profile: React.FC = () => {
     }, [userId]);
 
     const globalRank = player?.rank
-    const getRankClass = (rank: any) => {
+    const getRankClass = (rank: number) => {
         if (rank >= 50 && rank <= 100) return style.rankBronze;
         if (rank >= 20 && rank < 50) return style.rankPrata;
         if (rank >= 6 && rank < 20) return style.rankOuro;
@@ -99,7 +98,7 @@ const Profile: React.FC = () => {
                                     <div className={style.rankArea}>
                                         <div>
                                             <span style={{ fontSize: '8px', color: '#FFFFFF' }}>Ranque Global</span><br />
-                                            <span className={`${style.rankNumber} ${getRankClass(globalRank)}`}>#{globalRank}</span>
+                                            <span className={`${style.rankNumber} ${getRankClass(globalRank ?? 0)}`}>#{globalRank}</span>
                                         </div>
                                         <div>
                                             <span style={{ paddingLeft: '5px', fontSize: '8px', color: '#FFFFFF' }}>Ranque Estadual</span><br />
@@ -119,7 +118,6 @@ const Profile: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className={style.profileGraph}></div>
                         <div className={style.profileInfos}>
                             <div className={style.profileMaps}>
                                 {top10Maps.map((e: any, idx: number) => (
@@ -192,14 +190,8 @@ const Profile: React.FC = () => {
 
                                     </div>
                                     <div className={style.catImg}>
-                                        <img src={catHead} style={{ height: '120px', width: '160px' }} />
+                                        <img src={catHead} alt="" />
                                     </div>
-                                </div>
-                                <div className="profileTop">
-
-                                </div>
-                                <div className="profileTop">
-
                                 </div>
 
                             </div>

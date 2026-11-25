@@ -96,3 +96,57 @@
     height: 50px;
     position: relative;
 }
+
+.pageWrapper {
+    animation: fadeIn 0.35s ease-out both;
+}
+
+.infoCard {
+    animation: fadeIn 0.4s ease-out 0.1s both;
+}
+
+.buttonsRow {
+    animation: fadeIn 0.4s ease-out 0.2s both;
+}
+
+@media (max-width: 768px) {
+    .cardHeader {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .logoSvg {
+        width: 60%;
+        align-self: center;
+    }
+
+    .description {
+        padding-left: 0;
+        font-size: 15px;
+    }
+
+    .stats {
+        padding-left: 0;
+        flex-wrap: wrap;
+    }
+
+    .infoCard {
+        margin-top: 85px;
+    }
+}
+
+@media (max-width: 480px) {
+    .buttonsRow {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btnWrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .centerContent {
+        padding: 10px;
+    }
+}

@@ -108,3 +108,47 @@
     padding: 40px;
     color: #666;
 }
+
+.col300, .col100, .col50, .colX, .colMods, .colCombo {}
+
+.pageWrapper {
+    animation: fadeIn 0.4s ease-out both;
+}
+
+@media (max-width: 768px) {
+    .gridStructure {
+        grid-template-columns: 40px 1fr 70px 80px 90px;
+        gap: 6px;
+        padding: 0 12px;
+    }
+
+    .col300,
+    .col100,
+    .col50,
+    .colX {
+        display: none;
+    }
+
+    .title {
+        font-size: 22px;
+    }
+
+    .tableCard {
+        padding: 20px 10px;
+    }
+
+    .playerRow {
+        height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .gridStructure {
+        grid-template-columns: 35px 1fr 65px 70px;
+    }
+
+    .colMods,
+    .colCombo {
+        display: none;
+    }
+}

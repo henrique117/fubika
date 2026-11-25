@@ -1,15 +1,15 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, Message, AutocompleteInteraction } from 'discord.js';
 
 export default interface ICommand {
-    data: SlashCommandBuilder | any // Dados do SlashCommand
+    data: SlashCommandBuilder | any 
     
-    aliases?: string[]; // Configs dos comandos de texto
+    aliases?: string[]; 
     
-    isAdmin?: boolean; // Flag para bloquear no MCP
+    isAdmin?: boolean; 
     
-    isDestructive?: boolean; // Flag para comandos destrutivos
+    isDestructive?: boolean; 
     
-    execute(interaction: ChatInputCommandInteraction): Promise<void> // Execução do Slash Command
+    execute(interaction: ChatInputCommandInteraction): Promise<void> 
     
     executePrefix?(message: Message, index?: number | null, args?: string[]): Promise<void>
     

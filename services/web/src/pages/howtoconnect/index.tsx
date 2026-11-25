@@ -2,6 +2,7 @@ import React from 'react'
 import style from './style.module.css'
 import { WrapperComponent } from '../../components/components.export'
 import { Link } from 'react-router-dom'
+import { BASE_DOMAIN } from '../../config'
 
 const HowToConnect: React.FC = () => {
     return (
@@ -22,7 +23,7 @@ const HowToConnect: React.FC = () => {
                             <li>Localize o arquivo do osu! .exe em seu computador;</li>
                             <li>Clique com o botão direito sobre o osu! .exe e duplique o osu! .exe;</li>
                             <li>Após duplicar o arquivo, clique como botão direito e vá em propriedades;</li>
-                            <li>Nas propriedades adicione “-devserver fubika.com.br” no destino (igual ao exemplo abaixo);</li>
+                            <li>Nas propriedades adicione “-devserver {BASE_DOMAIN}” no destino (igual ao exemplo abaixo);</li>
                         </ul>
                         <img src="example.png" alt="" className={style.image} />
                         <ul className={style.dashedList}>

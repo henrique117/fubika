@@ -1,11 +1,11 @@
-/**
- * Queue Service - Gerencia fila individual por usuário + limite global de concorrência
- * 
- * Estrutura:
- * - Cada usuário tem sua própria queue (FIFO)
- * - Máximo de requisições simultâneas ao Groq (global)
- * - Quando uma requisição termina, processa a próxima da fila
- */
+
+
+
+
+
+
+
+
 
 interface QueuedMessage {
     userId: string
@@ -18,18 +18,18 @@ interface QueuedMessage {
 
 class MessageQueue {
     private userQueues: Map<string, QueuedMessage[]> = new Map()
-    private activeRequests: Set<string> = new Set() // userId da requisição ativa
+    private activeRequests: Set<string> = new Set() 
     private maxConcurrency: number = 10
-    private timeout: number = 10000 // 10 segundos
+    private timeout: number = 10000 
 
     constructor(maxConcurrency: number = 10, timeout: number = 10000) {
         this.maxConcurrency = maxConcurrency
         this.timeout = timeout
     }
 
-    /**
-     * Enfileira uma mensagem para processamento
-     */
+    
+
+
     enqueueMessage(userId: string, content: string, messageId: string, channelId: string): Promise<any> {
         return new Promise((resolve, reject) => {
             const queuedMessage: QueuedMessage = {
@@ -47,17 +47,17 @@ class MessageQueue {
 
             this.userQueues.get(userId)!.push(queuedMessage)
 
-            // Tenta processar imediatamente
+            
             this.processQueues()
         })
     }
 
-    /**
-     * Processa as filas respeitando limite global
-     */
+    
+
+
     private async processQueues() {
         while (this.activeRequests.size < this.maxConcurrency) {
-            // Encontra próximo usuário com mensagens na fila
+            
             let userWithMessages: string | null = null
 
             for (const [userId, queue] of this.userQueues) {
@@ -78,27 +78,27 @@ class MessageQueue {
                 this.userQueues.delete(userWithMessages)
             }
 
-            // Marca como ativa e processa
+            
             this.activeRequests.add(message.userId)
 
             try {
-                // Aqui será chamado o processamento da mensagem com Groq
-                // Por enquanto, apenas marca como pronta
+                
+                
                 const result = await this.processMessageWithTimeout(message)
                 message.resolve(result)
             } catch (error) {
                 message.reject(error)
             } finally {
                 this.activeRequests.delete(message.userId)
-                // Continua processando próximas mensagens
+                
                 this.processQueues()
             }
         }
     }
 
-    /**
-     * Processa uma mensagem com timeout
-     */
+    
+
+
     private processMessageWithTimeout(message: QueuedMessage): Promise<any> {
         return new Promise((resolve, reject) => {
             const timeoutId = setTimeout(() => {

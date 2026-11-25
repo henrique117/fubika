@@ -43,7 +43,7 @@ export default {
             const dmChannel = await interaction.user.createDM()
             await dmChannel.send('**Insira seu código:**')
 
-            // --- Loop coletor do postCheckLink ---
+            
             let tries = 0
             const maxTries = 3
             let sucess = false

@@ -13,6 +13,20 @@
     --color-background: #2C2825;
     --color-background-dark: #191715;
     --color-background-light: #655A50;
+    --vh-full: 100vh;
+}
+
+@supports (height: 100dvh) {
+    :root { --vh-full: 100dvh; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
 
 @font-face {

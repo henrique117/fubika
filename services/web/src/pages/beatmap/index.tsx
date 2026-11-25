@@ -5,7 +5,7 @@ import { WrapperComponent, DiffIconComponent } from '../../components/components
 import SuccessRate from '../../components/ui/sucessrate';
 import { api } from '../../services/api';
 
-//img stuff
+
 import clock from '/clock.svg'
 import note from '/note.svg'
 import sliders from '/sliders.svg'

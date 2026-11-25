@@ -1,5 +1,5 @@
 import { Client, EmbedBuilder, TextChannel } from 'discord.js'
-import { COLORS, GUILD_CONFIG, URLS } from '../constants'
+import { beatmapUrl, COLORS, GUILD_CONFIG, URLS } from '../constants'
 import { getBeatmap } from '../services/apiCalls'
 
 const formatNum = (val: any, options?: Intl.NumberFormatOptions) => {
@@ -27,7 +27,7 @@ export async function sendSnipeEmbed(discordClient: Client, data: any) {
         const beatmap = await getBeatmap(data.beatmap_id)
 
         const options = { maximumFractionDigits: 2 }
-        const mapUrl = `https://fubika.com.br/beatmap/${data.beatmap_id}`
+        const mapUrl = beatmapUrl(data.beatmap_id)
         const weapon = "︻╦デ╤━╼"
         const hiddenUrl = `[\u2800](https://osu.ppy.sh/b/${data.beatmap_id})`
 
@@ -88,7 +88,7 @@ export async function sendTop1Embed(discordClient: Client, data: any) {
     try {
         const beatmap = await getBeatmap(data.beatmap_id)
         const options = { maximumFractionDigits: 2 }
-        const mapUrl = `https://fubika.com.br/beatmap/${data.beatmap_id}`
+        const mapUrl = beatmapUrl(data.beatmap_id)
         const hiddenUrl = `[\u2800](https://osu.ppy.sh/b/${data.beatmap_id})`
 
         const embed = new EmbedBuilder()

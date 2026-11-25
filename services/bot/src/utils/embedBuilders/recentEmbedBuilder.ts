@@ -1,6 +1,6 @@
 import { EmbedBuilder, time, TimestampStyles } from "discord.js"
 import { IPlayer, IScore } from "../../interfaces/interfaces.export"
-import { URLS, EMOJIS, COLORS } from "../../constants"
+import { URLS, EMOJIS, COLORS, beatmapUrl } from "../../constants"
 import { scoreGradeToEmoji, applyModsToStats, formatTime, capitalizeFirstLetter } from "../utils.export"
 
 export default async function recentEmbedBuilder(player: IPlayer, score: IScore): Promise<EmbedBuilder> {
@@ -15,7 +15,7 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
     const beatmap = score.beatmap
     const { bpm, length } = applyModsToStats(beatmap.bpm, beatmap.total_length, score.mods)
     
-    // DEFINIR DEPOIS COMO VÃO SER CALCULADOS CS, AR, OD, HP DO SCORE
+    
     const scoreRankPosition = player.top_200
         ? player.top_200.filter(s => Number(s.pp) > Number(score.pp)).length + 1
         : 0
@@ -28,7 +28,7 @@ export default async function recentEmbedBuilder(player: IPlayer, score: IScore)
         ? `~~${score.pp.toLocaleString('en-US', options)}PP~~` // Crossed
         : `${score.pp.toLocaleString('en-US', options)}PP`
 
-    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const mapUrl = beatmapUrl(beatmap.beatmap_id)
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()

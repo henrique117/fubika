@@ -80,7 +80,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    /* justify-content: space-evenly; */
+    
     margin-bottom: 5px;
 }
 
@@ -129,7 +129,7 @@
     padding: 8.5px 10px;
     text-align: center;
     background-color: rgba(25, 23, 21, 0.85);
-    /* Figma */
+    
     font-size: 14px;
     font-weight: bold;
     border-radius: 10px;
@@ -144,7 +144,7 @@
 .mapSucess {
     width: 100%;
     background-color: rgba(25, 23, 21, 0.85);
-    /* Figma */
+    
     border-radius: 10px;
     margin-bottom: 3px;
 }
@@ -258,7 +258,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    /* width: 17%; */
+    
 }
 
 .mapNumbers div img {
@@ -623,7 +623,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-evenly;
-        /* width: 17%; */
+        
     }
 
     .mapNumbers div img {

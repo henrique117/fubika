@@ -1,0 +1,34 @@
+# ==============================================================================
+# Contexto de build do web
+# ==============================================================================
+# Sem este arquivo o 'COPY . .' do Dockerfile levava ~117 MB de node_modules do
+# host (e qualquer .env) para dentro da imagem. O build precisa só de:
+# package*.json, tsconfig*.json, index.html, vite.config.ts, src/ e public/.
+# ==============================================================================
+
+node_modules
+dist
+dist-ssr
+
+# Segredos: nunca entram na imagem. (O .env de verdade fica na raiz do repo,
+# fora deste contexto, mas a regra fica aqui como trava.)
+.env
+.env.*
+
+.git
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+
+# 'npm run build' é 'tsc -b && vite build' — não roda lint, e eslint.config.js
+# não entra em nenhum tsconfig (tsconfig.app.json inclui src/,
+# tsconfig.node.json inclui vite.config.ts). Os tsconfig*.json SÃO necessários.
+eslint.config.js
+
+*.tsbuildinfo
+*.log
+logs
+.vscode
+.idea
+.DS_Store

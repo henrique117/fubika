@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "tsx watch --env-file=../../.env src/server.ts",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -16,8 +16,10 @@
   "type": "commonjs",
   "dependencies": {
     "@fastify/cors": "^11.2.0",
+    "@fastify/helmet": "^13.0.2",
     "@fastify/jwt": "^10.0.0",
     "@fastify/multipart": "^9.4.0",
+    "@fastify/rate-limit": "^11.0.0",
     "@prisma/client": "5.22.0",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
@@ -26,6 +28,8 @@
     "fastify-type-provider-zod": "^6.1.0",
     "ioredis": "^5.8.2",
     "node-cron": "^4.2.1",
+    "pino": "^10.3.1",
+    "prisma": "5.22.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
@@ -33,13 +37,16 @@
     "@types/node": "^24.10.1",
     "@types/node-cron": "^3.0.11",
     "@vitest/coverage-v8": "^4.0.18",
-    "prisma": "^5.22.0",
-    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts",
-    "binaryTargets": ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+    "seed": "tsx prisma/seed.ts",
+    "binaryTargets": [
+      "native",
+      "debian-openssl-3.0.x",
+      "linux-musl-openssl-3.0.x"
+    ]
   }
 }

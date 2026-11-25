@@ -6,22 +6,30 @@ import osuApiClient from "../../utils/axios";
 import { getModString } from "../../utils/getModString";
 import { SearchBeatmaps } from "./beatmap.schema";
 import { Errors } from "../../utils/errorHandler";
+import { env } from "../../config/env";
+import { logger } from "../../utils/logger";
+import {
+    OsuBeatmap,
+    OsuBeatmapset,
+    OsuBeatmapsListResponse,
+} from "../../interfaces/osuApi.interface";
+import { BeatmapScoreRow } from "../../interfaces/scoreRow.interface";
 
-const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
+const mapOsuBeatmapToDomain = (data: OsuBeatmap): IBeatmap => {
     return {
-        artist: data.beatmapset?.artist || 'Desconhecido',
+        artist: data.beatmapset?.artist || "Desconhecido",
         beatmap_id: data.id,
         beatmapset_id: data.beatmapset_id,
         beatmap_md5: data.checksum,
-        title: data.beatmapset?.title || 'Sem título', 
+        title: data.beatmapset?.title || "Sem título",
         mode: data.mode,
         mode_int: data.mode_int,
         status: data.status,
         total_length: data.total_length,
         author_id: data.user_id,
-        author_name: data.beatmapset?.creator || 'Desconhecido',
-        cover: data.beatmapset?.covers?.cover || '',
-        thumbnail: data.beatmapset?.covers?.['list@2x'] || '',
+        author_name: data.beatmapset?.creator || "Desconhecido",
+        cover: data.beatmapset?.covers?.cover || "",
+        thumbnail: data.beatmapset?.covers?.["list@2x"] || "",
         diff: data.version,
         star_rating: data.difficulty_rating,
         bpm: data.bpm,
@@ -34,32 +42,32 @@ const mapOsuBeatmapToDomain = (data: any): IBeatmap => {
         count_sliders: data.count_sliders,
         passcount: data.passcount,
         playcount: data.playcount,
-        scores: []
+        scores: [],
     };
 };
 
-const mapOsuBeatmapsetToDomain = (data: any): IBeatmapset => {
+const mapOsuBeatmapsetToDomain = (data: OsuBeatmapset): IBeatmapset => {
     return {
         beatmapset_id: data.id,
         playcount: data.play_count,
         artist: data.artist,
         favourite_count: data.favourite_count,
-        cover: data.covers?.cover || '',
-        thumbnail: data.covers?.['list@2x'] || '',
+        cover: data.covers?.cover || "",
+        thumbnail: data.covers?.["list@2x"] || "",
         author_id: String(data.user_id),
         title: data.title,
-        beatmaps: (data.beatmaps || []).map((beatmap: any) => {
+        beatmaps: (data.beatmaps || []).map((beatmap) => {
             return mapOsuBeatmapToDomain({
                 ...beatmap,
-                beatmapset: data
+                beatmapset: data,
             });
-        })
+        }),
     };
 };
 
-const mapDatabaseToScoreWithoutMap = (row: any): Omit<IScore, 'beatmap'> => {
+const mapDatabaseToScoreWithoutMap = (row: BeatmapScoreRow): Omit<IScore, "beatmap"> => {
     return {
-        id: Number(row.score_id), 
+        id: Number(row.score_id),
         score: Number(row.score_val),
         pp: row.score_pp || 0,
         acc: row.score_acc,
@@ -78,26 +86,26 @@ const mapDatabaseToScoreWithoutMap = (row: any): Omit<IScore, 'beatmap'> => {
             id: row.userid,
             name: row.name,
             safe_name: row.safe_name,
-            rank: 0, 
+            rank: 0,
             pp: row.user_pp || 0,
             acc: row.user_acc || 0,
-            pfp: `https://a.${process.env.DOMAIN}/${row.userid}`,
-            banner: `https://assets.${process.env.DOMAIN}/user-profile-covers/${row.userid}.jpg`,
+            pfp: `https://a.${env.domain}/${row.userid}`,
+            banner: `https://assets.${env.domain}/user-profile-covers/${row.userid}.jpg`,
 
             a_count: row.a_count || 0,
             s_count: row.s_count || 0,
             ss_count: row.x_count || 0,
             sh_count: row.sh_count || 0,
             ssh_count: row.xh_count || 0,
-            
-            level: 0, 
+
+            level: 0,
 
             total_score: Number(row.user_tscore || 0),
             ranked_score: Number(row.user_rscore || 0),
             max_combo: row.user_max_combo || 0,
             playtime: row.playtime || 0,
-            playcount: 0
-        }
+            playcount: 0,
+        },
     };
 };
 
@@ -106,20 +114,20 @@ export const ensureBeatmapsCache = async (mapIds: number[]): Promise<void> => {
 
     const existingLocalMaps = await prisma.maps.findMany({
         where: { id: { in: mapIds } },
-        select: { id: true }
+        select: { id: true },
     });
-    
-    const validMapIds = existingLocalMaps.map(m => m.id);
+
+    const validMapIds = existingLocalMaps.map((m) => m.id);
     if (validMapIds.length === 0) return;
 
     const existingCache = await prisma.api_beatmap_cache.findMany({
         where: { map_id: { in: validMapIds } },
-        select: { map_id: true }
+        select: { map_id: true },
     });
 
-    const existingCacheIds = new Set(existingCache.map(c => c.map_id));
+    const existingCacheIds = new Set(existingCache.map((c) => c.map_id));
 
-    const missingIds = validMapIds.filter(id => !existingCacheIds.has(id));
+    const missingIds = validMapIds.filter((id) => !existingCacheIds.has(id));
 
     if (missingIds.length === 0) {
         return;
@@ -128,60 +136,64 @@ export const ensureBeatmapsCache = async (mapIds: number[]): Promise<void> => {
     const chunkSize = 50;
     for (let i = 0; i < missingIds.length; i += chunkSize) {
         const chunk = missingIds.slice(i, i + chunkSize);
-        
+
         try {
-            const queryParams = chunk.map(id => `ids[]=${id}`).join('&');
-            const response = await osuApiClient.get(`/beatmaps?${queryParams}`);
+            const queryParams = chunk.map((id) => `ids[]=${id}`).join("&");
+            const response = await osuApiClient.get<OsuBeatmapsListResponse>(
+                `/beatmaps?${queryParams}`
+            );
             const beatmapsData = response.data?.beatmaps || [];
 
             if (beatmapsData.length === 0) continue;
 
-            const cachePayload = beatmapsData.map((map: any) => ({
+            const cachePayload = beatmapsData.map((map) => ({
                 map_id: map.id,
                 cover: map.beatmapset?.covers?.cover || null,
-                thumbnail: map.beatmapset?.covers?.['list@2x'] || null,
-                tags: map.beatmapset?.tags || null
+                thumbnail: map.beatmapset?.covers?.["list@2x"] || null,
+                tags: map.beatmapset?.tags || null,
             }));
 
             await prisma.api_beatmap_cache.createMany({
                 data: cachePayload,
-                skipDuplicates: true
+                skipDuplicates: true,
             });
-
-        } catch (error) {
-            console.error(`[Cache] Falha ao buscar lote de mapas na API oficial.`);
+        } catch {
+            logger.error("[Cache] Falha ao buscar lote de mapas na API oficial.");
         }
     }
-}
+};
 
-const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<IScore, 'beatmap'>[]> => {
+const getBeatmapLB = async (
+    beatmapId: number,
+    knownMd5?: string
+): Promise<Omit<IScore, "beatmap">[]> => {
     let bmap_md5 = knownMd5;
-    
+
     if (!bmap_md5) {
         const localMap = await prisma.maps.findFirst({
             where: { id: beatmapId },
-            select: { md5: true }
+            select: { md5: true },
         });
 
         if (localMap) {
             bmap_md5 = localMap.md5;
         } else {
             try {
-                const response = await osuApiClient.get(`/beatmaps/${beatmapId}`);
+                const response = await osuApiClient.get<OsuBeatmap>(`/beatmaps/${beatmapId}`);
                 if (response.data && response.data.checksum) {
                     bmap_md5 = response.data.checksum;
                 } else {
                     return [];
                 }
-            } catch (e) {
+            } catch {
                 return [];
             }
         }
     }
 
-    const mapLBRaw = await prisma.$queryRaw<any[]>`
+    const mapLBRaw = await prisma.$queryRaw<BeatmapScoreRow[]>`
         WITH RankedScores AS (
-            SELECT 
+            SELECT
                 s.id as score_id,
                 s.userid,
                 s.score as score_val,
@@ -193,21 +205,21 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<
                 s.grade,
                 s.perfect,
                 s.map_md5,
-                s.mode, 
+                s.mode,
                 s.play_time,
                 ROW_NUMBER() OVER (
-                    PARTITION BY s.userid 
+                    PARTITION BY s.userid
                     ORDER BY s.score DESC
                 ) as rn
             FROM scores s
             WHERE s.map_md5 = ${bmap_md5} AND (s.status = 2 OR s.status = 3) AND (s.mods & 536870912) > 0
         )
-        SELECT 
+        SELECT
             rs.*,
-            u.name, 
+            u.name,
             u.safe_name,
             u.latest_activity as last_activity,
-            
+
             st.pp as user_pp,
             st.acc as user_acc,
             st.tscore as user_tscore,
@@ -219,7 +231,7 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<
         FROM RankedScores rs
         JOIN users u ON rs.userid = u.id
         LEFT JOIN stats st ON u.id = st.id AND st.mode = rs.mode
-        WHERE rs.rn = 1 
+        WHERE rs.rn = 1
         ORDER BY rs.score_val DESC
         LIMIT 50;
     `;
@@ -229,54 +241,54 @@ const getBeatmapLB = async (beatmapId: number, knownMd5?: string): Promise<Omit<
     }
 
     return mapLBRaw.map((row) => mapDatabaseToScoreWithoutMap(row));
-}
+};
 
 const getBeatmapPlaycount = async (md5: string): Promise<number> => {
     return await prisma.scores.count({
-        where: { map_md5: md5 }
+        where: { map_md5: md5 },
     });
 };
 
 const getBeatmapPasscount = async (md5: string): Promise<number> => {
     return await prisma.scores.count({
-        where: { 
+        where: {
             map_md5: md5,
-            grade: { not: 'F' }
-        }
+            grade: { not: "F" },
+        },
     });
 };
 
 export const getBeatmap = async (input: SearchBeatmaps): Promise<IBeatmap> => {
-    const response = await osuApiClient.get(`/beatmaps/${input.id}`);
+    const response = await osuApiClient.get<OsuBeatmap>(`/beatmaps/${input.id}`);
 
     if (!response.data) {
-        throw Errors.NotFound('O beatmap solicitado não retornou dados.');
+        throw Errors.NotFound("O beatmap solicitado não retornou dados.");
     }
 
     const bmap = mapOsuBeatmapToDomain(response.data);
-    
+
     const [map_lb, localPlaycount, localPasscount] = await Promise.all([
         getBeatmapLB(input.id, bmap.beatmap_md5),
         getBeatmapPlaycount(bmap.beatmap_md5),
-        getBeatmapPasscount(bmap.beatmap_md5)
+        getBeatmapPasscount(bmap.beatmap_md5),
     ]);
 
     ensureBeatmapsCache([input.id]).catch(() => {});
 
-    return { 
+    return {
         ...bmap,
         playcount: localPlaycount,
         passcount: localPasscount,
-        scores: map_lb 
+        scores: map_lb,
     };
-}
+};
 
 export const getBeatmapset = async (input: SearchBeatmaps): Promise<IBeatmapset> => {
-    const response = await osuApiClient.get(`/beatmapsets/${input.id}`);
+    const response = await osuApiClient.get<OsuBeatmapset>(`/beatmapsets/${input.id}`);
 
     if (!response.data) {
-        throw Errors.NotFound('O beatmapset solicitado não retornou dados.');
+        throw Errors.NotFound("O beatmapset solicitado não retornou dados.");
     }
 
     return mapOsuBeatmapsetToDomain(response.data);
-}
+};

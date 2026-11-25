@@ -1,6 +1,6 @@
 import { EmbedBuilder, time, TimestampStyles } from "discord.js"
 import { IPlayer, IScore } from "../../interfaces/interfaces.export"
-import { URLS, EMOJIS, COLORS } from "../../constants"
+import { URLS, EMOJIS, COLORS, beatmapUrl } from "../../constants"
 import { scoreGradeToEmoji, applyModsToStats, formatTime, capitalizeFirstLetter } from "../utils.export"
 
 export default async function topIndexEmbedBuilder(player: IPlayer, score: IScore, index: number): Promise<EmbedBuilder> {
@@ -15,19 +15,19 @@ export default async function topIndexEmbedBuilder(player: IPlayer, score: IScor
 
     const beatmap = score.beatmap
     const { bpm, length } = applyModsToStats(beatmap.bpm, beatmap.total_length, score.mods)
-    // DEFINIR DEPOIS COMO VÃO SER CALCULADOS CS, AR, OD, HP DO SCORE
-    // + OTHERS SCORES ON THE BEATMAP POSTERIORMENTE
+    
+    
     const displayMods = score.mods === '' ? '' : `+${score.mods}`
 
-    const mapUrl = `https://fubika.com.br/beatmap/${beatmap.beatmap_id}`
+    const mapUrl = beatmapUrl(beatmap.beatmap_id)
     const hidden_link = `[\u2800](https://osu.ppy.sh/b/${beatmap.beatmap_id})`
 
     return new EmbedBuilder()
         .setAuthor({ 
-            name: `${player.name}: ${player.pp}pp (#${player.rank})`, 
+            name: `${player.name}: ${player.pp.toLocaleString('en-US')}pp (#${player.rank})`,
             iconURL: URLS.fubikaIcon,
             url: player.url
-        }) //                                       Mudar --->  score.star_rating.toLocaleString('en-US', options)}
+        })
         .setTitle(`${beatmap.title} [${beatmap.diff}] [${beatmap.star_rating.toLocaleString('en-US', options)}★]`)
         .setURL(mapUrl)
         .setColor(COLORS.blue)

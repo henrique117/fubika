@@ -2,10 +2,11 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { createUser, deleteUser, getUserBestOnMap, getUserRankHistory, getUserRecent, getUsersCount, getUserStats, loginUser, setUserPfp } from "./user.service";
 import { CreateUserInput, DeleteUserInput, GetRankHistoryInput, GetUserInput, GetUserMapInput, LoginUserInput, PostPfpInput, postPfpSchema, ScoreQueryInput, ScoreQueryModeInput } from "./user.schema";
 import { Errors } from "../../utils/errorHandler";
+import { env } from "../../config/env";
 
 const toSafeName = (name: string) => name.trim().toLowerCase().replace(/ /g, '_');
 
-export const handleGetUsersCount = async (_: any, res: FastifyReply) => {
+export const handleGetUsersCount = async (_req: FastifyRequest, res: FastifyReply) => {
     const userCount = await getUsersCount();
     return res.send(userCount);
 }
@@ -17,7 +18,7 @@ export const handleUserLogin = async (req: FastifyRequest<{ Body: LoginUserInput
         id: user.id,
         name: user.name,
     }, {
-        expiresIn: '7d'
+        expiresIn: env.jwtExpiresIn
     });
 
     return res.send({ token, user });
@@ -105,8 +106,10 @@ export const handlePostPfp = async (req: FastifyRequest<{ Body: PostPfpInput }>,
         throw Errors.BadRequest("Nenhum arquivo enviado.");
     }
 
+    const discordField = data.fields.discord_id as { value?: string } | undefined;
+
     const payload = {
-        discord_id: (data.fields.discord_id as any)?.value,
+        discord_id: discordField?.value,
         avatar: data
     };
 

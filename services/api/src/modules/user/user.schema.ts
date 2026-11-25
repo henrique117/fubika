@@ -1,4 +1,5 @@
 import z from "zod";
+import type { MultipartFile } from "@fastify/multipart";
 
 export const createUserInputSchema = z.object({
     name: z.string({ error: "O nome de usuário deve ser um texto." }) 
@@ -54,7 +55,7 @@ export type GetUserMapInput = z.infer<typeof getUserMapInputSchema>;
 
 export const postPfpSchema = z.object({
     discord_id: z.string().regex(/^\d+$/, "Discord ID inválido"),
-    avatar: z.any()
+    avatar: z.custom<MultipartFile>()
         .refine((file) => !!file, "Arquivo é obrigatório")
         .refine(
             (file) => file.mimetype?.startsWith("image/"),

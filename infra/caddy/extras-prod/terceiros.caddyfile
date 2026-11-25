@@ -1,0 +1,22 @@
+# ==============================================================================
+# Projetos de TERCEIROS servidos pelo mesmo Caddy da produção.
+#
+# NÃO ALTERE o conteúdo destes blocos: são idênticos aos do Caddyfile antigo e
+# estes containers (tickets_app e avaliacao_app) vivem na rede externa
+# `public_proxy`, fora deste repositório. Serão removidos no futuro — até lá,
+# precisam continuar funcionando exatamente como hoje.
+#
+# Carregado apenas em produção (docker-compose.prod.yml monta esta pasta em
+# /etc/caddy/extras).
+# ==============================================================================
+
+# --- TICKETS (bot de tickets do Discord) ---
+tickets.fubika.com.br {
+	{$TLS_OPTS}
+	reverse_proxy tickets_app:8169
+}
+
+app.fubika.com.br {
+	{$TLS_OPTS}
+	reverse_proxy avaliacao_app:80
+}

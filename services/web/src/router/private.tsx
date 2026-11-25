@@ -1,6 +1,6 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/auth'
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { signed, loading } = useAuth()

@@ -3,7 +3,8 @@ import { useNavigate, Link, Navigate } from 'react-router-dom'
 import style from './style.module.css'
 import { ButtonGradientComponent, WrapperComponent } from '../../components/components.export'
 import { api } from '../../services/api'
-import { useAuth } from '../../contexts/AuthContext'
+import { isAxiosError } from 'axios'
+import { useAuth } from '../../contexts/auth'
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate()
@@ -49,8 +50,8 @@ const LoginPage: React.FC = () => {
             signIn(token, user)
             navigate('/')
 
-        } catch (err: any) {
-            const msg = err.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.'
+        } catch (err) {
+            const msg = (isAxiosError(err) && err.response?.data?.message) || 'Erro ao fazer login. Verifique suas credenciais.'
             setError(msg)
         } finally {
             setLoading(false)

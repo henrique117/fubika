@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import style from './style.module.css'
-import { useAuth } from '../../../contexts/AuthContext'
+import { useAuth } from '../../../contexts/auth'
 import { useState, useEffect } from 'react'
 import { avatarUrl } from '../../../config'
 

@@ -7,9 +7,18 @@ import { api } from '../../services/api'
 
 import catHead from '/cat_head.png'
 import follow from '/follow.svg'
-import following from '/following.svg'
-import mutal from '/mutual.svg'
 import sino from '/sino.svg'
+
+interface ITopPlay {
+    pp: number;
+    acc: number;
+    max_combo: number;
+    beatmap: {
+        title: string;
+        artist: string;
+        cover: string;
+    };
+}
 
 export interface IPlayer {
     id: number;
@@ -29,33 +38,29 @@ export interface IPlayer {
     s_count: number;
     sh_count: number;
     a_count: number;
-    top_200: any[];
+    top_200: ITopPlay[];
     ranked_score: number;
     total_score: number;
 }
 
 const Profile: React.FC = () => {
-    const [loading, setLoading] = useState(true)
     const [player, setPlayer] = useState<IPlayer | null>(null);
+    const top200 = player?.top_200;
     const top10Maps = useMemo(() => {
-        if (!player?.top_200) return [];
-        return [...player.top_200].sort((a, b) => b.pp - a.pp).slice(0, 10);
-    }, [player?.top_200]);
+        if (!top200) return [];
+        return [...top200].sort((a, b) => b.pp - a.pp).slice(0, 10);
+    }, [top200]);
 
     const id = useParams<{ id: string }>();
     const userId = Number(id.id)
 
     const getUser = async (id: number) => {
-        setLoading(true)
         try {
             const response = await api.get(`/user/${id}`,);
             setPlayer(response.data);
 
         } catch (error) {
             console.error("Erro no usuario:", error)
-        } finally {
-            setLoading(false)
-
         }
     }
 
@@ -120,7 +125,7 @@ const Profile: React.FC = () => {
 
                         <div className={style.profileInfos}>
                             <div className={style.profileMaps}>
-                                {top10Maps.map((e: any, idx: number) => (
+                                {top10Maps.map((e, idx) => (
                                     <div
                                         key={idx}
                                         className={style.mapsPill}
@@ -174,13 +179,13 @@ const Profile: React.FC = () => {
                                     </div>
                                     <div className={style.statRow}>
                                         <span style={{ fontWeight: 'bold' }}>Acertos totais</span>
-                                        <span>{(player?.top_200 || []).reduce((n, p) => n + (p.max_combo), 0 || 0).toLocaleString('pt-BR')}</span>
+                                        <span>{(player?.top_200 || []).reduce((n, p) => n + (p.max_combo || 0), 0).toLocaleString('pt-BR')}</span>
 
                                     </div>
                                     <div className={style.statRow}>
                                         <span style={{ fontWeight: 'bold' }}>Acertos por jogada</span>
                                         {player?.top_200 && player.top_200.length > 0
-                                            ? (player.top_200.reduce((n, p: any) => n + (p.max_combo || 0), 0) / player.top_200.length).toFixed(2)
+                                            ? (player.top_200.reduce((n, p) => n + (p.max_combo || 0), 0) / player.top_200.length).toFixed(2)
                                             : "0.00"}
 
                                     </div>

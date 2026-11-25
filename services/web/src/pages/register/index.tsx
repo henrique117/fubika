@@ -3,7 +3,8 @@ import { useNavigate, Link, Navigate } from 'react-router-dom'
 import style from './style.module.css'
 import { WrapperComponent, ButtonGradientComponent } from '../../components/components.export'
 import { api } from '../../services/api'
-import { useAuth } from '../../contexts/AuthContext'
+import { isAxiosError } from 'axios'
+import { useAuth } from '../../contexts/auth'
 
 interface FormErrors {
     name?: string
@@ -15,15 +16,7 @@ interface FormErrors {
 
 const Register: React.FC = () => {
     const navigate = useNavigate()
-    const { signIn, signed, loading } = useAuth()
-    
-    if (loading) {
-        return null
-    }
-    
-    if (signed) {
-        return <Navigate to="/" replace />
-    }
+    const { signed, loading } = useAuth()
 
     const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
@@ -37,6 +30,14 @@ const Register: React.FC = () => {
     
     const [errors, setErrors] = useState<FormErrors>({})
 
+    if (loading) {
+        return null
+    }
+
+    if (signed) {
+        return <Navigate to="/" replace />
+    }
+
     const togglePassword = () => setShowPassword(!showPassword)
     const toggleConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword)
 
@@ -44,7 +45,7 @@ const Register: React.FC = () => {
         const newErrors: FormErrors = {}
         const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
         
-        const usernameRegex = /^[a-zA-Z0-9áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ\+\-_\[\] ]+$/
+        const usernameRegex = /^[a-zA-Z0-9áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ+\-_[\] ]+$/
         
         if (!username || username.length < 3) {
             newErrors.name = "Nome de usuário muito curto (min 3 chars)."
@@ -93,8 +94,8 @@ const Register: React.FC = () => {
             alert('Conta criada com sucesso! Faça login.')
             navigate('/login')
 
-        } catch (err: any) {
-            const errorData = err.response?.data
+        } catch (err) {
+            const errorData = isAxiosError(err) ? err.response?.data : undefined
             const msg = errorData?.message || errorData?.error || 'Erro ao criar conta.'
             
             setErrors({ general: msg })
